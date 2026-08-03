@@ -3,31 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro - Banca Compartilhada</title>
+    <meta name="description" content="Crie sua conta na Banca Compartilhada.">
+    <meta name="color-scheme" content="dark">
+    <title>Criar Conta · Banca Compartilhada</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <main class="container">
         <div class="card">
-            <h2>Criar Conta</h2>
-            <form id="registerForm">
+            <span class="eyebrow">Banca Compartilhada</span>
+            <h2>Criar conta</h2>
+
+            <form id="registerForm" novalidate>
                 <div class="input-group">
-                    <label>Nome Completo</label>
-                    <input type="text" id="nome" required placeholder="Seu nome">
+                    <label for="nome">Nome completo</label>
+                    <input
+                        type="text"
+                        id="nome"
+                        name="nome"
+                        placeholder="Seu nome"
+                        autocomplete="name"
+                        required
+                    >
                 </div>
+
                 <div class="input-group">
-                    <label>E-mail</label>
-                    <input type="email" id="emailReg" required placeholder="seu@email.com">
+                    <label for="emailReg">E-mail</label>
+                    <input
+                        type="email"
+                        id="emailReg"
+                        name="email"
+                        placeholder="seu@email.com"
+                        autocomplete="email"
+                        inputmode="email"
+                        required
+                    >
                 </div>
+
                 <div class="input-group">
-                    <label>Senha</label>
-                    <input type="password" id="senhaReg" required placeholder="******">
+                    <label for="senhaReg">Senha</label>
+                    <input
+                        type="password"
+                        id="senhaReg"
+                        name="senha"
+                        placeholder="Mínimo de 6 caracteres"
+                        autocomplete="new-password"
+                        minlength="6"
+                        required
+                    >
                 </div>
+
                 <button type="submit" class="btn">Cadastrar</button>
             </form>
+
             <p class="link-text">Já possui conta? <a href="login.html">Faça login</a></p>
         </div>
-    </div>
+    </main>
+
     <!-- Script modular do Firebase Auth -->
     <script type="module" src="auth.js"></script>
 </body>
