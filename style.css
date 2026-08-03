@@ -1,46 +1,47 @@
 /* ==========================================================================
-   Design Tokens
+   Design Tokens — Paleta Preto & Marrom Premium
    ========================================================================== */
 :root {
     /* Superfícies */
-    --bg-color: #0a0d12;
-    --bg-color-elevated: #10141b;
-    --card-bg: #131720;
-    --card-bg-hover: #171c26;
-    --border-color: #232a36;
-    --border-color-strong: #2f3847;
+    --bg-color: #0b0806;
+    --bg-color-elevated: #16100b;
+    --card-bg: #1c140e;
+    --card-bg-hover: #221a12;
+    --border-color: #33261a;
+    --border-color-strong: #4a3620;
 
-    /* Marca / Acento */
-    --primary: #c9a35c;
-    --primary-hover: #e0c184;
-    --primary-soft: rgba(201, 163, 92, 0.12);
-    --accent: #5b8def;
+    /* Marca / Acento (bronze → champanhe) */
+    --primary: #b8763f;
+    --primary-deep: #7c4a24;
+    --primary-hover: #e8bf82;
+    --primary-soft: rgba(184, 118, 63, 0.14);
 
     /* Texto */
-    --text-main: #eef1f6;
-    --text-muted: #8b93a3;
-    --text-faint: #5b6270;
+    --text-main: #f4ead9;
+    --text-muted: #a68a6d;
+    --text-faint: #6b5541;
 
     /* Estados */
-    --danger: #ef4444;
-    --danger-soft: rgba(239, 68, 68, 0.1);
-    --success: #22c55e;
-    --success-soft: rgba(34, 197, 94, 0.1);
-    --warning: #f59e0b;
+    --danger: #e5484d;
+    --danger-soft: rgba(229, 72, 77, 0.12);
+    --success: #3fae74;
+    --success-soft: rgba(63, 174, 116, 0.12);
+    --warning: #d9a441;
+    --warning-soft: rgba(217, 164, 65, 0.12);
 
     /* Escala de espaçamento */
     --space-xs: 8px;
     --space-sm: 12px;
     --space-md: 20px;
-    --space-lg: 30px;
+    --space-lg: 32px;
     --space-xl: 48px;
 
     /* Raios e sombras */
     --radius-sm: 8px;
     --radius-md: 12px;
-    --radius-lg: 16px;
-    --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.45);
-    --shadow-elevated: 0 20px 48px rgba(0, 0, 0, 0.55);
+    --radius-lg: 18px;
+    --shadow-card: 0 20px 50px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-elevated: 0 24px 60px rgba(0, 0, 0, 0.6);
 
     /* Transições */
     --transition-fast: 0.15s ease;
@@ -64,8 +65,9 @@ html {
 
 body {
     background:
-        radial-gradient(circle at 15% -10%, rgba(201, 163, 92, 0.06), transparent 45%),
-        radial-gradient(circle at 85% 110%, rgba(91, 141, 239, 0.05), transparent 45%),
+        radial-gradient(circle at 20% -10%, rgba(184, 118, 63, 0.14), transparent 45%),
+        radial-gradient(circle at 85% 15%, rgba(124, 74, 36, 0.10), transparent 40%),
+        radial-gradient(circle at 50% 120%, rgba(184, 118, 63, 0.08), transparent 50%),
         var(--bg-color);
     color: var(--text-main);
     min-height: 100vh;
@@ -95,18 +97,43 @@ body.protected-page {
 }
 
 .card {
-    background-color: var(--card-bg);
+    position: relative;
+    background:
+        linear-gradient(180deg, rgba(184, 118, 63, 0.04), transparent 30%),
+        var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: var(--space-lg);
+    padding: var(--space-xl) var(--space-lg);
     box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+/* Fio dourado no topo do cartão — o único acento de destaque do design */
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary) 25%, var(--primary-hover) 50%, var(--primary) 75%, transparent);
+}
+
+.card .eyebrow {
+    display: block;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 0.72rem;
+    color: var(--text-faint);
+    margin-bottom: var(--space-xs);
 }
 
 h2 {
     color: var(--text-main);
     margin-bottom: var(--space-lg);
     text-align: center;
-    font-size: 1.6rem;
+    font-size: 1.7rem;
     font-weight: 700;
     letter-spacing: -0.01em;
 }
@@ -126,13 +153,13 @@ h2 {
 .input-group input,
 .input-group select {
     width: 100%;
-    padding: 12px 14px;
+    padding: 13px 14px;
     background-color: var(--bg-color-elevated);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     color: var(--text-main);
     font-size: 0.95rem;
-    transition: border-color var(--transition-fast), background-color var(--transition-fast);
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .input-group input::placeholder {
@@ -149,30 +176,51 @@ h2 {
     border-color: var(--primary);
     outline: none;
     background-color: var(--card-bg-hover);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+/* Corrige o autofill do Chrome, que ignora o tema escuro */
+.input-group input:-webkit-autofill,
+.input-group input:-webkit-autofill:hover,
+.input-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text-main);
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-color-elevated) inset;
+    transition: background-color 9999s ease-in-out 0s;
 }
 
 .btn {
+    position: relative;
     width: 100%;
-    padding: 13px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-    color: #14110a;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--primary-deep), var(--primary) 55%, var(--primary-hover));
+    background-size: 200% 100%;
+    background-position: 0% 0%;
+    color: #150f0b;
     border: none;
     border-radius: var(--radius-sm);
     font-weight: 700;
     font-size: 0.95rem;
     letter-spacing: 0.01em;
     cursor: pointer;
-    transition: filter var(--transition-fast), transform var(--transition-fast);
-    margin-top: var(--space-xs);
+    transition: background-position var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-fast);
+    margin-top: var(--space-sm);
+    box-shadow: 0 8px 20px rgba(124, 74, 36, 0.35);
 }
 
 .btn:hover {
-    filter: brightness(1.08);
+    background-position: 100% 0%;
     transform: translateY(-1px);
+    box-shadow: 0 10px 26px rgba(124, 74, 36, 0.45);
 }
 
 .btn:active {
     transform: translateY(0);
+}
+
+.btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .link-text {
@@ -183,13 +231,13 @@ h2 {
 }
 
 .link-text a {
-    color: var(--primary);
+    color: var(--primary-hover);
     text-decoration: none;
     font-weight: 600;
 }
 
 .link-text a:hover {
-    color: var(--primary-hover);
+    color: var(--primary);
     text-decoration: underline;
 }
 
@@ -205,12 +253,12 @@ h2 {
 
 .warning-banner {
     background-color: var(--danger-soft);
-    border: 1px solid rgba(239, 68, 68, 0.35);
+    border: 1px solid rgba(229, 72, 77, 0.35);
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-sm);
     margin-bottom: var(--space-md);
     font-size: 0.85rem;
-    color: #ff8787;
+    color: #ff9a9d;
     text-align: center;
 }
 
@@ -226,12 +274,13 @@ h2 {
     border: 1px solid var(--border-color);
     padding: var(--space-md);
     border-radius: var(--radius-md);
-    transition: border-color var(--transition-base), transform var(--transition-base);
+    transition: border-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .stat-card:hover {
     border-color: var(--border-color-strong);
     transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
 }
 
 .stat-card h3 {
@@ -246,7 +295,7 @@ h2 {
 .stat-card p {
     font-size: 1.6rem;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--primary-hover);
     letter-spacing: -0.01em;
 }
 
@@ -400,7 +449,7 @@ tbody tr:last-child td {
     }
 
     .card {
-        padding: var(--space-md);
+        padding: var(--space-lg) var(--space-md);
     }
 }
 
@@ -416,7 +465,7 @@ tbody tr:last-child td {
     }
 
     .card {
-        padding: var(--space-md) var(--space-sm);
+        padding: var(--space-lg) var(--space-md);
         border-radius: var(--radius-md);
     }
 
@@ -453,5 +502,16 @@ tbody tr:last-child td {
         min-width: 0;
         max-width: 100%;
         width: 100%;
+    }
+}
+
+/* Telas grandes (desktop) — cartão de login um pouco mais respirado */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 460px;
+    }
+
+    .card {
+        padding: var(--space-xl) var(--space-lg);
     }
 }
