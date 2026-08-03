@@ -6,8 +6,9 @@ import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebas
    ========================================================================== */
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 35,
-    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo (Domingo=0, Segunda=1, etc.)
+    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo
     TAXA_SAQUE_PERCENTUAL: 0.14, // 14% de taxa
+    VALORES_PLANOS_PERMITIDOS: [30, 50, 100, 300, 500, 1000]
 };
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
@@ -114,17 +115,17 @@ function inicializarPerfilUsuario(userId) {
 }
 
 /* ==========================================================================
-   Inicialização de Eventos e Modais (Depósito e Saque com Validação de Saldo)
+   Inicialização de Eventos e Modais (Depósito para múltiplos planos e Saque)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    // Sincronizar valor do input oculto com o modal de depósito
+    // Sincronizar valor do input oculto e modal ao escolher qualquer plano (30, 50, 100, 300, 500, 1000)
     document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
         btn.addEventListener('click', () => {
             const valor = btn.getAttribute('data-valor');
             const inputPlano = document.getElementById('valorPlano');
             if (inputPlano) inputPlano.value = valor;
             
-            const modalInput = document.getElementById('modalValorDepInput');
+            const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
             if (modalInput) modalInput.value = valor;
             
             abrirModalDeposito();
@@ -136,7 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnAbrirDep) {
         btnAbrirDep.addEventListener('click', () => {
             const inputPlano = document.getElementById('valorPlano');
-            const modalInput = document.getElementById('modalValorDepInput');
+            const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
             if (modalInput && inputPlano) modalInput.value = inputPlano.value || "30";
             abrirModalDeposito();
         });
@@ -170,18 +171,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modalDep) fecharModalDeposito();
     });
 
+    // Ação do Botão no Modal de Depósito (Validação do plano mínimo de R$ 30 e múltiplos)
     btnConfirmarModalDep?.addEventListener('click', () => {
         const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
         const valorAtual = parseFloat(modalInput?.value || 0);
 
+        // Validação de Valor Mínimo (< 30)
         if (valorAtual < 30) {
             if (modalToast) {
                 modalToast.style.display = 'block';
+                modalToast.textContent = "⚠️ O valor mínimo de depósito/plano é R$ 30,00.";
                 setTimeout(() => { if (modalToast) modalToast.style.display = 'none'; }, 4000);
             }
             return;
         }
 
+        // Se o QR Code ainda não estiver visível, gera com base no valor selecionado/digitado
         if (areaQrCodePix && (areaQrCodePix.style.display === 'none' || areaQrCodePix.style.display === '')) {
             const qrImg = document.getElementById('imgQrCode');
             const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
@@ -206,13 +211,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================================================
-    // Funções de Modal Saque (Aprimorado com Saldo, Validações e Visual Novo)
+    // Funções de Modal Saque (Com Saldo, Validações e Visual Novo)
     // ==========================================================================
     const modalSaque = document.getElementById('modalSaque') || document.getElementById('modalSaqueSistema');
     const btnAbrirSaqueModal = document.getElementById('btnAbrirSaqueModal');
     const btnConfirmarModalSaque = document.getElementById('btnConfirmarModalSaque') || document.getElementById('btnSolicitarSaqueFinal');
 
-    let saldoAtualUsuario = 0; // Armazena o saldo atual obtido do banco
+    let saldoAtualUsuario = 0;
 
     function abrirModalSaque() {
         const nomePerfil = document.getElementById('perfilNome')?.value || localStorage.getItem('usuarioNome') || 'Não informado';
@@ -227,7 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elTipo) elTipo.value = tipoPixPerfil;
         if (elChave) elChave.value = chavePixPerfil;
 
-        // Inserir ou atualizar o campo de Saldo Disponível no modal visualmente
         let boxSaldoModal = document.getElementById('boxSaldoDisponivelModal');
         if (!boxSaldoModal && modalSaque) {
             boxSaldoModal = document.createElement('div');
@@ -240,10 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             boxSaldoModal.innerHTML = `<span style="color: #aaa;">Saldo Disponível:</span> <strong style="color: #4ade80; font-size: 16px;">${formatadorMoeda.format(saldoAtualUsuario)}</strong>`;
         }
 
-        // Validação do dia da semana (Domingo)
         const diaHoje = new Date().getDay();
-        const avisoDomingo = document.getElementById('avisoDomingoSaque');
-        
         if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
             if (btnConfirmarModalSaque) {
                 btnConfirmarModalSaque.disabled = true;
@@ -278,12 +279,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modalSaque) fecharModalSaque();
     });
 
-    // Cálculo dinâmico, visual melhorado do resumo e validação de saldo
     const inputValSaque = document.getElementById('valorSaqueModal') || document.getElementById('modalValorSaque');
     const boxResumo = document.getElementById('resumoDescontoSaque') || document.getElementById('resumoValorLiquido');
-    const txtValSolicitado = document.getElementById('txtValSolicitado');
-    const txtValTaxa = document.getElementById('txtValTaxa');
-    const txtValLiquido = document.getElementById('txtValLiquido');
 
     inputValSaque?.addEventListener('input', (e) => {
         const val = parseFloat(e.target.value);
@@ -293,7 +290,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const taxa = val * CONFIG.TAXA_SAQUE_PERCENTUAL;
             const liquido = val - taxa;
 
-            // Estilização aprimorada do card de resumo com ícones e cores refinadas
             if (boxResumo) {
                 boxResumo.style.display = 'block';
                 boxResumo.style.background = '#18181b';
@@ -314,28 +310,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
-            // Validações rigorosas para permitir ou bloquear o botão de saque
             if (btnConfirmarModalSaque) {
                 if (val > saldoAtualUsuario) {
                     btnConfirmarModalSaque.disabled = true;
                     btnConfirmarModalSaque.style.opacity = '0.5';
                     btnConfirmarModalSaque.style.cursor = 'not-allowed';
-                    btnConfirmarModalSaque.title = "Saldo insuficiente para este saque.";
                 } else if (val < CONFIG.VALOR_SAQUE_MINIMO) {
                     btnConfirmarModalSaque.disabled = true;
                     btnConfirmarModalSaque.style.opacity = '0.5';
                     btnConfirmarModalSaque.style.cursor = 'not-allowed';
-                    btnConfirmarModalSaque.title = `O valor mínimo para saque é ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`;
                 } else if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
                     btnConfirmarModalSaque.disabled = true;
                     btnConfirmarModalSaque.style.opacity = '0.5';
                     btnConfirmarModalSaque.style.cursor = 'not-allowed';
-                    btnConfirmarModalSaque.title = "Saques liberados apenas aos domingos.";
                 } else {
                     btnConfirmarModalSaque.disabled = false;
                     btnConfirmarModalSaque.style.opacity = '1';
                     btnConfirmarModalSaque.style.cursor = 'pointer';
-                    btnConfirmarModalSaque.title = "";
                 }
             }
         } else {
@@ -343,7 +334,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Link interno para perfil dentro do modal de saque
     modalSaque?.querySelector('a[data-target="view-perfil"]')?.addEventListener('click', (e) => {
         e.preventDefault();
         fecharModalSaque();
@@ -351,7 +341,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navPerfil) navPerfil.click();
     });
 
-    // Autenticação e sincronização inicial de dados do usuário (Capturando Saldo)
     auth.onAuthStateChanged((user) => {
         if (!user) return;
         const userId = user.uid;
@@ -360,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
         onValue(userRef, (snapshot) => {
             const dados = snapshot.val();
             if (dados) {
-                saldoAtualUsuario = parseFloat(dados.saldo || 0); // Atualiza a variável global de saldo
+                saldoAtualUsuario = parseFloat(dados.saldo || 0);
                 atualizarPainel(dados);
 
                 const nomeUsuario = dados.nome || user.email || 'Usuário';
