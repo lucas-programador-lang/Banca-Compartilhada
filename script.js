@@ -1,4 +1,4 @@
-import { auth, db } from './auth.js';
+import { auth, db, mostrarToast } from './auth.js';
 import { ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 /* ==========================================================================
@@ -7,45 +7,12 @@ import { ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 35,
     DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo
-    TOAST_DURACAO_MS: 3000,
 };
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
 });
-
-/* ==========================================================================
-   Toast
-   ========================================================================== */
-function getToastContainer() {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toast-container';
-        document.body.appendChild(container);
-    }
-    return container;
-}
-
-/**
- * Exibe uma notificação temporária na tela.
- * @param {string} mensagem
- * @param {'success'|'error'|'warning'} tipo
- */
-function mostrarToast(mensagem, tipo = 'success') {
-    const container = getToastContainer();
-
-    const toast = document.createElement('div');
-    toast.className = `toast ${tipo}`;
-
-    const texto = document.createElement('span');
-    texto.textContent = mensagem; // textContent evita injeção de HTML
-    toast.appendChild(texto);
-
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), CONFIG.TOAST_DURACAO_MS);
-}
 
 /* ==========================================================================
    Helpers
