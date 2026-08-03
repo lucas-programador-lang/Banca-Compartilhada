@@ -727,3 +727,146 @@ tbody tr:last-child td {
         padding: var(--space-xl) var(--space-lg);
     }
 }
+
+/* ==========================================================================
+   Layout com Sidebar & Conteúdo Principal
+   ========================================================================== */
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.sidebar {
+    width: 260px;
+    background-color: var(--card-bg);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-md);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: var(--space-md);
+}
+
+.nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.nav-item svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.nav-item:hover {
+    background-color: var(--card-bg-hover);
+    color: var(--text-main);
+}
+
+/* Item Ativo (Estilo igual ao print com brilho e borda verde) */
+.nav-item.active {
+    background: linear-gradient(90deg, rgba(31, 168, 85, 0.18), rgba(31, 168, 85, 0.05));
+    color: #fff;
+    border: 1px solid rgba(31, 168, 85, 0.4);
+    box-shadow: 0 4px 15px rgba(31, 168, 85, 0.15);
+}
+
+.nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background-color: #1fa855;
+    border-radius: 0 2px 2px 0;
+    box-shadow: 0 0 8px #1fa855;
+}
+
+/* Card do usuário no rodapé da Sidebar */
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background-color: var(--bg-color-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+}
+
+.user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1fa855, #147239);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.user-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-status {
+    font-size: 0.7rem;
+    color: #1fa855;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Ajuste do container principal para abrir espaço para a sidebar */
+.main-content {
+    margin-left: 260px;
+    flex: 1;
+    padding: var(--space-lg);
+    max-width: 1200px;
+}
+
+/* Responsivo para celulares */
+@media (max-width: 768px) {
+    .sidebar {
+        display: none; /* Poderá ocultar ou virar menu mobile posteriormente */
+    }
+    .main-content {
+        margin-left: 0;
+        padding: var(--space-md);
+    }
+}
