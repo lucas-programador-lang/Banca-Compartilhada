@@ -354,12 +354,40 @@
             </section>
 
             <!-- ================= ABA PERFIL ================= -->
-            <section id="view-perfil" class="view-section" style="display: none;">
-                <h2>Configurações de Perfil</h2>
-                <div class="card" style="margin-top: 20px;">
-                    <p style="color: var(--text-muted);">Gerencie suas informações de cadastro e chave PIX padrão.</p>
-                </div>
-            </section>
+<section id="view-perfil" class="view-section" style="display: none;">
+    <h2>Configurações de Perfil</h2>
+    <p style="color: var(--text-muted); margin-bottom: 20px;">Gerencie suas informações de cadastro e dados para recebimento via PIX.</p>
+    
+    <div class="card" style="margin-bottom: 20px;">
+        <h3 style="margin-bottom: 15px;">Dados Pessoais</h3>
+        <div class="input-group">
+            <label>Nome do Usuário</label>
+            <input type="text" id="perfilNome" placeholder="Seu nome">
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Chave PIX Padrão para Saques</h3>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Ao salvar aqui, a chave será preenchida automaticamente no painel de saque da aba Início.</p>
+        
+        <div class="input-group">
+            <label>Tipo de Chave PIX</label>
+            <select id="perfilTipoPix" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-card, #1a1a1a); color: #fff; border: 1px solid var(--border-color);">
+                <option value="cpf">CPF</option>
+                <option value="email">E-mail</option>
+                <option value="telefone">Telefone</option>
+                <option value="aleatoria">Chave Aleatória</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Sua Chave PIX</label>
+            <input type="text" id="perfilChavePix" placeholder="Digite sua chave PIX">
+        </div>
+
+        <button class="btn" id="btnSalvarPerfil" style="margin-top: 10px;">Salvar Alterações</button>
+    </div>
+</section>
 
             <!-- Suporte WhatsApp -->
             <a href="https://chat.whatsapp.com/BS4tj3scOZzLYItGNRP4nN?s=cl&p=a&ilr=1" target="_blank" class="support-btn" style="margin-top: 30px;">
