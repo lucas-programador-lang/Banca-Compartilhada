@@ -7,109 +7,158 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 </head>
-</head>
 <body class="protected-page">
-    <div class="dashboard-container">
+
+    <div class="app-layout">
         
-        <!-- Aviso de Risco e Transparência -->
-        <div class="warning-banner">
-            ⚠️ <strong>Aviso de Transparência e Risco:</strong> Operações de renda variável e mercados de alta performance envolvem riscos de perdas totais ou parciais do capital investido. Invista apenas o capital que estiver disposto a perder. Rendimentos passados não garantem rentabilidade futura.
-        </div>
-
-        <h2>Banca Compartilhada</h2>
-
-        <!-- Estatísticas -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Saldo Disponível</h3>
-                <p id="saldoDisponivel">R$ 0,00</p>
+        <!-- Sidebar Esquerda -->
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                        Início
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        Investir
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        Carteira
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Comunidade
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        Equipe
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Extrato
+                    </a>
+                    <a href="#" class="nav-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Perfil
+                    </a>
+                </nav>
             </div>
-            <div class="stat-card">
-                <h3>Rendimento Acumulado (3% ao dia)</h3>
-                <p id="rendimentoTotal">R$ 0,00</p>
+
+            <!-- Rodapé da Sidebar com dados do usuário -->
+            <div class="sidebar-user">
+                <div class="user-avatar" id="userInitial">J</div>
+                <div class="user-info">
+                    <span class="user-name" id="userNameDisplay">Carregando...</span>
+                    <span class="user-status">Conta Ativa</span>
+                </div>
             </div>
-            <div class="stat-card">
-                <h3>Comissões (1º Nível - 15%)</h3>
-                <p id="comissaoTotal">R$ 0,00</p>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            
+            <!-- Aviso de Risco e Transparência -->
+            <div class="warning-banner">
+                ⚠️ <strong>Aviso de Transparência e Risco:</strong> Operações de renda variável e mercados de alta performance envolvem riscos de perdas totais ou parciais do capital investido. Invista apenas o capital que estiver disposto a perder. Rendimentos passados não garantem rentabilidade futura.
             </div>
-        </div>
 
-        <!-- Seleção de Planos (30 a 1000 reais) -->
-        <div class="card" style="margin-bottom: 20px;">
-            <h3>Selecionar Plano de Banca</h3>
-            <div class="input-group">
-                <label>Escolha o valor do plano (R$ 30 a R$ 1.000)</label>
-                <select id="valorPlano">
-                    <option value="30">Plano Inicial - R$ 30,00</option>
-                    <option value="50">Plano R$ 50,00</option>
-                    <option value="100">Plano R$ 100,00</option>
-                    <option value="300">Plano R$ 300,00</option>
-                    <option value="500">Plano R$ 500,00</option>
-                    <option value="1000">Plano Máximo - R$ 1.000,00</option>
-                </select>
+            <h2>Banca Compartilhada</h2>
+
+            <!-- Estatísticas -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Saldo Disponível</h3>
+                    <p id="saldoDisponivel">R$ 0,00</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Rendimento Acumulado (3% ao dia)</h3>
+                    <p id="rendimentoTotal">R$ 0,00</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Comissões (1º Nível - 15%)</h3>
+                    <p id="comissaoTotal">R$ 0,00</p>
+                </div>
             </div>
-            <button class="btn" id="btnDepositar">Depositar via PIX (API)</button>
-        </div>
 
-        <!-- Solicitação de Saque (Domingos e Mínimo 35) -->
-        <div class="card">
-            <h3>Solicitar Saque (Liberado apenas aos Domingos)</h3>
-            <div class="input-group">
-                <label>Chave PIX</label>
-                <input type="text" id="chavePix" placeholder="Digite sua chave PIX">
+            <!-- Seleção de Planos (30 a 1000 reais) -->
+            <div class="card" style="margin-bottom: 20px;">
+                <h3>Selecionar Plano de Banca</h3>
+                <div class="input-group">
+                    <label>Escolha o valor do plano (R$ 30 a R$ 1.000)</label>
+                    <select id="valorPlano">
+                        <option value="30">Plano Inicial - R$ 30,00</option>
+                        <option value="50">Plano R$ 50,00</option>
+                        <option value="100">Plano R$ 100,00</option>
+                        <option value="300">Plano R$ 300,00</option>
+                        <option value="500">Plano R$ 500,00</option>
+                        <option value="1000">Plano Máximo - R$ 1.000,00</option>
+                    </select>
+                </div>
+                <button class="btn" id="btnDepositar">Depositar via PIX (API)</button>
             </div>
-            <div class="input-group">
-                <label>Valor do Saque (Mínimo R$ 35,00 | Taxa: 14%)</label>
-                <input type="number" id="valorSaque" placeholder="0.00" min="35">
+
+            <!-- Solicitação de Saque (Domingos e Mínimo 35) -->
+            <div class="card">
+                <h3>Solicitar Saque (Liberado apenas aos Domingos)</h3>
+                <div class="input-group">
+                    <label>Chave PIX</label>
+                    <input type="text" id="chavePix" placeholder="Digite sua chave PIX">
+                </div>
+                <div class="input-group">
+                    <label>Valor do Saque (Mínimo R$ 35,00 | Taxa: 14%)</label>
+                    <input type="number" id="valorSaque" placeholder="0.00" min="35">
+                </div>
+                <button class="btn" id="btnSacar">Solicitar Saque</button>
             </div>
-            <button class="btn" id="btnSacar">Solicitar Saque</button>
-        </div>
 
-        <!-- Histórico Separado: Saques e Chaves x Depósitos -->
-        <div class="table-container">
-            <h3>Histórico de Saques (Chave PIX, Horário e Status)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data/Horário</th>
-                        <th>Chave PIX</th>
-                        <th>Valor Solicitado</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaSaques">
-                    <!-- Preenchido via Script/Firebase -->
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum saque solicitado ainda.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            <!-- Histórico Separado -->
+            <div class="table-container">
+                <h3>Histórico de Saques (Chave PIX, Horário e Status)</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data/Horário</th>
+                            <th>Chave PIX</th>
+                            <th>Valor Solicitado</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaSaques">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum saque solicitado ainda.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-        <div class="table-container">
-            <h3>Histórico de Depósitos</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data/Horário</th>
-                        <th>Valor do Plano</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaDepositos">
-                    <tr>
-                        <td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum depósito registrado.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+            <div class="table-container">
+                <h3>Histórico de Depósitos</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data/Horário</th>
+                            <th>Valor do Plano</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaDepositos">
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum depósito registrado.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-        <!-- Suporte WhatsApp -->
-        <a href="https://chat.whatsapp.com/BS4tj3scOZzLYItGNRP4nN?s=cl&p=a&ilr=1" target="_blank" class="support-btn">
-            💬 Entrar em Contato com o Suporte (Grupo WhatsApp)
-        </a>
+            <!-- Suporte WhatsApp -->
+            <a href="https://chat.whatsapp.com/BS4tj3scOZzLYItGNRP4nN?s=cl&p=a&ilr=1" target="_blank" class="support-btn">
+                💬 Entrar em Contato com o Suporte (Grupo WhatsApp)
+            </a>
 
+        </main>
     </div>
+
     <!-- Script principal em formato module para validar autenticação e carregar funções -->
     <script type="module" src="auth.js"></script>
     <script type="module" src="script.js"></script>
