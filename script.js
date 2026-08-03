@@ -84,182 +84,6 @@ function calcularRendimentoPlano(capital, diasCorridos) {
 }
 
 /* ==========================================================================
-   Lógica do Modal de Saque e Validações
-   ========================================================================== */
-function validarSaque({ valorSaque, chavePix }) {
-    const hoje = new Date().getDay();
-
-    if (hoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
-        return { valido: false, mensagem: '⚠️ Os saques estão liberados apenas aos DOMINGOS.', tipo: 'warning' };
-    }
-    if (!valorSaque || Number.isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
-        return {
-            valido: false,
-            mensagem: `⚠️ O valor mínimo para saque é de ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`,
-            tipo: 'error',
-        };
-    }
-    if (!chavePix) {
-        return { valido: false, mensagem: '⚠️ Por favor, cadastre a sua chave PIX na aba Perfil.', tipo: 'warning' };
-    }
-    return { valido: true };
-}
-
-async function solicitarSaque(userId, dadosSaque, botao, modalElement) {
-    setBotaoCarregando(botao, true, 'Enviando...');
-    try {
-        const saquesRef = ref(db, 'saques/' + userId);
-        const novoSaqueRef = push(saquesRef);
-
-        const valorBruto = dadosSaque.valorSaque;
-        const valorLiquido = valorBruto * (1 - CONFIG.TAXA_SAQUE_PERCENTUAL);
-
-        await set(novoSaqueRef, {
-            chavePix: dadosSaque.chavePix,
-            valorBruto: valorBruto,
-            valorLiquido: valorLiquido,
-            taxaAplicada: '14%',
-            dataHora: new Date().toLocaleString('pt-BR'),
-            status: 'Pendente',
-        });
-
-        mostrarToast('✅ Saque solicitado com sucesso!', 'success');
-        
-        if (modalElement) modalElement.style.display = 'none';
-        const inputValor = getEl('modalValorSaque');
-        if (inputValor) inputValor.value = '';
-        const elResumo = getEl('resumoValorLiquido');
-        if (elResumo) elResumo.innerText = '';
-
-    } catch (error) {
-        console.error('Erro ao solicitar saque:', error);
-        mostrarToast('❌ Erro ao solicitar saque: ' + error.message, 'error');
-    } finally {
-        setBotaoCarregando(botao, false);
-    }
-}
-
-function configurarModalSaque(userId, dadosUsuario) {
-    const modal = getEl('modalSaqueSistema');
-    const btnAbrir = getEl('btnAbrirSaqueModal');
-    const btnFechar = getEl('fecharModalSaque');
-    const btnConfirmar = getEl('btnConfirmarModalSacar');
-    const inputValorSaque = getEl('modalValorSaque');
-    const elResumo = getEl('resumoValorLiquido');
-
-    if (!modal || !btnAbrir) return;
-
-    btnAbrir.addEventListener('click', (e) => {
-        e.preventDefault();
-        modal.style.display = 'flex';
-    });
-
-    if (btnFechar) {
-        btnFechar.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) modal.style.display = 'none';
-    });
-
-    if (inputValorSaque && elResumo) {
-        inputValorSaque.addEventListener('input', () => {
-            const valor = parseFloat(inputValorSaque.value);
-            if (!valor || Number.isNaN(valor) || valor <= 0) {
-                elResumo.innerText = '';
-                return;
-            }
-
-            const taxa = valor * CONFIG.TAXA_SAQUE_PERCENTUAL;
-            const liquido = valor - taxa;
-
-            elResumo.innerText = `💡 Taxa (14%): ${formatadorMoeda.format(taxa)} | Você vai receber: ${formatadorMoeda.format(liquido)}`;
-        });
-    }
-
-    if (btnConfirmar && !btnConfirmar.dataset.listenerAtivo) {
-        btnConfirmar.addEventListener('click', () => {
-            const valorSaque = parseFloat(inputValorSaque.value);
-            const chavePix = dadosUsuario?.chavePix || '';
-
-            const validacao = validarSaque({ valorSaque, chavePix });
-            if (!validacao.valido) {
-                mostrarToast(validacao.mensagem, validacao.tipo);
-                return;
-            }
-
-            solicitarSaque(userId, { valorSaque, chavePix }, btnConfirmar, modal);
-        });
-        btnConfirmar.dataset.listenerAtivo = 'true';
-    }
-}
-
-/* ==========================================================================
-   Lógica do Modal de Depósito e Integração de Planos
-   ========================================================================== */
-function configurarModalDeposito() {
-    const modal = getEl('modalDepositoSistema');
-    const btnAbrir = getEl('btnAbrirDeposito');
-    const btnFechar = getEl('fecharModalDeposito');
-    const btnConfirmar = getEl('btnConfirmarModalDepositar');
-    const selectPlano = getEl('modalValorPlano');
-
-    if (!modal || !btnAbrir) return;
-
-    btnAbrir.addEventListener('click', (e) => {
-        e.preventDefault();
-        modal.style.display = 'flex';
-    });
-
-    if (btnFechar) {
-        btnFechar.addEventListener('click', () => {
-            modal.style.display = 'none';
-        });
-    }
-
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) modal.style.display = 'none';
-    });
-
-    if (btnConfirmar && !btnConfirmar.dataset.listenerAtivo) {
-        btnConfirmar.addEventListener('click', () => {
-            const plano = selectPlano.value;
-            if (!plano) {
-                mostrarToast('⚠️ Selecione um plano antes de continuar.', 'warning');
-                return;
-            }
-
-            mostrarToast(`Gerando PIX via API para o plano de R$ ${plano},00...`, 'success');
-            modal.style.display = 'none';
-        });
-        btnConfirmar.dataset.listenerAtivo = 'true';
-    }
-}
-
-function configurarSelecaoPlanos() {
-    const botoesPlano = document.querySelectorAll('.btn-escolher-plano');
-    const inputValorPlano = document.getElementById('modalValorPlano');
-    const modalDeposito = document.getElementById('modalDepositoSistema');
-
-    botoesPlano.forEach(botao => {
-        botao.addEventListener('click', (e) => {
-            e.preventDefault();
-            const valorPlano = botao.getAttribute('data-valor');
-
-            if (inputValorPlano) {
-                inputValorPlano.value = valorPlano;
-            }
-
-            if (modalDeposito) {
-                modalDeposito.style.display = 'flex';
-            }
-        });
-    });
-}
-
-/* ==========================================================================
    Gestão de Perfil e Bloqueio de Chave PIX
    ========================================================================== */
 function inicializarPerfilUsuario(userId) {
@@ -316,7 +140,6 @@ function inicializarPerfilUsuario(userId) {
                 updates['chavePix'] = novaChavePix;
 
                 await update(userRef, updates);
-
                 mostrarToast('✅ Chave PIX cadastrada com sucesso! Ela não poderá ser alterada.', 'success');
             } catch (error) {
                 console.error('Erro ao salvar perfil:', error);
@@ -330,15 +153,178 @@ function inicializarPerfilUsuario(userId) {
 }
 
 /* ==========================================================================
-   Inicialização Global
+   Inicialização de Eventos e Modais (Sua Lógica Original Integrada)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    configurarModalDeposito();
-    configurarSelecaoPlanos();
+    // Sincronizar valor do input oculto com o modal de depósito
+    document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const valor = btn.getAttribute('data-valor');
+            const inputPlano = document.getElementById('valorPlano');
+            if (inputPlano) inputPlano.value = valor;
+            
+            const modalInput = document.getElementById('modalValorDepInput');
+            if (modalInput) modalInput.value = valor;
+            
+            abrirModalDeposito();
+        });
+    });
 
+    // Botão Depositar Principal
+    const btnAbrirDep = document.getElementById('btnAbrirDeposito');
+    if (btnAbrirDep) {
+        btnAbrirDep.addEventListener('click', () => {
+            const inputPlano = document.getElementById('valorPlano');
+            const modalInput = document.getElementById('modalValorDepInput');
+            if (modalInput && inputPlano) modalInput.value = inputPlano.value || "30";
+            abrirModalDeposito();
+        });
+    }
+
+    // Funções de Modal Depósito
+    const modalDep = document.getElementById('modalDeposito') || document.getElementById('modalDepositoSistema');
+    const modalToast = document.getElementById('modalToast');
+    const areaQrCodePix = document.getElementById('areaQrCodePix');
+    const btnConfirmarModalDep = document.getElementById('btnConfirmarModalDep') || document.getElementById('btnConfirmarModalDepositar');
+
+    function abrirModalDeposito() {
+        if (modalToast) modalToast.style.display = 'none';
+        if (areaQrCodePix) areaQrCodePix.style.display = 'none';
+        if (btnConfirmarModalDep) {
+            btnConfirmarModalDep.textContent = "Gerar QR Code Pix";
+            btnConfirmarModalDep.style.display = 'block';
+        }
+        if (modalDep) modalDep.style.display = 'flex';
+    }
+
+    function fecharModalDeposito() {
+        if (modalDep) modalDep.style.display = 'none';
+    }
+
+    document.getElementById('fecharModalDepX')?.addEventListener('click', fecharModalDeposito);
+    document.getElementById('fecharModalDeposito')?.addEventListener('click', fecharModalDeposito);
+    document.getElementById('btnCancelarModalDep')?.addEventListener('click', fecharModalDeposito);
+    
+    modalDep?.addEventListener('click', (e) => {
+        if (e.target === modalDep) fecharModalDeposito();
+    });
+
+    // Ação do Botão no Modal de Depósito (Gerar QR Code / Validar Mínimo)
+    btnConfirmarModalDep?.addEventListener('click', () => {
+        const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
+        const valorAtual = parseFloat(modalInput?.value || 0);
+
+        // Validação de Valor Mínimo (< 30)
+        if (valorAtual < 30) {
+            if (modalToast) {
+                modalToast.style.display = 'block';
+                setTimeout(() => {
+                    if (modalToast) modalToast.style.display = 'none';
+                }, 4000);
+            }
+            return;
+        }
+
+        // Se já gerou ou vai gerar o QR Code
+        if (areaQrCodePix && (areaQrCodePix.style.display === 'none' || areaQrCodePix.style.display === '')) {
+            const qrImg = document.getElementById('imgQrCode');
+            const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
+            
+            if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BancaCompartilhadaR$${valorAtual}`;
+            if (pixCopiaCola) pixCopiaCola.textContent = `00020126580014br.gov.bcb.pix0136banca-compartilhada-pix-${valorAtual}5204000053039865802BR5925Banca Compartilhada6009Sao Paulo62070503***6304`;
+            
+            areaQrCodePix.style.display = 'block';
+            btnConfirmarModalDep.textContent = "Concluir Pagamento";
+        } else {
+            fecharModalDeposito();
+            const inputPlano = document.getElementById('valorPlano');
+            if (inputPlano && modalInput) inputPlano.value = modalInput.value;
+
+            const btnDepReal = document.getElementById('btnDepositar');
+            if (btnDepReal) {
+                btnDepReal.click();
+            } else {
+                mostrarToast('✅ Solicitação de depósito gerada com sucesso!', 'success');
+            }
+        }
+    });
+
+    // Funções de Modal Saque
+    const modalSaque = document.getElementById('modalSaque') || document.getElementById('modalSaqueSistema');
+    const btnAbrirSaqueModal = document.getElementById('btnAbrirSaqueModal');
+
+    function abrirModalSaque() {
+        const nomePerfil = document.getElementById('perfilNome')?.value || localStorage.getItem('usuarioNome') || 'Não informado';
+        const tipoPixPerfil = document.getElementById('perfilTipoPix')?.value || 'CPF';
+        const chavePixPerfil = document.getElementById('perfilChavePix')?.value || localStorage.getItem('usuarioChavePix') || '';
+
+        const elNome = document.getElementById('saqueNomeCompleto');
+        const elTipo = document.getElementById('saqueTipoPix');
+        const elChave = document.getElementById('saqueChavePix');
+
+        if (elNome) elNome.value = nomePerfil;
+        if (elTipo) elTipo.value = tipoPixPerfil;
+        if (elChave) elChave.value = chavePixPerfil;
+
+        if (modalSaque) modalSaque.style.display = 'flex';
+    }
+
+    function fecharModalSaque() {
+        if (modalSaque) modalSaque.style.display = 'none';
+    }
+
+    btnAbrirSaqueModal?.addEventListener('click', (e) => {
+        e.preventDefault();
+        abrirModalSaque();
+    });
+
+    document.getElementById('fecharModalSaqueX')?.addEventListener('click', fecharModalSaque);
+    document.getElementById('fecharModalSaque')?.addEventListener('click', fecharModalSaque);
+    document.getElementById('btnCancelarModalSaque')?.addEventListener('click', fecharModalSaque);
+
+    modalSaque?.addEventListener('click', (e) => {
+        if (e.target === modalSaque) fecharModalSaque();
+    });
+
+    // Cálculo dinâmico do desconto de 14% no Saque
+    const inputValSaque = document.getElementById('valorSaqueModal') || document.getElementById('modalValorSaque');
+    const boxResumo = document.getElementById('resumoDescontoSaque') || document.getElementById('resumoValorLiquido');
+    const txtValSolicitado = document.getElementById('txtValSolicitado');
+    const txtValTaxa = document.getElementById('txtValTaxa');
+    const txtValLiquido = document.getElementById('txtValLiquido');
+
+    inputValSaque?.addEventListener('input', (e) => {
+        const val = parseFloat(e.target.value);
+        if (!isNaN(val) && val > 0) {
+            const taxa = val * CONFIG.TAXA_SAQUE_PERCENTUAL;
+            const liquido = val - taxa;
+
+            if (txtValSolicitado) txtValSolicitado.textContent = `R$ ${val.toFixed(2).replace('.', ',')}`;
+            if (txtValTaxa) txtValTaxa.textContent = `- R$ ${taxa.toFixed(2).replace('.', ',')}`;
+            if (txtValLiquido) txtValLiquido.textContent = `R$ ${liquido.toFixed(2).replace('.', ',')}`;
+            
+            if (boxResumo) {
+                boxResumo.style.display = 'block';
+                if (!txtValSolicitado && !txtValLiquido) {
+                    boxResumo.innerText = `💡 Taxa (14%): ${formatadorMoeda.format(taxa)} | Você vai receber: ${formatadorMoeda.format(liquido)}`;
+                }
+            }
+        } else {
+            if (boxResumo) boxResumo.style.display = 'none';
+        }
+    });
+
+    // Link interno para perfil dentro do modal de saque
+    modalSaque?.querySelector('a[data-target="view-perfil"]')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        fecharModalSaque();
+        const navPerfil = document.querySelector('[data-target="view-perfil"]');
+        if (navPerfil) navPerfil.click();
+    });
+
+    // Autenticação e sincronização inicial de dados do usuário
     auth.onAuthStateChanged((user) => {
         if (!user) return;
-
         const userId = user.uid;
 
         const userRef = ref(db, 'usuarios/' + userId);
@@ -353,8 +339,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (elNome) elNome.innerText = nomeUsuario;
                 if (elInicial) elInicial.innerText = nomeUsuario.charAt(0).toUpperCase();
-
-                configurarModalSaque(userId, dados);
             }
         });
 
