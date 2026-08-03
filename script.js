@@ -1,5 +1,6 @@
 import { auth, db, mostrarToast } from './auth.js';
 import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 35,
@@ -419,6 +420,22 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
     const sections = document.querySelectorAll('.view-section');
+    const sidebar = document.getElementById('sidebarPrincipal');
+    const overlay = document.getElementById('sidebarOverlay');
+    const btnAbrirMenuMobile = document.getElementById('btnAbrirMenuMobile');
+    const btnSair = document.getElementById('btnSair');
+
+    function fecharMenuMobile() {
+        sidebar?.classList.remove('aberta');
+        overlay?.classList.remove('ativo');
+    }
+
+    btnAbrirMenuMobile?.addEventListener('click', () => {
+        sidebar?.classList.toggle('aberta');
+        overlay?.classList.toggle('ativo');
+    });
+
+    overlay?.addEventListener('click', fecharMenuMobile);
 
     navItems.forEach(item => {
         item.addEventListener('click', function(e) {
@@ -437,6 +454,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             }
+
+            fecharMenuMobile();
         });
+    });
+
+    btnSair?.addEventListener('click', async () => {
+        btnSair.disabled = true;
+        try {
+            await signOut(auth);
+        } catch (error) {
+            console.error('Erro ao sair:', error);
+            mostrarToast('❌ Erro ao sair: ' + error.message, 'error');
+            btnSair.disabled = false;
+        }
     });
 });
