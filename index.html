@@ -23,7 +23,7 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                         Investir
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="#" class="nav-item" data-target="view-carteira">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                         Carteira
                     </a>
@@ -98,7 +98,7 @@
                     <button class="btn" id="btnSacar">Solicitar Saque</button>
                 </div>
 
-                <!-- Histórico Separado: Saques e Chaves x Depósitos -->
+                <!-- Histórico de Saques -->
                 <div class="table-container">
                     <h3>Histórico de Saques (Chave PIX, Horário e Status)</h3>
                     <table>
@@ -118,6 +118,7 @@
                     </table>
                 </div>
 
+                <!-- Histórico de Depósitos -->
                 <div class="table-container">
                     <h3>Histórico de Depósitos</h3>
                     <table>
@@ -137,7 +138,7 @@
                 </div>
             </section>
 
-            <!-- ABA INVESTIR (Oculta por padrão) -->
+            <!-- ABA INVESTIR -->
             <section id="view-investir" class="view-section" style="display: none;">
                 <h2>Investir na Banca</h2>
                 <div class="card" style="margin-top: 20px;">
@@ -154,6 +155,42 @@
                         </select>
                     </div>
                     <button class="btn" id="btnDepositar">Depositar via PIX (API)</button>
+                </div>
+            </section>
+
+            <!-- ABA CARTEIRA (Planos e Rendimentos Ativos) -->
+            <section id="view-carteira" class="view-section" style="display: none;">
+                <h2>Minha Carteira de Planos</h2>
+                
+                <div class="stats-grid" style="margin-top: 20px;">
+                    <div class="stat-card">
+                        <h3>Total Investido em Planos</h3>
+                        <p id="totalInvestidoPlanos">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Rendimento Total dos Planos</h3>
+                        <p id="totalRendimentoPlanos">R$ 0,00</p>
+                    </div>
+                </div>
+
+                <div class="table-container" style="margin-top: 20px;">
+                    <h3>Planos Ativos e Rendimentos Diários</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data da Ativação</th>
+                                <th>Plano / Valor</th>
+                                <th>Rendimento Diário (3%)</th>
+                                <th>Rendimento Acumulado</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPlanosCarteira">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum plano ativo no momento.</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
