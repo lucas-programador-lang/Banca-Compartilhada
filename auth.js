@@ -178,6 +178,9 @@ document.querySelectorAll('.toggle-senha').forEach((botao) => {
 /* ==========================================================================
    Cadastro (register.html)
    ========================================================================== */
+/* ==========================================================================
+   Cadastro (register.html)
+   ========================================================================== */
 const registerForm = getEl('registerForm');
 if (registerForm) {
     aplicarMensagensValidacao(registerForm, {
@@ -189,6 +192,7 @@ if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        const nome = getEl('nome')?.value.trim() || 'Usuário';
         const email = getEl('emailReg').value.trim();
         const senha = getEl('senhaReg').value;
         const botao = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('button');
@@ -201,7 +205,24 @@ if (registerForm) {
 
         setBotaoCarregando(botao, true, 'Criando conta...');
         try {
-            await createUserWithEmailAndPassword(auth, email, senha);
+            // 1. Cria a conta no Firebase Auth
+            const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
+            const user = userCredential.user;
+
+            // 2. Importa e cria o registro inicial no Realtime Database
+            const { ref, set } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
+            const db = getDatabase(app);
+            
+            await set(ref(db, 'usuarios/' + user.uid), {
+                nome: nome,
+                email: email,
+                saldo: 0,
+                rendimento: 0,
+                comissao: 0,
+                tipoPix: 'cpf',
+                chavePix: ''
+            });
+
             mostrarToast('🎉 Conta criada com sucesso!', 'success');
             setTimeout(() => {
                 window.location.href = 'index.html';
