@@ -172,24 +172,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 /* ==========================================================================
-   Navegação da Sidebar (Menu Lateral)
+   Navegação da Sidebar e Alternância de Telas
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+    const sections = document.querySelectorAll('.view-section');
 
     navItems.forEach(item => {
         item.addEventListener('click', function(e) {
-            // Remove a classe 'active' de todos os itens
+            e.preventDefault();
+
+            // Gerencia classe ativa do menu
             navItems.forEach(nav => nav.classList.remove('active'));
-            
-            // Adiciona a classe 'active' apenas no item clicado
             this.classList.add('active');
 
-            // Se o link for apenas '#' (página única), impede o comportamento padrão de subir a página
-            if (this.getAttribute('href') === '#') {
-                e.preventDefault();
-                // Aqui você pode adicionar lógica futura se quiser alternar telas na mesma página (SPA),
-                // ex: carregar dados da aba "Investir", "Carteira", etc.
+            // Pega o alvo da seção correspondente
+            const targetId = this.getAttribute('data-target');
+            if (targetId) {
+                sections.forEach(sec => {
+                    if (sec.id === targetId) {
+                        sec.style.display = 'block';
+                    } else {
+                        sec.style.display = 'none';
+                    }
+                });
             }
         });
     });
