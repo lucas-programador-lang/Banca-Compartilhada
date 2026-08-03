@@ -10,12 +10,12 @@ import {
 
 // TODO: Substitua com as credenciais do seu projeto Firebase
 const firebaseConfig = {
-    apiKey: "SUA_API_KEY_AQUI",
-    authDomain: "seu-projeto.firebaseapp.com",
-    projectId: "seu-projeto",
-    storageBucket: "seu-projeto.appspot.com",
-    messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-    appId: "SEU_APP_ID"
+  apiKey: "AIzaSyCvzby1p6_CU0yAASmlrbSyhj6yoyJ9qBQ",
+  authDomain: "banca-compartilhada.firebaseapp.com",
+  projectId: "banca-compartilhada",
+  storageBucket: "banca-compartilhada.firebasestorage.app",
+  messagingSenderId: "395304529051",
+  appId: "1:395304529051:web:7e81033404097b164fea3e"
 };
 
 // Inicializar o Firebase
