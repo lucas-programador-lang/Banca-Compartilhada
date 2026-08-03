@@ -169,3 +169,28 @@ document.addEventListener('DOMContentLoaded', () => {
         inicializarBotaoSaque(userId);
     });
 });
+
+
+/* ==========================================================================
+   Navegação da Sidebar (Menu Lateral)
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
+
+    navItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            // Remove a classe 'active' de todos os itens
+            navItems.forEach(nav => nav.classList.remove('active'));
+            
+            // Adiciona a classe 'active' apenas no item clicado
+            this.classList.add('active');
+
+            // Se o link for apenas '#' (página única), impede o comportamento padrão de subir a página
+            if (this.getAttribute('href') === '#') {
+                e.preventDefault();
+                // Aqui você pode adicionar lógica futura se quiser alternar telas na mesma página (SPA),
+                // ex: carregar dados da aba "Investir", "Carteira", etc.
+            }
+        });
+    });
+});
