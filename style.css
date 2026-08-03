@@ -150,6 +150,60 @@ h2 {
     font-weight: 500;
 }
 
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-wrapper svg {
+    position: absolute;
+    left: 14px;
+    width: 18px;
+    height: 18px;
+    color: var(--text-faint);
+    pointer-events: none;
+    transition: color var(--transition-fast);
+}
+
+.input-wrapper input {
+    padding-left: 42px;
+}
+
+.input-wrapper:focus-within svg {
+    color: var(--primary);
+}
+
+.input-wrapper input[type="password"],
+.input-wrapper input[data-tipo-senha] {
+    padding-right: 42px;
+}
+
+.toggle-senha {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    padding: 4px;
+    display: flex;
+    color: var(--text-faint);
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.toggle-senha:hover {
+    color: var(--primary-hover);
+}
+
+.toggle-senha.ativo {
+    color: var(--primary);
+}
+
+.toggle-senha svg {
+    width: 18px;
+    height: 18px;
+}
+
 .input-group input,
 .input-group select {
     width: 100%;
@@ -228,6 +282,23 @@ h2 {
     margin-top: var(--space-md);
     font-size: 0.88rem;
     color: var(--text-muted);
+}
+
+.link-text + .link-text {
+    margin-top: var(--space-xs);
+}
+
+.link-text.secondary {
+    font-size: 0.82rem;
+}
+
+.link-text.secondary a {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.link-text.secondary a:hover {
+    color: var(--primary-hover);
 }
 
 .link-text a {
