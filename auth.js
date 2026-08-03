@@ -11,7 +11,7 @@ import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-
 const firebaseConfig = {
   apiKey: "AIzaSyCvzby1p6_CU0yAASmlrbSyhj6yoyJ9qBQ",
   authDomain: "banca-compartilhada.firebaseapp.com",
-  databaseURL: "https://banca-compartilhada-default-rtdb.firebaseio.com", // Adicione o link do seu Realtime Database aqui se necessário
+  databaseURL: "https://banca-compartilhada-default-rtdb.firebaseio.com",
   projectId: "banca-compartilhada",
   storageBucket: "banca-compartilhada.firebasestorage.app",
   messagingSenderId: "395304529051",
@@ -23,6 +23,26 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getDatabase(app);
 
+// Função global de Toast para mensagens bonitas
+function mostrarToast(mensagem, tipo = 'success') {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
+    toast.innerHTML = `<span>${mensagem}</span>`;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
+}
+
 // Lógica de Cadastro (register.html)
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
@@ -33,10 +53,12 @@ if (registerForm) {
 
         try {
             await createUserWithEmailAndPassword(auth, email, senha);
-            alert('🎉 Conta criada com sucesso!');
-            window.location.href = 'index.html';
+            mostrarToast('🎉 Conta criada com sucesso!', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500); // Aguarda 1.5s para o usuário ver o toast antes de mudar de página
         } catch (error) {
-            alert('❌ Erro no cadastro: ' + error.message);
+            mostrarToast('❌ Erro: ' + error.message, 'error');
         }
     });
 }
@@ -51,9 +73,12 @@ if (loginForm) {
 
         try {
             await signInWithEmailAndPassword(auth, email, senha);
-            window.location.href = 'index.html';
+            mostrarToast('✅ Login efetuado com sucesso!', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
         } catch (error) {
-            alert('❌ E-mail ou senha inválidos: ' + error.message);
+            mostrarToast('❌ E-mail ou senha inválidos.', 'error');
         }
     });
 }
