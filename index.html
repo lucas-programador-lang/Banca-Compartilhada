@@ -6,7 +6,7 @@
     <title>Painel - Banca Compartilhada</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="protected-page">
     <div class="dashboard-container">
         
         <!-- Aviso de Risco e Transparência -->
@@ -74,6 +74,7 @@
                         <th>Valor Solicitado</th>
                         <th>Status</th>
                     </tr>
+                </thead>
                 <tbody id="tabelaSaques">
                     <!-- Preenchido via Script/Firebase -->
                     <tr>
@@ -107,6 +108,8 @@
         </a>
 
     </div>
-    <script src="script.js"></script>
+    <!-- Script principal em formato module para validar autenticação e carregar funções -->
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>
