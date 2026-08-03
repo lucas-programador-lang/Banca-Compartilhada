@@ -106,6 +106,7 @@ body.protected-page {
     padding: var(--space-xl) var(--space-lg);
     box-shadow: var(--shadow-card);
     overflow: hidden;
+    animation: cardIn 0.45s ease both;
 }
 
 /* Fio dourado no topo do cartão — o único acento de destaque do design */
@@ -119,14 +120,38 @@ body.protected-page {
     background: linear-gradient(90deg, transparent, var(--primary) 25%, var(--primary-hover) 50%, var(--primary) 75%, transparent);
 }
 
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .card .eyebrow {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 0.16em;
     font-size: 0.72rem;
     color: var(--text-faint);
     margin-bottom: var(--space-xs);
+}
+
+.card .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-right: 7px;
+    flex-shrink: 0;
 }
 
 h2 {
@@ -174,8 +199,12 @@ h2 {
     color: var(--primary);
 }
 
-.input-wrapper input[type="password"],
-.input-wrapper input[data-tipo-senha] {
+/* Reserva espaço para o botão "mostrar/ocultar senha" com base na presença
+   do botão em si, não no type do input — o JS troca password <-> text ao
+   alternar a visibilidade, então um seletor por [type="password"] perdia
+   o padding assim que o usuário clicava no olho, fazendo o texto ficar
+   por baixo do ícone. */
+.input-wrapper:has(.toggle-senha) input {
     padding-right: 42px;
 }
 
@@ -501,7 +530,7 @@ tbody tr:last-child td {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .toast, .btn, .stat-card, .support-btn {
+    .toast, .btn, .stat-card, .support-btn, .card {
         animation: none !important;
         transition: none !important;
     }
