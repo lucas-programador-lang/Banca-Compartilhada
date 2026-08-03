@@ -1,5 +1,5 @@
 import { auth, db, mostrarToast } from './auth.js';
-import { ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 /* ==========================================================================
    Configurações / Constantes
@@ -118,6 +118,71 @@ function inicializarBotaoSaque(userId) {
 }
 
 /* ==========================================================================
+   Gestão de Perfil e Chave PIX Sincronizada
+   ========================================================================== */
+function inicializarPerfilUsuario(userId) {
+    const perfilTipoPix = getEl('perfilTipoPix');
+    const perfilChavePix = getEl('perfilChavePix');
+    const perfilNome = getEl('perfilNome');
+    const campoPixInicio = getEl('chavePix');
+    const btnSalvarPerfil = getEl('btnSalvarPerfil');
+
+    if (!btnSalvarPerfil) return;
+
+    const userRef = ref(db, 'usuarios/' + userId);
+    
+    // Ouve os dados do usuário para preencher a aba de Perfil em tempo real
+    onValue(userRef, (snapshot) => {
+        const dados = snapshot.val();
+        if (dados) {
+            if (perfilNome && dados.nome && !perfilNome.value) perfilNome.value = dados.nome;
+            if (perfilTipoPix && dados.tipoPix) perfilTipoPix.value = dados.tipoPix;
+            
+            if (dados.chavePix) {
+                if (perfilChavePix && !perfilChavePix.value) perfilChavePix.value = dados.chavePix;
+                if (campoPixInicio && !campoPixInicio.value) campoPixInicio.value = dados.chavePix;
+            }
+        }
+    });
+
+    // Salva as alterações de perfil no Firebase
+    if (!btnSalvarPerfil.dataset.listenerAtivo) {
+        btnSalvarPerfil.addEventListener('click', async () => {
+            const novoNome = perfilNome ? perfilNome.value.trim() : '';
+            const novoTipoPix = perfilTipoPix ? perfilTipoPix.value : '';
+            const novaChavePix = perfilChavePix ? perfilChavePix.value.trim() : '';
+
+            if (!novaChavePix) {
+                mostrarToast('⚠️ Por favor, informe a sua chave PIX.', 'warning');
+                return;
+            }
+
+            setBotaoCarregando(btnSalvarPerfil, true, 'Salvando...');
+            try {
+                const updates = {};
+                if (novoNome) updates['nome'] = novoNome;
+                updates['tipoPix'] = novoTipoPix;
+                updates['chavePix'] = novaChavePix;
+
+                await update(userRef, updates);
+
+                if (campoPixInicio) {
+                    campoPixInicio.value = novaChavePix;
+                }
+
+                mostrarToast('✅ Perfil e chave PIX atualizados com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao salvar perfil:', error);
+                mostrarToast('❌ Erro ao salvar perfil: ' + error.message, 'error');
+            } finally {
+                setBotaoCarregando(btnSalvarPerfil, false);
+            }
+        });
+        btnSalvarPerfil.dataset.listenerAtivo = 'true';
+    }
+}
+
+/* ==========================================================================
    Depósito
    ========================================================================== */
 function inicializarBotaoDeposito() {
@@ -136,9 +201,6 @@ function inicializarBotaoDeposito() {
     });
 }
 
-/* ==========================================================================
-   Inicialização
-   ========================================================================== */
 /* ==========================================================================
    Inicialização
    ========================================================================== */
@@ -167,9 +229,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         inicializarBotaoSaque(userId);
+        inicializarPerfilUsuario(userId);
     });
 });
-
 
 /* ==========================================================================
    Navegação da Sidebar e Alternância de Telas
