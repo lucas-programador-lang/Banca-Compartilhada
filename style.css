@@ -179,7 +179,7 @@ h2 {
     position: relative;
 }
 
-.input-wrapper svg {
+.input-wrapper svg.icon-left {
     position: absolute;
     left: 14px;
     top: 50%;
@@ -191,11 +191,14 @@ h2 {
     transition: color var(--transition-fast);
 }
 
-.input-wrapper input {
+/* Só reserva espaço à esquerda quando o campo realmente tem um ícone —
+   e-mail e senha já ganham o ícone nativo do navegador (autofill/chave),
+   então manter o nosso ali só duplicava e desalinhava os dois. */
+.input-wrapper:has(.icon-left) input {
     padding-left: 42px;
 }
 
-.input-wrapper:focus-within svg {
+.input-wrapper:focus-within svg.icon-left {
     color: var(--primary);
 }
 
