@@ -840,6 +840,34 @@ tbody tr:last-child td {
     box-shadow: 0 0 8px #1fa855;
 }
 
+/* Botão de suporte WhatsApp na sidebar, logo abaixo do menu de navegação */
+.sidebar-support-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: var(--space-sm);
+    padding: 12px 16px;
+    background: rgba(31, 168, 85, 0.1);
+    border: 1px solid rgba(31, 168, 85, 0.3);
+    border-radius: var(--radius-sm);
+    color: #3ddc84;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sidebar-support-btn svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.sidebar-support-btn:hover {
+    background: rgba(31, 168, 85, 0.18);
+    border-color: rgba(31, 168, 85, 0.5);
+}
+
 /* Card do usuário no rodapé da Sidebar */
 .sidebar-user {
     display: flex;
@@ -928,6 +956,10 @@ tbody tr:last-child td {
 .main-content {
     margin-left: 260px;
     flex: 1;
+    min-width: 0; /* itens flex têm min-width:auto por padrão, o que impedia
+                     o container de encolher além do conteúdo mais largo
+                     (a tabela com min-width:480px), causando overflow
+                     horizontal da página inteira no mobile */
     padding: var(--space-lg);
     max-width: 1200px;
 }
