@@ -132,10 +132,10 @@ body.protected-page {
 }
 
 .logo-ring {
-    width: 76px;
-    height: 76px;
-    margin: 0 auto var(--space-sm);
-    padding: 3px;
+    width: 116px;
+    height: 116px;
+    margin: 0 auto var(--space-md);
+    padding: 4px;
     border-radius: 50%;
     background: conic-gradient(from 180deg, var(--primary-deep), var(--primary-hover), var(--primary), var(--primary-deep));
     box-shadow: 0 10px 24px rgba(124, 74, 36, 0.4);
@@ -148,7 +148,7 @@ body.protected-page {
     border-radius: 50%;
     object-fit: cover;
     background-color: var(--bg-color-elevated);
-    border: 3px solid var(--bg-color);
+    border: 4px solid var(--bg-color);
 }
 
 .card .eyebrow {
