@@ -3,6 +3,7 @@ import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
+    sendPasswordResetEmail,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -66,15 +67,21 @@ function getEl(id) {
     return document.getElementById(id);
 }
 
-function setBotaoCarregando(botao, carregando, textoCarregando = 'Enviando...') {
-    if (!botao) return;
+function setBotaoCarregando(elemento, carregando, textoCarregando = 'Enviando...') {
+    if (!elemento) return;
+    const ehBotao = 'disabled' in elemento;
+
     if (carregando) {
-        botao.dataset.textoOriginal = botao.dataset.textoOriginal || botao.innerText;
-        botao.disabled = true;
-        botao.innerText = textoCarregando;
+        elemento.dataset.textoOriginal = elemento.dataset.textoOriginal || elemento.innerText;
+        if (ehBotao) elemento.disabled = true;
+        else elemento.style.pointerEvents = 'none';
+        elemento.style.opacity = '0.65';
+        elemento.innerText = textoCarregando;
     } else {
-        botao.disabled = false;
-        botao.innerText = botao.dataset.textoOriginal || botao.innerText;
+        if (ehBotao) elemento.disabled = false;
+        else elemento.style.pointerEvents = '';
+        elemento.style.opacity = '';
+        elemento.innerText = elemento.dataset.textoOriginal || elemento.innerText;
     }
 }
 
@@ -101,7 +108,14 @@ function traduzirErroFirebase(error, contexto = 'login') {
         'auth/too-many-requests': 'Muitas tentativas. Aguarde um momento e tente novamente.',
     };
 
-    const dicionario = contexto === 'cadastro' ? mensagensCadastro : mensagensLogin;
+    const mensagensReset = {
+        'auth/invalid-email': 'Informe um e-mail válido.',
+        'auth/user-not-found': 'Não encontramos uma conta com este e-mail.',
+        'auth/too-many-requests': 'Muitas tentativas. Aguarde um momento e tente novamente.',
+    };
+
+    const dicionarios = { cadastro: mensagensCadastro, login: mensagensLogin, reset: mensagensReset };
+    const dicionario = dicionarios[contexto] || mensagensLogin;
     return dicionario[codigo] || 'Ocorreu um erro. Tente novamente em instantes.';
 }
 
@@ -114,6 +128,21 @@ function validarEmailSenha(email, senha) {
     }
     return null;
 }
+
+/* ==========================================================================
+   Alternar visibilidade da senha (login.html e register.html)
+   ========================================================================== */
+document.querySelectorAll('.toggle-senha').forEach((botao) => {
+    botao.addEventListener('click', () => {
+        const campo = getEl(botao.dataset.alvo);
+        if (!campo) return;
+
+        const oculto = campo.type === 'password';
+        campo.type = oculto ? 'text' : 'password';
+        botao.setAttribute('aria-label', oculto ? 'Ocultar senha' : 'Mostrar senha');
+        botao.classList.toggle('ativo', oculto);
+    });
+});
 
 /* ==========================================================================
    Cadastro (register.html)
@@ -176,6 +205,36 @@ if (loginForm) {
             console.error('Erro ao fazer login:', error);
             mostrarToast('❌ ' + traduzirErroFirebase(error, 'login'), 'error');
             setBotaoCarregando(botao, false);
+        }
+    });
+}
+
+/* ==========================================================================
+   Recuperação de senha (login.html)
+   ========================================================================== */
+const linkEsqueciSenha = getEl('esqueciSenha');
+if (linkEsqueciSenha) {
+    linkEsqueciSenha.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const campoEmail = getEl('email');
+        const email = (campoEmail?.value || '').trim();
+
+        if (!email) {
+            mostrarToast('⚠️ Informe seu e-mail no campo acima antes de solicitar a recuperação.', 'warning');
+            campoEmail?.focus();
+            return;
+        }
+
+        setBotaoCarregando(linkEsqueciSenha, true, 'Enviando...');
+        try {
+            await sendPasswordResetEmail(auth, email);
+            mostrarToast('📩 Enviamos um link de redefinição para o seu e-mail.', 'success');
+        } catch (error) {
+            console.error('Erro ao solicitar redefinição de senha:', error);
+            mostrarToast('❌ ' + traduzirErroFirebase(error, 'reset'), 'error');
+        } finally {
+            setBotaoCarregando(linkEsqueciSenha, false);
         }
     });
 }
