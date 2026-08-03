@@ -1,87 +1,191 @@
 import { auth, db } from './auth.js';
 import { ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Função de Toast (Mantida)
-function mostrarToast(mensagem, tipo = 'success') {
+/* ==========================================================================
+   Configurações / Constantes
+   ========================================================================== */
+const CONFIG = {
+    VALOR_SAQUE_MINIMO: 35,
+    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo
+    TOAST_DURACAO_MS: 3000,
+};
+
+const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+});
+
+/* ==========================================================================
+   Toast
+   ========================================================================== */
+function getToastContainer() {
     let container = document.getElementById('toast-container');
     if (!container) {
         container = document.createElement('div');
         container.id = 'toast-container';
         document.body.appendChild(container);
     }
-    const toast = document.createElement('div');
-    toast.className = `toast ${tipo}`;
-    toast.innerHTML = `<span>${mensagem}</span>`;
-    container.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    return container;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Monitorar usuário autenticado
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            const userId = user.uid;
+/**
+ * Exibe uma notificação temporária na tela.
+ * @param {string} mensagem
+ * @param {'success'|'error'|'warning'} tipo
+ */
+function mostrarToast(mensagem, tipo = 'success') {
+    const container = getToastContainer();
 
-            // 1. Carregar Dados do Usuário em Tempo Real (Saldos, etc)
-            const userRef = ref(db, 'usuarios/' + userId);
-            onValue(userRef, (snapshot) => {
-                const dados = snapshot.val();
-                if (dados) {
-                    document.getElementById('saldoDisponivel').innerText = `R$ ${(dados.saldo || 0).toFixed(2)}`;
-                    document.getElementById('rendimentoTotal').innerText = `R$ ${(dados.rendimento || 0).toFixed(2)}`;
-                    document.getElementById('comissaoTotal').innerText = `R$ ${(dados.comissao || 0).toFixed(2)}`;
-                }
-            });
+    const toast = document.createElement('div');
+    toast.className = `toast ${tipo}`;
 
-            // 2. Ação de Solicitar Saque
-            const btnSacar = document.getElementById('btnSacar');
-            if (btnSacar) {
-                btnSacar.addEventListener('click', () => {
-                    const hoje = new Date().getDay(); // 0 = Domingo
-                    const valorSaque = parseFloat(document.getElementById('valorSaque').value);
-                    const chavePix = document.getElementById('chavePix').value;
+    const texto = document.createElement('span');
+    texto.textContent = mensagem; // textContent evita injeção de HTML
+    toast.appendChild(texto);
 
-                    if (hoje !== 0) {
-                        mostrarToast('⚠️ Os saques estão liberados apenas aos DOMINGOS.', 'warning');
-                        return;
-                    }
-                    if (!valorSaque || valorSaque < 35) {
-                        mostrarToast('⚠️ O valor mínimo para saque é de R$ 35,00.', 'error');
-                        return;
-                    }
-                    if (!chavePix) {
-                        mostrarToast('⚠️ Por favor, informe a sua chave PIX.', 'warning');
-                        return;
-                    }
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), CONFIG.TOAST_DURACAO_MS);
+}
 
-                    // Salvando o saque no Realtime Database na pasta do usuário
-                    const saquesRef = ref(db, 'saques/' + userId);
-                    const novoSaqueRef = push(saquesRef);
-                    
-                    set(novoSaqueRef, {
-                        chavePix: chavePix,
-                        valor: valorSaque,
-                        dataHora: new Date().toLocaleString('pt-BR'),
-                        status: 'Pendente'
-                    }).then(() => {
-                        mostrarToast('✅ Saque solicitado com sucesso!', 'success');
-                        document.getElementById('valorSaque').value = '';
-                        document.getElementById('chavePix').value = '';
-                    }).catch((error) => {
-                        mostrarToast('❌ Erro ao solicitar saque: ' + error.message, 'error');
-                    });
-                });
-            }
+/* ==========================================================================
+   Helpers
+   ========================================================================== */
+function getEl(id) {
+    return document.getElementById(id);
+}
+
+/**
+ * Ativa/desativa um botão durante uma operação assíncrona,
+ * evitando duplo clique e dando feedback visual ao usuário.
+ */
+function setBotaoCarregando(botao, carregando, textoCarregando = 'Enviando...') {
+    if (!botao) return;
+    if (carregando) {
+        botao.dataset.textoOriginal = botao.dataset.textoOriginal || botao.innerText;
+        botao.disabled = true;
+        botao.innerText = textoCarregando;
+    } else {
+        botao.disabled = false;
+        botao.innerText = botao.dataset.textoOriginal || botao.innerText;
+    }
+}
+
+function atualizarPainel(dados) {
+    const campos = {
+        saldoDisponivel: dados.saldo,
+        rendimentoTotal: dados.rendimento,
+        comissaoTotal: dados.comissao,
+    };
+
+    for (const [idCampo, valor] of Object.entries(campos)) {
+        const el = getEl(idCampo);
+        if (el) el.innerText = formatadorMoeda.format(valor || 0);
+    }
+}
+
+/* ==========================================================================
+   Regras de negócio: Saque
+   ========================================================================== */
+function validarSaque({ valorSaque, chavePix }) {
+    const hoje = new Date().getDay();
+
+    if (hoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
+        return { valido: false, mensagem: '⚠️ Os saques estão liberados apenas aos DOMINGOS.', tipo: 'warning' };
+    }
+    if (!valorSaque || Number.isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
+        return {
+            valido: false,
+            mensagem: `⚠️ O valor mínimo para saque é de ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`,
+            tipo: 'error',
+        };
+    }
+    if (!chavePix) {
+        return { valido: false, mensagem: '⚠️ Por favor, informe a sua chave PIX.', tipo: 'warning' };
+    }
+    return { valido: true };
+}
+
+async function solicitarSaque(userId, dadosSaque, botao) {
+    setBotaoCarregando(botao, true, 'Enviando solicitação...');
+    try {
+        const saquesRef = ref(db, 'saques/' + userId);
+        const novoSaqueRef = push(saquesRef);
+
+        await set(novoSaqueRef, {
+            chavePix: dadosSaque.chavePix,
+            valor: dadosSaque.valorSaque,
+            dataHora: new Date().toLocaleString('pt-BR'),
+            status: 'Pendente',
+        });
+
+        mostrarToast('✅ Saque solicitado com sucesso!', 'success');
+        getEl('valorSaque').value = '';
+        getEl('chavePix').value = '';
+    } catch (error) {
+        console.error('Erro ao solicitar saque:', error);
+        mostrarToast('❌ Erro ao solicitar saque: ' + error.message, 'error');
+    } finally {
+        setBotaoCarregando(botao, false);
+    }
+}
+
+function inicializarBotaoSaque(userId) {
+    const btnSacar = getEl('btnSacar');
+    if (!btnSacar || btnSacar.dataset.listenerAtivo) return;
+
+    btnSacar.addEventListener('click', () => {
+        const valorSaque = parseFloat(getEl('valorSaque').value);
+        const chavePix = getEl('chavePix').value.trim();
+
+        const validacao = validarSaque({ valorSaque, chavePix });
+        if (!validacao.valido) {
+            mostrarToast(validacao.mensagem, validacao.tipo);
+            return;
         }
+
+        solicitarSaque(userId, { valorSaque, chavePix }, btnSacar);
     });
 
-    // Ação do Botão de Depósito (API PIX)
-    const btnDepositar = document.getElementById('btnDepositar');
-    if (btnDepositar) {
-        btnDepositar.addEventListener('click', () => {
-            const plano = document.getElementById('valorPlano').value;
-            mostrarToast(`Gerando PIX via API para o plano de R$ ${plano},00...`, 'success');
-            // Aqui você chamará a sua API de pagamento (Mercado Pago, OpenPix, etc.)
+    // Marca o botão para não duplicar o listener caso a autenticação dispare novamente
+    btnSacar.dataset.listenerAtivo = 'true';
+}
+
+/* ==========================================================================
+   Depósito
+   ========================================================================== */
+function inicializarBotaoDeposito() {
+    const btnDepositar = getEl('btnDepositar');
+    if (!btnDepositar) return;
+
+    btnDepositar.addEventListener('click', () => {
+        const plano = getEl('valorPlano').value;
+        if (!plano) {
+            mostrarToast('⚠️ Selecione um plano antes de continuar.', 'warning');
+            return;
+        }
+
+        mostrarToast(`Gerando PIX via API para o plano de R$ ${plano},00...`, 'success');
+        // TODO: integrar com a API de pagamento (Mercado Pago, OpenPix, etc.)
+    });
+}
+
+/* ==========================================================================
+   Inicialização
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarBotaoDeposito();
+
+    auth.onAuthStateChanged((user) => {
+        if (!user) return;
+
+        const userId = user.uid;
+
+        const userRef = ref(db, 'usuarios/' + userId);
+        onValue(userRef, (snapshot) => {
+            const dados = snapshot.val();
+            if (dados) atualizarPainel(dados);
         });
-    }
+
+        inicializarBotaoSaque(userId);
+    });
 });
