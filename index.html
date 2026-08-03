@@ -347,22 +347,22 @@
                 <div class="card" style="margin-bottom: 20px;">
                     <h3 style="margin-bottom: 15px;">Dados Pessoais</h3>
                     <div class="input-group">
-                        <label>Nome do Usuário</label>
-                        <input type="text" id="perfilNome" placeholder="Seu nome">
+                        <label>Nome Completo</label>
+                        <input type="text" id="perfilNome" placeholder="Digite seu nome completo">
                     </div>
                 </div>
 
                 <div class="card">
                     <h3>Chave PIX Padrão para Saques</h3>
-                    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Ao salvar aqui, a chave será preenchida automaticamente no painel de saque.</p>
+                    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Estes dados serão preenchidos automaticamente na solicitação de saque.</p>
                     
                     <div class="input-group">
                         <label>Tipo de Chave PIX</label>
                         <select id="perfilTipoPix" style="width: 100%; padding: 12px; border-radius: 8px; background: var(--bg-card, #1a1a1a); color: #fff; border: 1px solid var(--border-color);">
-                            <option value="cpf">CPF</option>
-                            <option value="email">E-mail</option>
-                            <option value="telefone">Telefone</option>
-                            <option value="aleatoria">Chave Aleatória</option>
+                            <option value="CPF">CPF</option>
+                            <option value="E-mail">E-mail</option>
+                            <option value="Telefone">Telefone</option>
+                            <option value="Chave Aleatória">Chave Aleatória</option>
                         </select>
                     </div>
 
@@ -383,40 +383,203 @@
         </main>
     </div>
 
+    <!-- ================= MODAL DE DEPÓSITO ================= -->
+    <div id="modalDeposito" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="card" style="width: 100%; max-width: 420px; position: relative; margin: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+            <button id="fecharModalDepX" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; font-weight: bold;">&times;</button>
+            
+            <h3 style="margin-bottom: 10px; font-size: 20px; color: var(--primary-hover);">Realizar Depósito</h3>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Selecione o plano desejado e prossiga com o pagamento.</p>
+            
+            <div class="input-group">
+                <label>Valor do Plano / Depósito (R$)</label>
+                <input type="number" id="modalValorDepInput" placeholder="30.00" value="30">
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 25px;">
+                <button class="btn" id="btnCancelarModalDep" style="flex: 1; background: transparent; border: 1px solid var(--border-color-strong); color: var(--text-muted);">Cancelar</button>
+                <button class="btn" id="btnConfirmarModalDep" style="flex: 1;">Depositar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL DE SAQUE ================= -->
+    <div id="modalSaque" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+        <div class="card" style="width: 100%; max-width: 480px; position: relative; margin: 20px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-height: 90vh; overflow-y: auto;">
+            <button id="fecharModalSaqueX" style="position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; font-weight: bold;">&times;</button>
+            
+            <h3 style="margin-bottom: 5px; font-size: 20px; color: var(--primary-hover);">Solicitar Saque</h3>
+            <p style="color: var(--primary); font-size: 13px; font-weight: 600; margin-bottom: 15px;">⚠️ Liberado apenas aos Domingos</p>
+            
+            <div style="background: var(--bg-card, #1a1a1a); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 15px; margin-bottom: 15px; font-size: 13px; color: var(--text-muted);">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span>Valor Mínimo:</span>
+                    <strong style="color: #fff;">R$ 35,00</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Taxa de Saque:</span>
+                    <strong style="color: #fff;">14%</strong>
+                </div>
+            </div>
+
+            <!-- Dados preenchidos do Perfil -->
+            <div style="margin-bottom: 15px;">
+                <div class="input-group" style="margin-bottom: 10px;">
+                    <label>Nome Completo (Cadastrado no Perfil)</label>
+                    <input type="text" id="saqueNomeCompleto" readonly style="background: rgba(255,255,255,0.03); color: var(--text-muted); cursor: not-allowed;">
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px;">
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label>Tipo PIX</label>
+                        <input type="text" id="saqueTipoPix" readonly style="background: rgba(255,255,255,0.03); color: var(--text-muted); cursor: not-allowed;">
+                    </div>
+                    <div class="input-group" style="margin-bottom: 0;">
+                        <label>Chave PIX</label>
+                        <input type="text" id="saqueChavePix" readonly style="background: rgba(255,255,255,0.03); color: var(--text-muted); cursor: not-allowed;">
+                    </div>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
+                    * Para alterar seus dados PIX, acesse a aba <a href="#" data-target="view-perfil" style="color: var(--primary);">Perfil</a>.
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Valor do Saque (R$)</label>
+                <input type="number" id="valorSaqueModal" placeholder="35.00" min="35" step="0.01">
+            </div>
+
+            <div id="resumoDescontoSaque" style="background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px 12px; margin-bottom: 15px; font-size: 13px; display: none;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                    <span>Valor Solicitado:</span>
+                    <span id="txtValSolicitado">R$ 0,00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 4px; color: #ff6b6b;">
+                    <span>Taxa (14%):</span>
+                    <span id="txtValTaxa">- R$ 0,00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; border-top: 1px solid var(--border-color); padding-top: 4px; color: #51cf66;">
+                    <span>Valor a Receber na Conta:</span>
+                    <span id="txtValLiquido">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button class="btn" id="btnCancelarModalSaque" style="flex: 1; background: transparent; border: 1px solid var(--border-color-strong); color: var(--text-muted);">Cancelar</button>
+                <button class="btn" id="btnConfirmarModalSaque" style="flex: 1;">Solicitar Saque</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script type="module" src="auth.js"></script>
     <script type="module" src="script.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Integração dos cards de planos com o sistema de depósito
+            // Sincronizar valor do input oculto com o modal de depósito
             document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const valor = btn.getAttribute('data-valor');
                     const inputPlano = document.getElementById('valorPlano');
                     if (inputPlano) inputPlano.value = valor;
                     
-                    const btnDep = document.getElementById('btnDepositar');
-                    if (btnDep) btnDep.click();
+                    const modalInput = document.getElementById('modalValorDepInput');
+                    if (modalInput) modalInput.value = valor;
+                    
+                    abrirModalDeposito();
                 });
             });
 
-            // Atalho do botão Depositar no Início
+            // Botão Depositar Principal
             const btnAbrirDep = document.getElementById('btnAbrirDeposito');
             if (btnAbrirDep) {
                 btnAbrirDep.addEventListener('click', () => {
-                    const navInvestir = document.querySelector('[data-target="view-investir"]');
-                    if (navInvestir) navInvestir.click();
+                    abrirModalDeposito();
                 });
             }
 
-            // Atalho do botão Sacar no Início
-            const btnAbrirSacar = document.getElementById('btnAbrirSaqueModal');
-            if (btnAbrirSacar) {
-                btnAbrirSacar.addEventListener('click', () => {
-                    const navPerfil = document.querySelector('[data-target="view-perfil"]');
-                    if (navPerfil) navPerfil.click();
-                });
+            // Funções de Modal Depósito
+            const modalDep = document.getElementById('modalDeposito');
+            function abrirModalDeposito() {
+                if (modalDep) modalDep.style.display = 'flex';
             }
+            function fecharModalDeposito() {
+                if (modalDep) modalDep.style.display = 'none';
+            }
+
+            document.getElementById('fecharModalDepX')?.addEventListener('click', fecharModalDeposito);
+            document.getElementById('btnCancelarModalDep')?.addEventListener('click', fecharModalDeposito);
+            modalDep?.addEventListener('click', (e) => {
+                if (e.target === modalDep) fecharModalDeposito();
+            });
+
+            // Botão Confirmar Depósito no Modal
+            document.getElementById('btnConfirmarModalDep')?.addEventListener('click', () => {
+                const valInput = document.getElementById('modalValorDepInput').value;
+                const inputPlano = document.getElementById('valorPlano');
+                if (inputPlano) inputPlano.value = valInput;
+                
+                fecharModalDeposito();
+                const btnDepReal = document.getElementById('btnDepositar');
+                if (btnDepReal) btnDepReal.click();
+            });
+
+            // Funções de Modal Saque
+            const modalSaque = document.getElementById('modalSaque');
+            const btnAbrirSaqueModal = document.getElementById('btnAbrirSaqueModal');
+
+            function abrirModalSaque() {
+                // Puxar dados do perfil atualizados do localStorage ou inputs
+                const nomePerfil = document.getElementById('perfilNome')?.value || localStorage.getItem('usuarioNome') || 'Não informado';
+                const tipoPixPerfil = document.getElementById('perfilTipoPix')?.value || 'CPF';
+                const chavePixPerfil = document.getElementById('perfilChavePix')?.value || localStorage.getItem('usuarioChavePix') || '';
+
+                document.getElementById('saqueNomeCompleto').value = nomePerfil;
+                document.getElementById('saqueTipoPix').value = tipoPixPerfil;
+                document.getElementById('saqueChavePix').value = chavePixPerfil;
+
+                if (modalSaque) modalSaque.style.display = 'flex';
+            }
+
+            function fecharModalSaque() {
+                if (modalSaque) modalSaque.style.display = 'none';
+            }
+
+            btnAbrirSaqueModal?.addEventListener('click', abrirModalSaque);
+            document.getElementById('fecharModalSaqueX')?.addEventListener('click', fecharModalSaque);
+            document.getElementById('btnCancelarModalSaque')?.addEventListener('click', fecharModalSaque);
+            modalSaque?.addEventListener('click', (e) => {
+                if (e.target === modalSaque) fecharModalSaque();
+            });
+
+            // Cálculo dinâmico do desconto de 14% no Saque
+            const inputValSaque = document.getElementById('valorSaqueModal');
+            const boxResumo = document.getElementById('resumoDescontoSaque');
+            const txtValSolicitado = document.getElementById('txtValSolicitado');
+            const txtValTaxa = document.getElementById('txtValTaxa');
+            const txtValLiquido = document.getElementById('txtValLiquido');
+
+            inputValSaque?.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value);
+                if (!isNaN(val) && val > 0) {
+                    const taxa = val * 0.14;
+                    const liquido = val - taxa;
+
+                    txtValSolicitado.textContent = `R$ ${val.toFixed(2).replace('.', ',')}`;
+                    txtValTaxa.textContent = `- R$ ${taxa.toFixed(2).replace('.', ',')}`;
+                    txtValLiquido.textContent = `R$ ${liquido.toFixed(2).replace('.', ',')}`;
+                    boxResumo.style.display = 'block';
+                } else {
+                    boxResumo.style.display = 'none';
+                }
+            });
+
+            // Link interno para perfil dentro do modal de saque
+            modalSaque?.querySelector('a[data-target="view-perfil"]')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                fecharModalSaque();
+                const navPerfil = document.querySelector('[data-target="view-perfil"]');
+                if (navPerfil) navPerfil.click();
+            });
         });
     </script>
 </body>
