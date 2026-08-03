@@ -1,13 +1,10 @@
 import { auth, db, mostrarToast } from './auth.js';
 import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-/* ==========================================================================
-   Configurações / Constantes
-   ========================================================================== */
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 35,
-    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo
-    TAXA_SAQUE_PERCENTUAL: 0.14, // 14% de taxa
+    DIA_SAQUE_PERMITIDO: 0,
+    TAXA_SAQUE_PERCENTUAL: 0.14,
     VALORES_PLANOS_PERMITIDOS: [30, 50, 100, 300, 500, 1000]
 };
 
@@ -45,9 +42,6 @@ function atualizarPainel(dados) {
     }
 }
 
-/* ==========================================================================
-   Gestão de Perfil e Bloqueio de Chave PIX
-   ========================================================================== */
 function inicializarPerfilUsuario(userId) {
     const perfilTipoPix = getEl('perfilTipoPix');
     const perfilChavePix = getEl('perfilChavePix');
@@ -114,11 +108,7 @@ function inicializarPerfilUsuario(userId) {
     }
 }
 
-/* ==========================================================================
-   Inicialização de Eventos e Modais (Depósito para múltiplos planos e Saque)
-   ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    // Sincronizar valor do input oculto e modal ao escolher qualquer plano (30, 50, 100, 300, 500, 1000)
     document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
         btn.addEventListener('click', () => {
             const valor = btn.getAttribute('data-valor');
@@ -132,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Botão Depositar Principal
     const btnAbrirDep = document.getElementById('btnAbrirDeposito');
     if (btnAbrirDep) {
         btnAbrirDep.addEventListener('click', () => {
@@ -143,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Funções de Modal Depósito
     const modalDep = document.getElementById('modalDeposito') || document.getElementById('modalDepositoSistema');
     const modalToast = document.getElementById('modalToast');
     const areaQrCodePix = document.getElementById('areaQrCodePix');
@@ -171,12 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modalDep) fecharModalDeposito();
     });
 
-    // Ação do Botão no Modal de Depósito (Validação do plano mínimo de R$ 30 e múltiplos)
     btnConfirmarModalDep?.addEventListener('click', () => {
         const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
         const valorAtual = parseFloat(modalInput?.value || 0);
 
-        // Validação de Valor Mínimo (< 30)
         if (valorAtual < 30) {
             if (modalToast) {
                 modalToast.style.display = 'block';
@@ -186,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Se o QR Code ainda não estiver visível, gera com base no valor selecionado/digitado
         if (areaQrCodePix && (areaQrCodePix.style.display === 'none' || areaQrCodePix.style.display === '')) {
             const qrImg = document.getElementById('imgQrCode');
             const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
@@ -210,14 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ==========================================================================
-    // Funções de Modal Saque (Com Saldo, Validações e Visual Novo)
-    // ==========================================================================
     const modalSaque = document.getElementById('modalSaque') || document.getElementById('modalSaqueSistema');
     const btnAbrirSaqueModal = document.getElementById('btnAbrirSaqueModal');
-    const btnConfirmarModalSaque = document.getElementById('btnConfirmarModalSaque') || document.getElementById('btnSolicitarSaqueFinal');
+    const btnConfirmarModalSaque = document.getElementById('btnConfirmarModalSaque') || document.getElementById('btnSolicitarSaqueFinal') || document.getElementById('btnConfirmarModalSacar');
 
     let saldoAtualUsuario = 0;
+    let userIdAtual = null;
 
     function abrirModalSaque() {
         const nomePerfil = document.getElementById('perfilNome')?.value || localStorage.getItem('usuarioNome') || 'Não informado';
@@ -341,9 +324,77 @@ document.addEventListener('DOMContentLoaded', () => {
         if (navPerfil) navPerfil.click();
     });
 
+    btnConfirmarModalSaque?.addEventListener('click', async () => {
+        if (!userIdAtual) {
+            mostrarToast('❌ Você precisa estar logado para solicitar um saque.', 'error');
+            return;
+        }
+
+        const diaHoje = new Date().getDay();
+        const valorSaque = parseFloat(inputValSaque?.value || 0);
+
+        if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
+            mostrarToast('⚠️ Saques só podem ser solicitados aos domingos.', 'warning');
+            return;
+        }
+
+        if (isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
+            mostrarToast(`⚠️ O valor mínimo para saque é ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`, 'warning');
+            return;
+        }
+
+        if (valorSaque > saldoAtualUsuario) {
+            mostrarToast('⚠️ Valor solicitado maior que o saldo disponível.', 'warning');
+            return;
+        }
+
+        const tipoPixSaque = document.getElementById('saqueTipoPix')?.value
+            || document.getElementById('perfilTipoPix')?.value
+            || 'CPF';
+        const chavePixSaque = document.getElementById('saqueChavePix')?.value
+            || document.getElementById('perfilChavePix')?.value
+            || '';
+
+        if (!chavePixSaque) {
+            mostrarToast('⚠️ Cadastre sua chave PIX no Perfil antes de solicitar um saque.', 'warning');
+            return;
+        }
+
+        const taxa = valorSaque * CONFIG.TAXA_SAQUE_PERCENTUAL;
+        const valorLiquido = valorSaque - taxa;
+        const novoSaldo = saldoAtualUsuario - valorSaque;
+
+        setBotaoCarregando(btnConfirmarModalSaque, true, 'Processando...');
+        try {
+            const saquesRef = ref(db, 'saques/' + userIdAtual);
+            const novoSaqueRef = push(saquesRef);
+            await set(novoSaqueRef, {
+                valorSolicitado: valorSaque,
+                taxa: taxa,
+                valorLiquido: valorLiquido,
+                tipoPix: tipoPixSaque,
+                chavePix: chavePixSaque,
+                status: 'pendente',
+                dataSolicitacao: new Date().toISOString()
+            });
+
+            const userRef = ref(db, 'usuarios/' + userIdAtual);
+            await update(userRef, { saldo: novoSaldo });
+
+            mostrarToast('✅ Saque solicitado com sucesso!', 'success');
+            fecharModalSaque();
+        } catch (error) {
+            console.error('Erro ao solicitar saque:', error);
+            mostrarToast('❌ Erro ao solicitar saque: ' + error.message, 'error');
+        } finally {
+            setBotaoCarregando(btnConfirmarModalSaque, false);
+        }
+    });
+
     auth.onAuthStateChanged((user) => {
         if (!user) return;
         const userId = user.uid;
+        userIdAtual = userId;
 
         const userRef = ref(db, 'usuarios/' + userId);
         onValue(userRef, (snapshot) => {
@@ -365,9 +416,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/* ==========================================================================
-   Navegação da Sidebar e Alternância de Telas
-   ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
     const sections = document.querySelectorAll('.view-section');
