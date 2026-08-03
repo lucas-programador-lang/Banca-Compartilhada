@@ -6,7 +6,7 @@ import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebas
    ========================================================================== */
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 35,
-    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo
+    // Removida a restrição de dias para saque (liberado todos os dias)
 };
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
@@ -54,11 +54,8 @@ function atualizarPainel(dados) {
    Regras de negócio: Saque
    ========================================================================== */
 function validarSaque({ valorSaque, chavePix }) {
-    const hoje = new Date().getDay();
-
-    if (hoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
-        return { valido: false, mensagem: '⚠️ Os saques estão liberados apenas aos DOMINGOS.', tipo: 'warning' };
-    }
+    // Validação de dia removida, permitindo saque a qualquer momento.
+    
     if (!valorSaque || Number.isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
         return {
             valido: false,
@@ -87,7 +84,6 @@ async function solicitarSaque(userId, dadosSaque, botao) {
 
         mostrarToast('✅ Saque solicitado com sucesso!', 'success');
         getEl('valorSaque').value = '';
-        getEl('chavePix').value = '';
     } catch (error) {
         console.error('Erro ao solicitar saque:', error);
         mostrarToast('❌ Erro ao solicitar saque: ' + error.message, 'error');
@@ -118,7 +114,7 @@ function inicializarBotaoSaque(userId) {
 }
 
 /* ==========================================================================
-   Gestão de Perfil e Chave PIX Sincronizada
+   Gestão de Perfil e Bloqueio de Chave PIX
    ========================================================================== */
 function inicializarPerfilUsuario(userId) {
     const perfilTipoPix = getEl('perfilTipoPix');
@@ -131,7 +127,7 @@ function inicializarPerfilUsuario(userId) {
 
     const userRef = ref(db, 'usuarios/' + userId);
     
-    // Ouve os dados do usuário para preencher a aba de Perfil em tempo real
+    // Ouve os dados do usuário para preencher a aba de Perfil e bloquear a edição se já houver chave
     onValue(userRef, (snapshot) => {
         const dados = snapshot.val();
         if (dados) {
@@ -139,13 +135,30 @@ function inicializarPerfilUsuario(userId) {
             if (perfilTipoPix && dados.tipoPix) perfilTipoPix.value = dados.tipoPix;
             
             if (dados.chavePix) {
-                if (perfilChavePix && !perfilChavePix.value) perfilChavePix.value = dados.chavePix;
-                if (campoPixInicio && !campoPixInicio.value) campoPixInicio.value = dados.chavePix;
+                if (perfilChavePix) {
+                    perfilChavePix.value = dados.chavePix;
+                    // TRAVA: Se já tem chave cadastrada, bloqueia a edição definitiva
+                    perfilChavePix.disabled = true;
+                    perfilChavePix.style.backgroundColor = '#2a2a2a';
+                    perfilChavePix.style.cursor = 'not-allowed';
+                }
+                if (perfilTipoPix) {
+                    perfilTipoPix.disabled = true;
+                    perfilTipoPix.style.backgroundColor = '#2a2a2a';
+                    perfilTipoPix.style.cursor = 'not-allowed';
+                }
+                if (btnSalvarPerfil) {
+                    btnSalvarPerfil.style.display = 'none'; // Oculta o botão de salvar se já estiver cadastrado
+                }
+            }
+
+            if (dados.chavePix && campoPixInicio && !campoPixInicio.value) {
+                campoPixInicio.value = dados.chavePix;
             }
         }
     });
 
-    // Salva as alterações de perfil no Firebase
+    // Salva as alterações de perfil apenas na primeira vez
     if (!btnSalvarPerfil.dataset.listenerAtivo) {
         btnSalvarPerfil.addEventListener('click', async () => {
             const novoNome = perfilNome ? perfilNome.value.trim() : '';
@@ -170,7 +183,7 @@ function inicializarPerfilUsuario(userId) {
                     campoPixInicio.value = novaChavePix;
                 }
 
-                mostrarToast('✅ Perfil e chave PIX atualizados com sucesso!', 'success');
+                mostrarToast('✅ Chave PIX cadastrada com sucesso! Ela não poderá ser alterada.', 'success');
             } catch (error) {
                 console.error('Erro ao salvar perfil:', error);
                 mostrarToast('❌ Erro ao salvar perfil: ' + error.message, 'error');
