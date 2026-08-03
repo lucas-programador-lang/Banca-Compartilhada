@@ -6,7 +6,7 @@ import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebas
    ========================================================================== */
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 35,
-    // Removida a restrição de dias para saque (liberado todos os dias)
+    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo (Restrito apenas para domingos)
 };
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
@@ -54,8 +54,11 @@ function atualizarPainel(dados) {
    Regras de negócio: Saque
    ========================================================================== */
 function validarSaque({ valorSaque, chavePix }) {
-    // Validação de dia removida, permitindo saque a qualquer momento.
-    
+    const hoje = new Date().getDay();
+
+    if (hoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
+        return { valido: false, mensagem: '⚠️ Os saques estão liberados apenas aos DOMINGOS.', tipo: 'warning' };
+    }
     if (!valorSaque || Number.isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
         return {
             valido: false,
