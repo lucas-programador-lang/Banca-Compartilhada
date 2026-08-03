@@ -48,7 +48,7 @@ function atualizarPainel(dados) {
 }
 
 /* ==========================================================================
-   Modal e Regras de Saque
+   Lógica do Modal de Saque e Validações
    ========================================================================== */
 function validarSaque({ valorSaque, chavePix }) {
     const hoje = new Date().getDay();
@@ -103,50 +103,35 @@ async function solicitarSaque(userId, dadosSaque, botao, modalElement) {
     }
 }
 
-function criarModalSaque(userId, chavePixSalva) {
-    let modal = getEl('modalSaqueSistema');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'modalSaqueSistema';
-        modal.style.cssText = `
-            display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7); align-items: center; justify-content: center;
-        `;
+function configurarModalSaque(userId, dadosUsuario) {
+    const modal = getEl('modalSaqueSistema');
+    const btnAbrir = getEl('btnAbrirSaqueModal');
+    const btnFechar = getEl('fecharModalSaque');
+    const btnConfirmar = getEl('btnConfirmarModalSacar');
+    const inputValorSaque = getEl('modalValorSaque');
+    const elResumo = getEl('resumoValorLiquido');
 
-        modal.innerHTML = `
-            <div style="background: #1e1e2f; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative;">
-                <button id="fecharModalSaque" style="position: absolute; right: 15px; top: 15px; background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer;">&times;</button>
-                <h3 style="margin-bottom: 15px; font-size: 1.2rem; color: #fff;">Solicitar Saque</h3>
-                
-                <p style="font-size: 0.85rem; color: #f59e0b; margin-bottom: 12px; background: rgba(245, 158, 11, 0.1); padding: 8px; border-radius: 6px; text-align: center;">
-                    ⏳ <strong>Liberado apenas aos Domingos</strong>
-                </p>
+    if (!modal || !btnAbrir) return;
 
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; font-size: 0.9rem; margin-bottom: 5px; color: #ccc;">Valor do Saque:</label>
-                    <input type="number" id="modalValorSaque" placeholder="Ex: 50.00" style="width: 100%; padding: 10px; background: #2a2a3eb5; border: 1px solid #444; color: #fff; border-radius: 6px; outline: none;">
-                    <small style="display: block; color: #aaa; margin-top: 4px;">Mínimo R$ 35,00 | Taxa: 14%</small>
-                </div>
+    // Abrir Modal
+    btnAbrir.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.style.display = 'flex';
+    });
 
-                <div id="resumoValorLiquido" style="font-size: 0.9rem; margin-bottom: 20px; color: #10B981; min-height: 20px;"></div>
-
-                <button id="btnConfirmarModalSacar" style="width: 100%; padding: 12px; background: #6366f1; border: none; color: #fff; font-weight: bold; border-radius: 6px; cursor: pointer;">Solicitar Saque</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-
-        modal.querySelector('#fecharModalSaque').addEventListener('click', () => {
+    // Fechar Modal
+    if (btnFechar) {
+        btnFechar.addEventListener('click', () => {
             modal.style.display = 'none';
         });
+    }
 
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) modal.style.display = 'none';
-        });
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
 
-        // Cálculo em tempo real dos 14%
-        const inputValorSaque = modal.querySelector('#modalValorSaque');
-        const elResumo = modal.querySelector('#resumoValorLiquido');
-
+    // Cálculo em tempo real dos 14%
+    if (inputValorSaque && elResumo) {
         inputValorSaque.addEventListener('input', () => {
             const valor = parseFloat(inputValorSaque.value);
             if (!valor || Number.isNaN(valor) || valor <= 0) {
@@ -159,11 +144,13 @@ function criarModalSaque(userId, chavePixSalva) {
 
             elResumo.innerText = `💡 Taxa (14%): ${formatadorMoeda.format(taxa)} | Você vai receber: ${formatadorMoeda.format(liquido)}`;
         });
+    }
 
-        const btnConfirmar = modal.querySelector('#btnConfirmarModalSacar');
+    // Botão de Confirmar Saque dentro do Modal
+    if (btnConfirmar && !btnConfirmar.dataset.listenerAtivo) {
         btnConfirmar.addEventListener('click', () => {
-            const valorSaque = parseFloat(modal.querySelector('#modalValorSaque').value);
-            const chavePix = chavePixSalva;
+            const valorSaque = parseFloat(inputValorSaque.value);
+            const chavePix = dadosUsuario?.chavePix || '';
 
             const validacao = validarSaque({ valorSaque, chavePix });
             if (!validacao.valido) {
@@ -173,69 +160,40 @@ function criarModalSaque(userId, chavePixSalva) {
 
             solicitarSaque(userId, { valorSaque, chavePix }, btnConfirmar, modal);
         });
+        btnConfirmar.dataset.listenerAtivo = 'true';
     }
-
-    return modal;
-}
-
-function inicializarBotaoSaque(userId, dadosUsuario) {
-    const btnSacar = getEl('btnSacar');
-    if (!btnSacar || btnSacar.dataset.listenerAtivo) return;
-
-    btnSacar.addEventListener('click', (e) => {
-        e.preventDefault();
-        const modal = criarModalSaque(userId, dadosUsuario?.chavePix || '');
-        modal.style.display = 'flex';
-    });
-
-    btnSacar.dataset.listenerAtivo = 'true';
 }
 
 /* ==========================================================================
-   Modal e Regras de Depósito
+   Lógica do Modal de Depósito
    ========================================================================== */
-function criarModalDeposito() {
-    let modal = getEl('modalDepositoSistema');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'modalDepositoSistema';
-        modal.style.cssText = `
-            display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.7); align-items: center; justify-content: center;
-        `;
+function configurarModalDeposito() {
+    const modal = getEl('modalDepositoSistema');
+    const btnAbrir = getEl('btnAbrirDeposito');
+    const btnFechar = getEl('fecharModalDeposito');
+    const btnConfirmar = getEl('btnConfirmarModalDepositar');
+    const selectPlano = getEl('modalValorPlano');
 
-        modal.innerHTML = `
-            <div style="background: #1e1e2f; padding: 25px; border-radius: 12px; width: 90%; max-width: 400px; color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.5); position: relative;">
-                <button id="fecharModalDeposito" style="position: absolute; right: 15px; top: 15px; background: none; border: none; color: #aaa; font-size: 20px; cursor: pointer;">&times;</button>
-                <h3 style="margin-bottom: 15px; font-size: 1.2rem; color: #fff;">Fazer Depósito / Investimento</h3>
-                
-                <div style="margin-bottom: 15px;">
-                    <label style="display: block; font-size: 0.9rem; margin-bottom: 5px; color: #ccc;">Selecione o Plano:</label>
-                    <select id="modalValorPlano" style="width: 100%; padding: 10px; background: #2a2a3eb5; border: 1px solid #444; color: #fff; border-radius: 6px; outline: none;">
-                        <option value="">Selecione um valor...</option>
-                        <option value="50">R$ 50,00</option>
-                        <option value="100">R$ 100,00</option>
-                        <option value="250">R$ 250,00</option>
-                        <option value="500">R$ 500,00</option>
-                    </select>
-                </div>
+    if (!modal || !btnAbrir) return;
 
-                <button id="btnConfirmarModalDepositar" style="width: 100%; padding: 12px; background: #10B981; border: none; color: #fff; font-weight: bold; border-radius: 6px; cursor: pointer;">Gerar PIX de Depósito</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
+    btnAbrir.addEventListener('click', (e) => {
+        e.preventDefault();
+        modal.style.display = 'flex';
+    });
 
-        modal.querySelector('#fecharModalDeposito').addEventListener('click', () => {
+    if (btnFechar) {
+        btnFechar.addEventListener('click', () => {
             modal.style.display = 'none';
         });
+    }
 
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) modal.style.display = 'none';
-        });
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
 
-        const btnConfirmarDep = modal.querySelector('#btnConfirmarModalDepositar');
-        btnConfirmarDep.addEventListener('click', () => {
-            const plano = modal.querySelector('#modalValorPlano').value;
+    if (btnConfirmar && !btnConfirmar.dataset.listenerAtivo) {
+        btnConfirmar.addEventListener('click', () => {
+            const plano = selectPlano.value;
             if (!plano) {
                 mostrarToast('⚠️ Selecione um plano antes de continuar.', 'warning');
                 return;
@@ -244,22 +202,8 @@ function criarModalDeposito() {
             mostrarToast(`Gerando PIX via API para o plano de R$ ${plano},00...`, 'success');
             modal.style.display = 'none';
         });
+        btnConfirmar.dataset.listenerAtivo = 'true';
     }
-
-    return modal;
-}
-
-function inicializarBotaoDeposito() {
-    const btnDepositar = getEl('btnDepositar');
-    if (!btnDepositar || btnDepositar.dataset.listenerAtivo) return;
-
-    btnDepositar.addEventListener('click', (e) => {
-        e.preventDefault();
-        const modal = criarModalDeposito();
-        modal.style.display = 'flex';
-    });
-
-    btnDepositar.dataset.listenerAtivo = 'true';
 }
 
 /* ==========================================================================
@@ -333,10 +277,10 @@ function inicializarPerfilUsuario(userId) {
 }
 
 /* ==========================================================================
-   Inicialização
+   Inicialização Global
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-    inicializarBotaoDeposito();
+    configurarModalDeposito();
 
     auth.onAuthStateChanged((user) => {
         if (!user) return;
@@ -356,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (elNome) elNome.innerText = nomeUsuario;
                 if (elInicial) elInicial.innerText = nomeUsuario.charAt(0).toUpperCase();
 
-                inicializarBotaoSaque(userId, dados);
+                configurarModalSaque(userId, dados);
             }
         });
 
