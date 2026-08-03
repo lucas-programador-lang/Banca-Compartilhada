@@ -48,6 +48,42 @@ function atualizarPainel(dados) {
 }
 
 /* ==========================================================================
+   Lógica de Cálculo de Rendimento e Tetos dos Planos
+   ========================================================================== */
+function calcularRendimentoPlano(capital, diasCorridos) {
+    let taxaDiaria = 0;
+    let tetoPercentual = 0;
+
+    if (capital >= 30 && capital <= 50) {
+        taxaDiaria = 0.03;       // 3% ao dia
+        tetoPercentual = 0.70;   // 70% sobre o capital
+    } else if (capital >= 100 && capital <= 1000) {
+        taxaDiaria = 0.02;       // 2% ao dia
+        tetoPercentual = 0.60;   // Teto de 60% sobre o capital
+    } else {
+        return { erro: "Valor de aporte inválido." };
+    }
+
+    const lucroMaximo = capital * tetoPercentual;
+    let lucroAtual = capital * taxaDiaria * diasCorridos;
+    let atingiuTeto = false;
+
+    if (lucroAtual >= lucroMaximo) {
+        lucroAtual = lucroMaximo;
+        atingiuTeto = true;
+    }
+
+    return {
+        capital: capital,
+        lucroDiario: capital * taxaDiaria,
+        lucroAcumulado: lucroAtual,
+        lucroMaximo: lucroMaximo,
+        atingiuTeto: atingiuTeto,
+        montanteTotal: capital + lucroAtual
+    };
+}
+
+/* ==========================================================================
    Lógica do Modal de Saque e Validações
    ========================================================================== */
 function validarSaque({ valorSaque, chavePix }) {
@@ -113,13 +149,11 @@ function configurarModalSaque(userId, dadosUsuario) {
 
     if (!modal || !btnAbrir) return;
 
-    // Abrir Modal
     btnAbrir.addEventListener('click', (e) => {
         e.preventDefault();
         modal.style.display = 'flex';
     });
 
-    // Fechar Modal
     if (btnFechar) {
         btnFechar.addEventListener('click', () => {
             modal.style.display = 'none';
@@ -130,7 +164,6 @@ function configurarModalSaque(userId, dadosUsuario) {
         if (e.target === modal) modal.style.display = 'none';
     });
 
-    // Cálculo em tempo real dos 14%
     if (inputValorSaque && elResumo) {
         inputValorSaque.addEventListener('input', () => {
             const valor = parseFloat(inputValorSaque.value);
@@ -146,7 +179,6 @@ function configurarModalSaque(userId, dadosUsuario) {
         });
     }
 
-    // Botão de Confirmar Saque dentro do Modal
     if (btnConfirmar && !btnConfirmar.dataset.listenerAtivo) {
         btnConfirmar.addEventListener('click', () => {
             const valorSaque = parseFloat(inputValorSaque.value);
@@ -165,7 +197,7 @@ function configurarModalSaque(userId, dadosUsuario) {
 }
 
 /* ==========================================================================
-   Lógica do Modal de Depósito
+   Lógica do Modal de Depósito e Integração de Planos
    ========================================================================== */
 function configurarModalDeposito() {
     const modal = getEl('modalDepositoSistema');
@@ -204,6 +236,27 @@ function configurarModalDeposito() {
         });
         btnConfirmar.dataset.listenerAtivo = 'true';
     }
+}
+
+function configurarSelecaoPlanos() {
+    const botoesPlano = document.querySelectorAll('.btn-escolher-plano');
+    const inputValorPlano = document.getElementById('modalValorPlano');
+    const modalDeposito = document.getElementById('modalDepositoSistema');
+
+    botoesPlano.forEach(botao => {
+        botao.addEventListener('click', (e) => {
+            e.preventDefault();
+            const valorPlano = botao.getAttribute('data-valor');
+
+            if (inputValorPlano) {
+                inputValorPlano.value = valorPlano;
+            }
+
+            if (modalDeposito) {
+                modalDeposito.style.display = 'flex';
+            }
+        });
+    });
 }
 
 /* ==========================================================================
@@ -281,6 +334,7 @@ function inicializarPerfilUsuario(userId) {
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     configurarModalDeposito();
+    configurarSelecaoPlanos();
 
     auth.onAuthStateChanged((user) => {
         if (!user) return;
