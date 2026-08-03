@@ -58,8 +58,8 @@
             <!-- ================= ABA INÍCIO ================= -->
             <section id="view-inicio" class="view-section">
                 
-                <!-- Card Principal com Saldo e Botões DEPOSITAR / SACAR (igual à sua referência) -->
-                <div class="card" style="background: linear-gradient(135deg, #0d1f18 0%, #06120e 100%); border: 1px solid rgba(16, 185, 129, 0.2); padding: 30px; border-radius: 16px; margin-bottom: 25px;">
+                <!-- Card Principal com Saldo e Botões DEPOSITAR / SACAR -->
+                <div class="card" style="background: linear-gradient(135deg, #0a1813 0%, #040e0b 100%); border: 1px solid rgba(16, 185, 129, 0.25); padding: 30px; border-radius: 16px; margin-bottom: 25px;">
                     <div style="display: flex; align-items: center; gap: 10px; color: #10b981; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                         Saldo Disponível
@@ -71,7 +71,7 @@
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                             Depositar
                         </button>
-                        <button class="btn" id="btnAbrirSaqueModal" style="flex: 1; min-width: 140px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <button class="btn" id="btnAbrirSaqueModal" style="flex: 1; min-width: 140px; background: transparent; border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; display: flex; align-items: center; justify-content: center; gap: 8px;">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                             Sacar
                         </button>
@@ -139,18 +139,18 @@
                 </div>
             </section>
 
-            <!-- ================= ABA INVESTIR (Planos Estilizados com Nomes) ================= -->
+            <!-- ================= ABA INVESTIR (Com Nomes Próprios e Cores do Site) ================= -->
             <section id="view-investir" class="view-section" style="display: none;">
-                <h2>Escolha seu Plano de Investimento</h2>
-                <p style="color: var(--text-muted); margin-bottom: 25px;">Selecione o plano ideal para rentabilizar a sua banca diariamente.</p>
+                <h2>Planos de Banca Compartilhada</h2>
+                <p style="color: var(--text-muted); margin-bottom: 25px;">Escolha abaixo o nível de aporte para iniciar a rentabilidade diária.</p>
 
-                <!-- Grid de Planos Estilizados -->
+                <!-- Grid de Planos -->
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px;">
                     
                     <!-- Plano 1 -->
-                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #0b1612; position: relative; border-radius: 16px; padding: 25px;">
-                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Safira Start</h3>
-                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
+                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #07120e; position: relative; border-radius: 16px; padding: 25px;">
+                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 10px;">Banca Starter</h3>
+                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
                             Rende R$ 0,90 / dia
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
@@ -169,9 +169,9 @@
                     </div>
 
                     <!-- Plano 2 -->
-                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #0b1612; position: relative; border-radius: 16px; padding: 25px;">
-                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Topázio Blue</h3>
-                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
+                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #07120e; position: relative; border-radius: 16px; padding: 25px;">
+                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 10px;">Banca Bronze</h3>
+                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
                             Rende R$ 1,50 / dia
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
@@ -190,9 +190,9 @@
                     </div>
 
                     <!-- Plano 3 -->
-                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #0b1612; position: relative; border-radius: 16px; padding: 25px;">
-                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Âmbar Gold</h3>
-                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
+                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #07120e; position: relative; border-radius: 16px; padding: 25px;">
+                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 10px;">Banca Prata</h3>
+                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
                             Rende R$ 3,00 / dia
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
@@ -211,9 +211,9 @@
                     </div>
 
                     <!-- Plano 4 -->
-                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #0b1612; position: relative; border-radius: 16px; padding: 25px;">
-                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Rubi Master</h3>
-                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
+                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #07120e; position: relative; border-radius: 16px; padding: 25px;">
+                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 10px;">Banca Ouro</h3>
+                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
                             Rende R$ 9,00 / dia
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
@@ -232,9 +232,9 @@
                     </div>
 
                     <!-- Plano 5 -->
-                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #0b1612; position: relative; border-radius: 16px; padding: 25px;">
-                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Diamante VIP</h3>
-                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
+                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #07120e; position: relative; border-radius: 16px; padding: 25px;">
+                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 10px;">Banca Platinum</h3>
+                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
                             Rende R$ 15,00 / dia
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
@@ -253,9 +253,9 @@
                     </div>
 
                     <!-- Plano 6 -->
-                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #0b1612; position: relative; border-radius: 16px; padding: 25px;">
-                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 12px;">Black Diamond</h3>
-                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
+                    <div class="card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: #07120e; position: relative; border-radius: 16px; padding: 25px;">
+                        <h3 style="color: #10b981; font-size: 20px; font-weight: 700; margin-bottom: 10px;">Banca Master</h3>
+                        <div style="display: inline-block; background: rgba(16, 185, 129, 0.12); color: #10b981; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
                             Rende R$ 30,00 / dia
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px;">
@@ -275,7 +275,7 @@
 
                 </div>
 
-                <!-- Input oculto para manter compatibilidade com o script de depósito existente -->
+                <!-- Input oculto para manter compatibilidade com o script de depósito -->
                 <input type="hidden" id="valorPlano" value="30">
                 <button id="btnDepositar" style="display: none;"></button>
             </section>
@@ -362,8 +362,8 @@
     <script type="module" src="auth.js"></script>
     <script type="module" src="script.js"></script>
     <script>
-        // Script auxiliar para os botões "APLICAR AGORA" dos novos cards de planos
         document.addEventListener('DOMContentLoaded', () => {
+            // Integração dos cards de planos com o sistema de depósito
             document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const valor = btn.getAttribute('data-valor');
@@ -375,17 +375,16 @@
                 });
             });
 
-            // Botão Depositar do card superior na aba Início
+            // Atalho do botão Depositar no Início
             const btnAbrirDep = document.getElementById('btnAbrirDeposito');
             if (btnAbrirDep) {
                 btnAbrirDep.addEventListener('click', () => {
-                    // Clica no menu "Investir" para levar o usuário aos planos
                     const navInvestir = document.querySelector('[data-target="view-investir"]');
                     if (navInvestir) navInvestir.click();
                 });
             }
 
-            // Botão Sacar do card superior na aba Início (rola até o painel de saque)
+            // Atalho do botão Sacar no Início
             const btnAbrirSacar = document.getElementById('btnAbrirSaqueModal');
             if (btnAbrirSacar) {
                 btnAbrirSacar.addEventListener('click', () => {
