@@ -139,6 +139,9 @@ function inicializarBotaoDeposito() {
 /* ==========================================================================
    Inicialização
    ========================================================================== */
+/* ==========================================================================
+   Inicialização
+   ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
     inicializarBotaoDeposito();
 
@@ -150,7 +153,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const userRef = ref(db, 'usuarios/' + userId);
         onValue(userRef, (snapshot) => {
             const dados = snapshot.val();
-            if (dados) atualizarPainel(dados);
+            if (dados) {
+                atualizarPainel(dados);
+
+                // Atualiza o nome e a inicial do usuário na Sidebar
+                const nomeUsuario = dados.nome || user.email || 'Usuário';
+                const elNome = getEl('userNameDisplay');
+                const elInicial = getEl('userInitial');
+
+                if (elNome) elNome.innerText = nomeUsuario;
+                if (elInicial) elInicial.innerText = nomeUsuario.charAt(0).toUpperCase();
+            }
         });
 
         inicializarBotaoSaque(userId);
