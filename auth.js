@@ -130,6 +130,37 @@ function validarEmailSenha(email, senha) {
 }
 
 /* ==========================================================================
+   Mensagens de validação nativa personalizadas
+   ==========================================================================
+   Usa o próprio balão de validação do navegador (o mesmo estilo de
+   "Preencha este campo."), mas com o texto trocado para indicar
+   exatamente qual campo falta preencher.
+   ========================================================================== */
+function aplicarMensagensValidacao(form, camposMensagens) {
+    if (!form) return;
+
+    Object.entries(camposMensagens).forEach(([idCampo, mensagens]) => {
+        const input = getEl(idCampo);
+        if (!input) return;
+
+        input.addEventListener('invalid', () => {
+            if (input.validity.valueMissing) {
+                input.setCustomValidity(mensagens.vazio || 'Preencha este campo.');
+            } else if (input.validity.typeMismatch) {
+                input.setCustomValidity(mensagens.invalido || 'Valor inválido.');
+            } else if (input.validity.tooShort) {
+                input.setCustomValidity(mensagens.curto || 'Valor muito curto.');
+            } else {
+                input.setCustomValidity('');
+            }
+        });
+
+        // Limpa a mensagem customizada assim que o usuário começa a corrigir o campo
+        input.addEventListener('input', () => input.setCustomValidity(''));
+    });
+}
+
+/* ==========================================================================
    Alternar visibilidade da senha (login.html e register.html)
    ========================================================================== */
 document.querySelectorAll('.toggle-senha').forEach((botao) => {
@@ -149,6 +180,12 @@ document.querySelectorAll('.toggle-senha').forEach((botao) => {
    ========================================================================== */
 const registerForm = getEl('registerForm');
 if (registerForm) {
+    aplicarMensagensValidacao(registerForm, {
+        nome: { vazio: 'Preencha seu nome completo.' },
+        emailReg: { vazio: 'Preencha seu e-mail.', invalido: 'Informe um e-mail válido.' },
+        senhaReg: { vazio: 'Preencha sua senha.', curto: 'A senha deve ter no mínimo 6 caracteres.' },
+    });
+
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -182,6 +219,11 @@ if (registerForm) {
    ========================================================================== */
 const loginForm = getEl('loginForm');
 if (loginForm) {
+    aplicarMensagensValidacao(loginForm, {
+        email: { vazio: 'Preencha seu e-mail.', invalido: 'Informe um e-mail válido.' },
+        senha: { vazio: 'Preencha sua senha.' },
+    });
+
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
