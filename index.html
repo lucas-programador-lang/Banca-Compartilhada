@@ -15,11 +15,11 @@
         <aside class="sidebar">
             <div class="sidebar-top">
                 <nav class="sidebar-nav">
-                    <a href="#" class="nav-item active">
+                    <a href="#" class="nav-item active" data-target="view-inicio">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                         Início
                     </a>
-                    <a href="#" class="nav-item">
+                    <a href="#" class="nav-item" data-target="view-investir">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                         Investir
                     </a>
@@ -59,107 +59,113 @@
         <!-- Conteúdo Principal -->
         <main class="main-content">
             
-            <!-- Aviso de Risco e Transparência -->
-            <div class="warning-banner">
-                ⚠️ <strong>Aviso de Transparência e Risco:</strong> Operações de renda variável e mercados de alta performance envolvem riscos de perdas totais ou parciais do capital investido. Invista apenas o capital que estiver disposto a perder. Rendimentos passados não garantem rentabilidade futura.
-            </div>
-
-            <h2>Banca Compartilhada</h2>
-
-            <!-- Estatísticas -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>Saldo Disponível</h3>
-                    <p id="saldoDisponivel">R$ 0,00</p>
+            <!-- ABA INÍCIO -->
+            <section id="view-inicio" class="view-section">
+                <!-- Aviso de Risco e Transparência -->
+                <div class="warning-banner">
+                    ⚠️ <strong>Aviso de Transparência e Risco:</strong> Operações de renda variável e mercados de alta performance envolvem riscos de perdas totais ou parciais do capital investido. Invista apenas o capital que estiver disposto a perder. Rendimentos passados não garantem rentabilidade futura.
                 </div>
-                <div class="stat-card">
-                    <h3>Rendimento Acumulado (3% ao dia)</h3>
-                    <p id="rendimentoTotal">R$ 0,00</p>
-                </div>
-                <div class="stat-card">
-                    <h3>Comissões (1º Nível - 15%)</h3>
-                    <p id="comissaoTotal">R$ 0,00</p>
-                </div>
-            </div>
 
-            <!-- Seleção de Planos (30 a 1000 reais) -->
-            <div class="card" style="margin-bottom: 20px;">
-                <h3>Selecionar Plano de Banca</h3>
-                <div class="input-group">
-                    <label>Escolha o valor do plano (R$ 30 a R$ 1.000)</label>
-                    <select id="valorPlano">
-                        <option value="30">Plano Inicial - R$ 30,00</option>
-                        <option value="50">Plano R$ 50,00</option>
-                        <option value="100">Plano R$ 100,00</option>
-                        <option value="300">Plano R$ 300,00</option>
-                        <option value="500">Plano R$ 500,00</option>
-                        <option value="1000">Plano Máximo - R$ 1.000,00</option>
-                    </select>
-                </div>
-                <button class="btn" id="btnDepositar">Depositar via PIX (API)</button>
-            </div>
+                <h2>Banca Compartilhada</h2>
 
-            <!-- Solicitação de Saque (Domingos e Mínimo 35) -->
-            <div class="card">
-                <h3>Solicitar Saque (Liberado apenas aos Domingos)</h3>
-                <div class="input-group">
-                    <label>Chave PIX</label>
-                    <input type="text" id="chavePix" placeholder="Digite sua chave PIX">
+                <!-- Estatísticas -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Saldo Disponível</h3>
+                        <p id="saldoDisponivel">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Rendimento Acumulado (3% ao dia)</h3>
+                        <p id="rendimentoTotal">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Comissões (1º Nível - 15%)</h3>
+                        <p id="comissaoTotal">R$ 0,00</p>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <label>Valor do Saque (Mínimo R$ 35,00 | Taxa: 14%)</label>
-                    <input type="number" id="valorSaque" placeholder="0.00" min="35">
+
+                <!-- Solicitação de Saque (Domingos e Mínimo 35) -->
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Solicitar Saque (Liberado apenas aos Domingos)</h3>
+                    <div class="input-group">
+                        <label>Chave PIX</label>
+                        <input type="text" id="chavePix" placeholder="Digite sua chave PIX">
+                    </div>
+                    <div class="input-group">
+                        <label>Valor do Saque (Mínimo R$ 35,00 | Taxa: 14%)</label>
+                        <input type="number" id="valorSaque" placeholder="0.00" min="35">
+                    </div>
+                    <button class="btn" id="btnSacar">Solicitar Saque</button>
                 </div>
-                <button class="btn" id="btnSacar">Solicitar Saque</button>
-            </div>
 
-            <!-- Histórico Separado -->
-            <div class="table-container">
-                <h3>Histórico de Saques (Chave PIX, Horário e Status)</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data/Horário</th>
-                            <th>Chave PIX</th>
-                            <th>Valor Solicitado</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaSaques">
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum saque solicitado ainda.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                <!-- Histórico Separado: Saques e Chaves x Depósitos -->
+                <div class="table-container">
+                    <h3>Histórico de Saques (Chave PIX, Horário e Status)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Horário</th>
+                                <th>Chave PIX</th>
+                                <th>Valor Solicitado</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaSaques">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum saque solicitado ainda.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="table-container">
-                <h3>Histórico de Depósitos</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Data/Horário</th>
-                            <th>Valor do Plano</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaDepositos">
-                        <tr>
-                            <td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum depósito registrado.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                <div class="table-container">
+                    <h3>Histórico de Depósitos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Horário</th>
+                                <th>Valor do Plano</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaDepositos">
+                            <tr>
+                                <td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum depósito registrado.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ABA INVESTIR (Oculta por padrão) -->
+            <section id="view-investir" class="view-section" style="display: none;">
+                <h2>Investir na Banca</h2>
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Selecionar Plano de Banca</h3>
+                    <div class="input-group">
+                        <label>Escolha o valor do plano (R$ 30 a R$ 1.000)</label>
+                        <select id="valorPlano">
+                            <option value="30">Plano Inicial - R$ 30,00</option>
+                            <option value="50">Plano R$ 50,00</option>
+                            <option value="100">Plano R$ 100,00</option>
+                            <option value="300">Plano R$ 300,00</option>
+                            <option value="500">Plano R$ 500,00</option>
+                            <option value="1000">Plano Máximo - R$ 1.000,00</option>
+                        </select>
+                    </div>
+                    <button class="btn" id="btnDepositar">Depositar via PIX (API)</button>
+                </div>
+            </section>
 
             <!-- Suporte WhatsApp -->
-            <a href="https://chat.whatsapp.com/BS4tj3scOZzLYItGNRP4nN?s=cl&p=a&ilr=1" target="_blank" class="support-btn">
+            <a href="https://chat.whatsapp.com/BS4tj3scOZzLYItGNRP4nN?s=cl&p=a&ilr=1" target="_blank" class="support-btn" style="margin-top: 30px;">
                 💬 Entrar em Contato com o Suporte (Grupo WhatsApp)
             </a>
 
         </main>
     </div>
 
-    <!-- Script principal em formato module para validar autenticação e carregar funções -->
+    <!-- Scripts -->
     <script type="module" src="auth.js"></script>
     <script type="module" src="script.js"></script>
 </body>
