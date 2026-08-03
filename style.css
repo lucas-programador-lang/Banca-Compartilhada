@@ -545,6 +545,11 @@ h2::after {
     overflow-x: auto;
 }
 
+.grid-planos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -714,6 +719,10 @@ tbody tr:last-child td {
     }
 
     .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-planos {
         grid-template-columns: 1fr;
     }
 
