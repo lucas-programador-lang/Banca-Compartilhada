@@ -90,22 +90,8 @@
                     </div>
                 </div>
 
-                <!-- Painel de Saque Rápido -->
-                <div class="card" style="margin-top: 25px;">
-                    <h3>Solicitar Saque (Liberado apenas aos Domingos)</h3>
-                    <div class="input-group">
-                        <label>Chave PIX</label>
-                        <input type="text" id="chavePix" placeholder="Digite sua chave PIX">
-                    </div>
-                    <div class="input-group">
-                        <label>Valor do Saque (Mínimo R$ 35,00 | Taxa: 14%)</label>
-                        <input type="number" id="valorSaque" placeholder="0.00" min="35">
-                    </div>
-                    <button class="btn" id="btnSacar">Solicitar Saque</button>
-                </div>
-
                 <!-- Históricos -->
-                <div class="table-container">
+                <div class="table-container" style="margin-top: 25px;">
                     <h3>Histórico de Saques</h3>
                     <table>
                         <thead>
@@ -368,7 +354,7 @@
 
                 <div class="card">
                     <h3>Chave PIX Padrão para Saques</h3>
-                    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Ao salvar aqui, a chave será preenchida automaticamente no painel de saque da aba Início.</p>
+                    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Ao salvar aqui, a chave será preenchida automaticamente no painel de saque.</p>
                     
                     <div class="input-group">
                         <label>Tipo de Chave PIX</label>
@@ -427,11 +413,8 @@
             const btnAbrirSacar = document.getElementById('btnAbrirSaqueModal');
             if (btnAbrirSacar) {
                 btnAbrirSacar.addEventListener('click', () => {
-                    const campoPix = document.getElementById('chavePix');
-                    if (campoPix) {
-                        campoPix.scrollIntoView({ behavior: 'smooth' });
-                        campoPix.focus();
-                    }
+                    const navPerfil = document.querySelector('[data-target="view-perfil"]');
+                    if (navPerfil) navPerfil.click();
                 });
             }
         });
