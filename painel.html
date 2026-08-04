@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico - Banca Compartilhada</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+</head>
+<body class="protected-page">
+
+    <div class="dashboard-container">
+
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md); flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h2 style="text-align: left; margin-bottom: 4px;">Histórico de Movimentações</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Acompanhe seus saques e depósitos em tempo real.</p>
+            </div>
+            <a href="index.html" class="link-text" style="margin-top: 0;">&larr; Voltar ao Painel</a>
+        </div>
+
+        <div class="table-container" style="margin-top: 25px;">
+            <h3>Histórico de Saques</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data/Horário</th>
+                        <th>Chave PIX</th>
+                        <th>Valor Solicitado</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaSaques">
+                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-container">
+            <h3>Histórico de Depósitos</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Data/Horário</th>
+                        <th>Valor do Plano</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaDepositos">
+                    <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="painel.js"></script>
+</body>
+</html>
