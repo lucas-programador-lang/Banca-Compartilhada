@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Histórico - Banca Compartilhada</title>
+    <title>Painel Admin - Banca Compartilhada</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 </head>
@@ -13,49 +13,71 @@
 
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md); flex-wrap: wrap; gap: 12px;">
             <div>
-                <h2 style="text-align: left; margin-bottom: 4px;">Histórico de Movimentações</h2>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Acompanhe seus saques e depósitos em tempo real.</p>
+                <h2 style="text-align: left; margin-bottom: 4px;">Painel Administrativo</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Todos os saques e depósitos da plataforma, em tempo real.</p>
             </div>
             <a href="index.html" class="link-text" style="margin-top: 0;">&larr; Voltar ao Painel</a>
         </div>
 
-        <div class="table-container" style="margin-top: 25px;">
-            <h3>Histórico de Saques</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data/Horário</th>
-                        <th>Chave PIX</th>
-                        <th>Valor Solicitado</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaSaques">
-                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando...</td></tr>
-                </tbody>
-            </table>
+        <!-- Mensagem exibida caso o usuário logado não seja admin -->
+        <div id="acessoNegado" class="warning-banner" style="display: none;">
+            ⚠️ Você não tem permissão para acessar esta página.
         </div>
 
-        <div class="table-container">
-            <h3>Histórico de Depósitos</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data/Horário</th>
-                        <th>Valor do Plano</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaDepositos">
-                    <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Carregando...</td></tr>
-                </tbody>
-            </table>
+        <div id="conteudoAdmin" style="display: none;">
+
+            <div class="stats-grid" style="margin-bottom: var(--space-md);">
+                <div class="stat-card">
+                    <h3>Total de Saques Pendentes</h3>
+                    <p id="totalSaquesPendentes">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total de Depósitos Pendentes</h3>
+                    <p id="totalDepositosPendentes">0</p>
+                </div>
+            </div>
+
+            <div class="table-container" style="margin-top: 25px;">
+                <h3>Todos os Saques</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data/Horário</th>
+                            <th>Usuário</th>
+                            <th>Chave PIX</th>
+                            <th>Valor Solicitado</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaSaquesAdmin">
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-container">
+                <h3>Todos os Depósitos</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data/Horário</th>
+                            <th>Usuário</th>
+                            <th>Valor do Plano</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaDepositosAdmin">
+                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
 
     </div>
 
     <!-- Scripts -->
     <script type="module" src="auth.js"></script>
-    <script type="module" src="painel.js"></script>
+    <script type="module" src="admin.js"></script>
 </body>
 </html>
