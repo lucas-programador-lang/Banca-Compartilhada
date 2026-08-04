@@ -110,6 +110,9 @@ function inicializarPerfilUsuario(userId) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    let saldoAtualUsuario = 0;
+    let userIdAtual = null;
+
     document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
         btn.addEventListener('click', () => {
             const valor = btn.getAttribute('data-valor');
@@ -160,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modalDep) fecharModalDeposito();
     });
 
-    btnConfirmarModalDep?.addEventListener('click', () => {
+    btnConfirmarModalDep?.addEventListener('click', async () => {
         const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
         const valorAtual = parseFloat(modalInput?.value || 0);
 
@@ -183,15 +186,36 @@ document.addEventListener('DOMContentLoaded', () => {
             areaQrCodePix.style.display = 'block';
             btnConfirmarModalDep.textContent = "Concluir Pagamento";
         } else {
-            fecharModalDeposito();
-            const inputPlano = document.getElementById('valorPlano');
-            if (inputPlano && modalInput) inputPlano.value = modalInput.value;
+            if (!userIdAtual) {
+                mostrarToast('❌ Você precisa estar logado para solicitar um depósito.', 'error');
+                return;
+            }
 
-            const btnDepReal = document.getElementById('btnDepositar');
-            if (btnDepReal) {
-                btnDepReal.click();
-            } else {
-                mostrarToast('✅ Solicitação de depósito gerada com sucesso!', 'success');
+            setBotaoCarregando(btnConfirmarModalDep, true, 'Enviando...');
+            try {
+                const depositosRef = ref(db, 'depositos/' + userIdAtual);
+                const novoDepositoRef = push(depositosRef);
+                await set(novoDepositoRef, {
+                    valorPlano: valorAtual,
+                    status: 'pendente',
+                    dataSolicitacao: new Date().toISOString()
+                });
+
+                fecharModalDeposito();
+                const inputPlano = document.getElementById('valorPlano');
+                if (inputPlano && modalInput) inputPlano.value = modalInput.value;
+
+                const btnDepReal = document.getElementById('btnDepositar');
+                if (btnDepReal) {
+                    btnDepReal.click();
+                } else {
+                    mostrarToast('✅ Solicitação de depósito gerada com sucesso!', 'success');
+                }
+            } catch (error) {
+                console.error('Erro ao registrar depósito:', error);
+                mostrarToast('❌ Erro ao registrar depósito: ' + error.message, 'error');
+            } finally {
+                setBotaoCarregando(btnConfirmarModalDep, false);
             }
         }
     });
@@ -199,9 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalSaque = document.getElementById('modalSaque') || document.getElementById('modalSaqueSistema');
     const btnAbrirSaqueModal = document.getElementById('btnAbrirSaqueModal');
     const btnConfirmarModalSaque = document.getElementById('btnConfirmarModalSaque') || document.getElementById('btnSolicitarSaqueFinal') || document.getElementById('btnConfirmarModalSacar');
-
-    let saldoAtualUsuario = 0;
-    let userIdAtual = null;
 
     function abrirModalSaque() {
         const nomePerfil = document.getElementById('perfilNome')?.value || localStorage.getItem('usuarioNome') || 'Não informado';
