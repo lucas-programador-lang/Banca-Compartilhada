@@ -1,5 +1,5 @@
-import { auth, db } from './auth.js';
-import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { auth, db, mostrarToast } from './auth.js';
+import { ref, onValue, update, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -40,6 +40,20 @@ function badgeStatus(status) {
     const label = STATUS_LABELS[chave] || status || 'Pendente';
     const cor = STATUS_CORES[chave] || 'var(--text-muted)';
     return `<span style="color: ${cor}; font-weight: 600;">${label}</span>`;
+}
+
+/**
+ * Regras de rendimento por valor de plano, espelhando o que é mostrado
+ * na aba "Investir" do index.html:
+ *   R$ 30 / R$ 50   -> 3% ao dia, teto de 70% sobre o capital
+ *   R$ 100 a 1000   -> 2% ao dia, teto de 60% sobre o capital
+ */
+function obterConfigPlano(valor) {
+    const valorNumerico = parseFloat(valor) || 0;
+    if (valorNumerico === 30 || valorNumerico === 50) {
+        return { percentualDiario: 0.03, tetoPercentual: 0.70 };
+    }
+    return { percentualDiario: 0.02, tetoPercentual: 0.60 };
 }
 
 /**
@@ -96,21 +110,114 @@ function renderizarTabelaDepositos(depositos, usuarios) {
     if (!tbody) return;
 
     if (!depositos.length) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum depósito registrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum depósito registrado.</td></tr>';
     } else {
-        tbody.innerHTML = depositos.map(deposito => `
-            <tr>
-                <td>${formatarDataHora(deposito.dataSolicitacao)}</td>
-                <td>${nomeDoUsuario(usuarios, deposito.uid)}</td>
-                <td>${formatadorMoeda.format(deposito.valorPlano || 0)}</td>
-                <td>${badgeStatus(deposito.status)}</td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = depositos.map(deposito => {
+            const status = (deposito.status || 'pendente').toLowerCase();
+            const acoes = status === 'pendente'
+                ? `
+                    <button
+                        class="btn btn-aprovar-deposito"
+                        data-uid="${deposito.uid}"
+                        data-id="${deposito.id}"
+                        data-valor="${deposito.valorPlano || 0}"
+                        style="padding: 6px 12px; font-size: 12px; margin-right: 6px; background: #2ecc71; border-color: #2ecc71;"
+                    >Aprovar</button>
+                    <button
+                        class="btn btn-recusar-deposito"
+                        data-uid="${deposito.uid}"
+                        data-id="${deposito.id}"
+                        style="padding: 6px 12px; font-size: 12px; background: transparent; border: 1px solid var(--danger); color: var(--danger);"
+                    >Recusar</button>
+                `
+                : '—';
+
+            return `
+                <tr>
+                    <td>${formatarDataHora(deposito.dataSolicitacao)}</td>
+                    <td>${nomeDoUsuario(usuarios, deposito.uid)}</td>
+                    <td>${formatadorMoeda.format(deposito.valorPlano || 0)}</td>
+                    <td>${badgeStatus(deposito.status)}</td>
+                    <td>${acoes}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     const pendentes = depositos.filter(d => (d.status || 'pendente').toLowerCase() === 'pendente').length;
     const elTotal = document.getElementById('totalDepositosPendentes');
     if (elTotal) elTotal.textContent = pendentes;
+}
+
+/**
+ * Aprova um depósito: marca o status como "aprovado" e cria o plano
+ * correspondente em planos/{uid}/{id}, que é o que faz o plano aparecer
+ * na aba "Carteira" do usuário.
+ */
+async function aprovarDeposito(uid, depositoId, valorPlano) {
+    try {
+        const { percentualDiario, tetoPercentual } = obterConfigPlano(valorPlano);
+
+        const planosRef = ref(db, 'planos/' + uid);
+        const novoPlanoRef = push(planosRef);
+
+        await set(novoPlanoRef, {
+            valor: parseFloat(valorPlano) || 0,
+            percentualDiario,
+            tetoPercentual,
+            dataAtivacao: new Date().toISOString(),
+            origemDepositoId: depositoId,
+            status: 'ativo',
+        });
+
+        const depositoRef = ref(db, 'depositos/' + uid + '/' + depositoId);
+        await update(depositoRef, { status: 'aprovado' });
+
+        mostrarToast('✅ Depósito aprovado! O plano já está ativo na Carteira do usuário.', 'success');
+    } catch (error) {
+        console.error('Erro ao aprovar depósito:', error);
+        mostrarToast('❌ Erro ao aprovar depósito: ' + error.message, 'error');
+    }
+}
+
+async function recusarDeposito(uid, depositoId) {
+    try {
+        const depositoRef = ref(db, 'depositos/' + uid + '/' + depositoId);
+        await update(depositoRef, { status: 'recusado' });
+        mostrarToast('Depósito recusado.', 'warning');
+    } catch (error) {
+        console.error('Erro ao recusar depósito:', error);
+        mostrarToast('❌ Erro ao recusar depósito: ' + error.message, 'error');
+    }
+}
+
+// Delegação de eventos: os botões de aprovar/recusar são recriados a
+// cada render da tabela, então o listener fica no tbody (que existe
+// desde o carregamento da página) em vez de nos botões individuais.
+function iniciarDelegacaoAcoesDepositos() {
+    const tbody = document.getElementById('tabelaDepositosAdmin');
+    if (!tbody || tbody.dataset.listenerAtivo) return;
+
+    tbody.addEventListener('click', (e) => {
+        const btnAprovar = e.target.closest('.btn-aprovar-deposito');
+        const btnRecusar = e.target.closest('.btn-recusar-deposito');
+
+        if (btnAprovar) {
+            const { uid, id, valor } = btnAprovar.dataset;
+            btnAprovar.disabled = true;
+            btnAprovar.textContent = 'Aprovando...';
+            aprovarDeposito(uid, id, valor);
+        }
+
+        if (btnRecusar) {
+            const { uid, id } = btnRecusar.dataset;
+            btnRecusar.disabled = true;
+            btnRecusar.textContent = 'Recusando...';
+            recusarDeposito(uid, id);
+        }
+    });
+
+    tbody.dataset.listenerAtivo = 'true';
 }
 
 /**
@@ -134,6 +241,8 @@ function rerenderizarTudo() {
 }
 
 function iniciarListenersAdmin() {
+    iniciarDelegacaoAcoesDepositos();
+
     const usuariosRef = ref(db, 'usuarios');
     onValue(usuariosRef, (snapshot) => {
         estado.usuarios = snapshot.val();
