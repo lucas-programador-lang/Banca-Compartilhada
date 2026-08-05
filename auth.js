@@ -6,7 +6,7 @@ import {
     sendPasswordResetEmail,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 /* ==========================================================================
    Configuração do Firebase
@@ -178,10 +178,53 @@ document.querySelectorAll('.toggle-senha').forEach((botao) => {
 /* ==========================================================================
    Indicação (register.html)
    ==========================================================================
-   Captura o código de indicação (?ref=UID) da URL do link que a pessoa
-   recebeu de quem a indicou e guarda no campo oculto do formulário de
-   cadastro, para ser salvo no perfil do novo usuário.
+   Em vez de usar o UID puro do Firebase (algo como "31PGrmPA8Nei...")
+   no link de indicação, cada usuário ganha um código curto e legível
+   (baseado no nome, tipo "joao" ou "joao23" se "joao" já existir),
+   salvo em codigosIndicacao/{codigo} -> uid. O link de indicação vira
+   "register.html?ref=joao23" e, ao cadastrar, resolvemos esse código
+   de volta para o UID real de quem indicou.
    ========================================================================== */
+
+/**
+ * Remove acentos, espaços e caracteres especiais, deixando só letras e
+ * números em minúsculo — a base do código de indicação.
+ */
+function gerarSlugNome(nome) {
+    const slug = (nome || 'user')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // remove acentos (João -> joao)
+        .replace(/[^a-z0-9]/g, '')
+        .slice(0, 12);
+    return slug || 'user';
+}
+
+/**
+ * Gera um código de indicação único a partir do nome do usuário,
+ * tentando "joao", depois "joao2", "joao57", etc. até achar um que
+ * ainda não exista em codigosIndicacao/.
+ */
+async function gerarCodigoIndicacaoUnico(nome) {
+    const base = gerarSlugNome(nome);
+    let tentativa = base;
+
+    for (let i = 0; i < 25; i++) {
+        const snap = await get(ref(db, 'codigosIndicacao/' + tentativa));
+        if (!snap.exists()) return tentativa;
+        tentativa = `${base}${Math.floor(10 + Math.random() * 90)}`;
+    }
+
+    // Fallback extremamente improvável: se 25 tentativas colidirem,
+    // usa um sufixo baseado no tempo atual para garantir unicidade.
+    return `${base}${Date.now().toString(36).slice(-5)}`;
+}
+
+/**
+ * Captura o código de indicação (?ref=codigo) da URL do link que a
+ * pessoa recebeu de quem a indicou e guarda no campo oculto do
+ * formulário de cadastro.
+ */
 function capturarCodigoIndicacao() {
     const params = new URLSearchParams(window.location.search);
     const codigoRef = params.get('ref');
@@ -189,11 +232,11 @@ function capturarCodigoIndicacao() {
     const avisoIndicacao = getEl('avisoIndicacao');
 
     if (codigoRef && campoRefIndicador) {
-        campoRefIndicador.value = codigoRef.trim();
+        campoRefIndicador.value = codigoRef.trim().toLowerCase();
         if (avisoIndicacao) avisoIndicacao.style.display = 'block';
     }
 
-    return codigoRef ? codigoRef.trim() : null;
+    return codigoRef ? codigoRef.trim().toLowerCase() : null;
 }
 
 capturarCodigoIndicacao();
@@ -215,7 +258,7 @@ if (registerForm) {
         const nome = getEl('nome')?.value.trim() || 'Usuário';
         const email = getEl('emailReg').value.trim();
         const senha = getEl('senhaReg').value;
-        const indicadoPor = getEl('refIndicador')?.value.trim() || null;
+        const codigoIndicadorDigitado = getEl('refIndicador')?.value.trim().toLowerCase() || null;
         const botao = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('button');
 
         const erroValidacao = validarEmailSenha(email, senha);
@@ -230,10 +273,21 @@ if (registerForm) {
             const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
             const user = userCredential.user;
 
-            // 2. Importa e cria o registro inicial no Realtime Database
-            const { ref, set } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
-            const db = getDatabase(app);
+            // 2. Resolve o código de indicação digitado (ex.: "joao23")
+            //    para o UID de quem indicou, consultando codigosIndicacao/.
+            //    Se o código não existir (link inválido/expirado), o
+            //    cadastro segue normalmente sem indicador.
+            let uidIndicador = null;
+            if (codigoIndicadorDigitado) {
+                const indicadorSnap = await get(ref(db, 'codigosIndicacao/' + codigoIndicadorDigitado));
+                uidIndicador = indicadorSnap.exists() ? indicadorSnap.val() : null;
+            }
 
+            // 3. Gera o código de indicação único deste novo usuário,
+            //    para que ele também possa indicar outras pessoas depois.
+            const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico(nome);
+
+            // 4. Grava o perfil do usuário e o mapeamento código -> uid
             await set(ref(db, 'usuarios/' + user.uid), {
                 nome: nome,
                 email: email,
@@ -242,9 +296,12 @@ if (registerForm) {
                 comissao: 0,
                 tipoPix: 'cpf',
                 chavePix: '',
-                indicadoPor: indicadoPor || null,
+                indicadoPor: uidIndicador,
+                codigoIndicacao: meuCodigoIndicacao,
                 dataCadastro: new Date().toISOString()
             });
+
+            await set(ref(db, 'codigosIndicacao/' + meuCodigoIndicacao), user.uid);
 
             mostrarToast('🎉 Conta criada com sucesso!', 'success');
             setTimeout(() => {
