@@ -255,15 +255,21 @@ function inicializarExtratoUsuario(userId) {
  * ".indexOn": "indicadoPor" dentro do nó "usuarios" (e permitir a
  * leitura filtrada), senão o Firebase recusa a consulta.
  */
-function gerarLinkIndicacao(userId) {
+/**
+ * Monta o link de indicação. Usa o código curto e legível
+ * (ex.: "joao23") sempre que o usuário já tiver um salvo pelo
+ * cadastro; contas criadas antes dessa funcionalidade existir ainda
+ * não têm codigoIndicacao, então caem de volta no UID puro.
+ */
+function gerarLinkIndicacao(userId, codigoIndicacao) {
     const baseUrl = window.location.href.split('index.html')[0].replace(/\/$/, '');
-    return `${baseUrl}/register.html?ref=${userId}`;
+    return `${baseUrl}/register.html?ref=${codigoIndicacao || userId}`;
 }
 
-function inicializarEquipeUsuario(userId) {
+function inicializarEquipeUsuario(userId, codigoIndicacao) {
     const inputLink = getEl('linkIndicacao');
     if (inputLink) {
-        inputLink.value = gerarLinkIndicacao(userId);
+        inputLink.value = gerarLinkIndicacao(userId, codigoIndicacao);
     }
 
     const btnCopiar = getEl('btnCopiarLinkIndicacao');
@@ -640,6 +646,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (elNome) elNome.innerText = nomeUsuario;
                 if (elInicial) elInicial.innerText = nomeUsuario.charAt(0).toUpperCase();
+
+                const inputLink = getEl('linkIndicacao');
+                if (inputLink) inputLink.value = gerarLinkIndicacao(userId, dados.codigoIndicacao);
             }
         });
 
