@@ -176,8 +176,28 @@ document.querySelectorAll('.toggle-senha').forEach((botao) => {
 });
 
 /* ==========================================================================
-   Cadastro (register.html)
+   Indicação (register.html)
+   ==========================================================================
+   Captura o código de indicação (?ref=UID) da URL do link que a pessoa
+   recebeu de quem a indicou e guarda no campo oculto do formulário de
+   cadastro, para ser salvo no perfil do novo usuário.
    ========================================================================== */
+function capturarCodigoIndicacao() {
+    const params = new URLSearchParams(window.location.search);
+    const codigoRef = params.get('ref');
+    const campoRefIndicador = getEl('refIndicador');
+    const avisoIndicacao = getEl('avisoIndicacao');
+
+    if (codigoRef && campoRefIndicador) {
+        campoRefIndicador.value = codigoRef.trim();
+        if (avisoIndicacao) avisoIndicacao.style.display = 'block';
+    }
+
+    return codigoRef ? codigoRef.trim() : null;
+}
+
+capturarCodigoIndicacao();
+
 /* ==========================================================================
    Cadastro (register.html)
    ========================================================================== */
@@ -195,6 +215,7 @@ if (registerForm) {
         const nome = getEl('nome')?.value.trim() || 'Usuário';
         const email = getEl('emailReg').value.trim();
         const senha = getEl('senhaReg').value;
+        const indicadoPor = getEl('refIndicador')?.value.trim() || null;
         const botao = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('button');
 
         const erroValidacao = validarEmailSenha(email, senha);
@@ -212,7 +233,7 @@ if (registerForm) {
             // 2. Importa e cria o registro inicial no Realtime Database
             const { ref, set } = await import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js");
             const db = getDatabase(app);
-            
+
             await set(ref(db, 'usuarios/' + user.uid), {
                 nome: nome,
                 email: email,
@@ -220,7 +241,9 @@ if (registerForm) {
                 rendimento: 0,
                 comissao: 0,
                 tipoPix: 'cpf',
-                chavePix: ''
+                chavePix: '',
+                indicadoPor: indicadoPor || null,
+                dataCadastro: new Date().toISOString()
             });
 
             mostrarToast('🎉 Conta criada com sucesso!', 'success');
