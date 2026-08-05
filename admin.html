@@ -8,9 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
 </head>
 <body class="protected-page">
-
     <div class="dashboard-container">
-
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-md); flex-wrap: wrap; gap: 12px;">
             <div>
                 <h2 style="text-align: left; margin-bottom: 4px;">Painel Administrativo</h2>
@@ -18,14 +16,11 @@
             </div>
             <a href="index.html" class="link-text" style="margin-top: 0;">&larr; Voltar ao Painel</a>
         </div>
-
         <!-- Mensagem exibida caso o usuário logado não seja admin -->
         <div id="acessoNegado" class="warning-banner" style="display: none;">
             ⚠️ Você não tem permissão para acessar esta página.
         </div>
-
         <div id="conteudoAdmin" style="display: none;">
-
             <div class="stats-grid" style="margin-bottom: var(--space-md);">
                 <div class="stat-card">
                     <h3>Total de Saques Pendentes</h3>
@@ -36,7 +31,6 @@
                     <p id="totalDepositosPendentes">0</p>
                 </div>
             </div>
-
             <div class="table-container" style="margin-top: 25px;">
                 <h3>Todos os Saques</h3>
                 <table>
@@ -54,9 +48,9 @@
                     </tbody>
                 </table>
             </div>
-
             <div class="table-container">
                 <h3>Todos os Depósitos</h3>
+                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 10px;">Ao aprovar um depósito, o plano correspondente é ativado automaticamente na Carteira do usuário.</p>
                 <table>
                     <thead>
                         <tr>
@@ -64,18 +58,16 @@
                             <th>Usuário</th>
                             <th>Valor do Plano</th>
                             <th>Status</th>
+                            <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaDepositosAdmin">
-                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Carregando...</td></tr>
+                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Carregando...</td></tr>
                     </tbody>
                 </table>
             </div>
-
         </div>
-
     </div>
-
     <!-- Scripts -->
     <script type="module" src="auth.js"></script>
     <script type="module" src="admin.js"></script>
