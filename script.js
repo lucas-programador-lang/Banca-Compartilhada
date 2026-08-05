@@ -14,6 +14,12 @@ const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
     currency: 'BRL',
 });
 
+const formatadorData = new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+});
+
 function getEl(id) {
     return document.getElementById(id);
 }
@@ -107,6 +113,90 @@ function inicializarPerfilUsuario(userId) {
         });
         btnSalvarPerfil.dataset.listenerAtivo = 'true';
     }
+}
+
+/**
+ * Calcula o estado atual de um plano (planos/{uid}/{id}) com base na
+ * data de ativação: quantos dias já se passaram, quanto rendeu até
+ * agora (respeitando o teto de retorno) e se ele já foi finalizado.
+ */
+function calcularEstadoPlano(plano) {
+    const valor = parseFloat(plano.valor || 0);
+    const percentualDiario = parseFloat(plano.percentualDiario || 0);
+    const tetoPercentual = parseFloat(plano.tetoPercentual || 0);
+
+    const dataAtivacao = new Date(plano.dataAtivacao || Date.now());
+    const agora = new Date();
+    const diasCorridos = Math.max(0, Math.floor((agora - dataAtivacao) / (1000 * 60 * 60 * 24)));
+
+    const rendimentoDiario = valor * percentualDiario;
+    const tetoValor = valor * tetoPercentual;
+    const rendimentoAcumulado = Math.min(rendimentoDiario * diasCorridos, tetoValor);
+    const finalizado = rendimentoAcumulado >= tetoValor && tetoValor > 0;
+
+    return {
+        dataAtivacao,
+        rendimentoDiario,
+        rendimentoAcumulado,
+        finalizado,
+    };
+}
+
+function renderizarTabelaCarteira(planosObj) {
+    const tbody = getEl('tabelaPlanosCarteira');
+    const elTotalInvestido = getEl('totalInvestidoPlanos');
+    const elTotalRendimento = getEl('totalRendimentoPlanos');
+    if (!tbody) return;
+
+    const planos = planosObj
+        ? Object.entries(planosObj).map(([id, dados]) => ({ id, ...dados }))
+        : [];
+
+    if (!planos.length) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum plano ativo no momento.</td></tr>';
+        if (elTotalInvestido) elTotalInvestido.innerText = formatadorMoeda.format(0);
+        if (elTotalRendimento) elTotalRendimento.innerText = formatadorMoeda.format(0);
+        return;
+    }
+
+    planos.sort((a, b) => new Date(b.dataAtivacao || 0) - new Date(a.dataAtivacao || 0));
+
+    let totalInvestido = 0;
+    let totalRendimento = 0;
+
+    tbody.innerHTML = planos.map(plano => {
+        const valor = parseFloat(plano.valor || 0);
+        const { dataAtivacao, rendimentoDiario, rendimentoAcumulado, finalizado } = calcularEstadoPlano(plano);
+
+        totalInvestido += valor;
+        totalRendimento += rendimentoAcumulado;
+
+        const statusTexto = finalizado ? 'Finalizado' : 'Ativo';
+        const statusCor = finalizado ? 'var(--text-muted)' : '#51cf66';
+
+        return `
+            <tr>
+                <td>${formatadorData.format(dataAtivacao)}</td>
+                <td>${formatadorMoeda.format(valor)}</td>
+                <td>${formatadorMoeda.format(rendimentoDiario)}</td>
+                <td>${formatadorMoeda.format(rendimentoAcumulado)}</td>
+                <td><span style="color: ${statusCor}; font-weight: 600;">${statusTexto}</span></td>
+            </tr>
+        `;
+    }).join('');
+
+    if (elTotalInvestido) elTotalInvestido.innerText = formatadorMoeda.format(totalInvestido);
+    if (elTotalRendimento) elTotalRendimento.innerText = formatadorMoeda.format(totalRendimento);
+}
+
+function inicializarCarteiraUsuario(userId) {
+    const tbody = getEl('tabelaPlanosCarteira');
+    if (!tbody) return;
+
+    const planosRef = ref(db, 'planos/' + userId);
+    onValue(planosRef, (snapshot) => {
+        renderizarTabelaCarteira(snapshot.val());
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -209,7 +299,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (btnDepReal) {
                     btnDepReal.click();
                 } else {
-                    mostrarToast('✅ Solicitação de depósito gerada com sucesso!', 'success');
+                    mostrarToast('✅ Solicitação de depósito gerada! Assim que o pagamento for confirmado, o plano aparecerá na sua Carteira.', 'success');
                 }
             } catch (error) {
                 console.error('Erro ao registrar depósito:', error);
@@ -435,6 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         inicializarPerfilUsuario(userId);
+        inicializarCarteiraUsuario(userId);
     });
 });
 
