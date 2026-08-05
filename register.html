@@ -19,7 +19,6 @@
             </div>
             <span class="eyebrow">Banca Compartilhada</span>
             <h2>Criar conta</h2>
-
             <form id="registerForm">
                 <div class="input-group">
                     <label for="nome">Nome completo</label>
@@ -35,7 +34,6 @@
                         >
                     </div>
                 </div>
-
                 <div class="input-group">
                     <label for="emailReg">E-mail</label>
                     <div class="input-wrapper">
@@ -50,7 +48,6 @@
                         >
                     </div>
                 </div>
-
                 <div class="input-group">
                     <label for="senhaReg">Senha</label>
                     <div class="input-wrapper">
@@ -68,14 +65,15 @@
                         </button>
                     </div>
                 </div>
-
+                <input type="hidden" id="refIndicador" name="refIndicador" value="">
+                <p id="avisoIndicacao" style="display: none; color: var(--primary); font-size: 13px; margin-bottom: 15px; text-align: center;">
+                    🎉 Você foi indicado por um amigo!
+                </p>
                 <button type="submit" class="btn">Cadastrar</button>
             </form>
-
             <p class="link-text">Já possui conta? <a href="login.html">Faça login</a></p>
         </div>
     </main>
-
     <!-- Script modular do Firebase Auth -->
     <script type="module" src="auth.js"></script>
 </body>
