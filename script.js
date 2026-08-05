@@ -116,11 +116,6 @@ function inicializarPerfilUsuario(userId) {
     }
 }
 
-/**
- * Calcula o estado atual de um plano (planos/{uid}/{id}) com base na
- * data de ativação: quantos dias já se passaram, quanto rendeu até
- * agora (respeitando o teto de retorno) e se ele já foi finalizado.
- */
 function calcularEstadoPlano(plano) {
     const valor = parseFloat(plano.valor || 0);
     const percentualDiario = parseFloat(plano.percentualDiario || 0);
@@ -200,11 +195,6 @@ function inicializarCarteiraUsuario(userId) {
     });
 }
 
-/**
- * Extrato: escuta em tempo real extrato/{userId}, onde cada registro
- * (comissões recebidas, etc.) é lançado assim que acontece — por
- * exemplo pelo admin.js ao aprovar o depósito de um indicado.
- */
 function inicializarExtratoUsuario(userId) {
     const tbody = getEl('tabelaExtratoGeral');
     if (!tbody) return;
@@ -245,22 +235,6 @@ function inicializarExtratoUsuario(userId) {
     });
 }
 
-/**
- * Equipe: gera o link de indicação do usuário, permite copiá-lo e
- * escuta em tempo real quem se cadastrou usando aquele link
- * (usuarios cujo campo indicadoPor === userId).
- *
- * IMPORTANTE: essa consulta usa orderByChild('indicadoPor'), então as
- * Regras do Firebase Realtime Database precisam ter
- * ".indexOn": "indicadoPor" dentro do nó "usuarios" (e permitir a
- * leitura filtrada), senão o Firebase recusa a consulta.
- */
-/**
- * Monta o link de indicação. Usa o código curto e legível
- * (ex.: "joao23") sempre que o usuário já tiver um salvo pelo
- * cadastro; contas criadas antes dessa funcionalidade existir ainda
- * não têm codigoIndicacao, então caem de volta no UID puro.
- */
 function gerarLinkIndicacao(userId, codigoIndicacao) {
     const baseUrl = window.location.href.split('index.html')[0].replace(/\/$/, '');
     return `${baseUrl}/register.html?ref=${codigoIndicacao || userId}`;
@@ -450,7 +424,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (elNome) elNome.value = nomePerfil;
         if (elTipo) elTipo.value = tipoPixPerfil;
-        if (elChave) elChave.value = chavePixPerfil;
+        if (elChave) {
+            // elChave é um <strong> de exibição, não um <input> — usar
+            // textContent (não .value) e avisar quando não há chave
+            // cadastrada ainda no Perfil.
+            elChave.textContent = chavePixPerfil || 'Nenhuma chave cadastrada — vá em Perfil e cadastre uma.';
+            elChave.style.color = chavePixPerfil ? '#fff' : 'var(--danger)';
+        }
 
         let boxSaldoModal = document.getElementById('boxSaldoDisponivelModal');
         if (!boxSaldoModal && modalSaque) {
@@ -585,12 +565,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const tipoPixSaque = document.getElementById('saqueTipoPix')?.value
-            || document.getElementById('perfilTipoPix')?.value
-            || 'CPF';
-        const chavePixSaque = document.getElementById('saqueChavePix')?.value
-            || document.getElementById('perfilChavePix')?.value
-            || '';
+        // A chave PIX usada no saque vem sempre do Perfil (fonte de
+        // verdade) — o modal de saque só EXIBE essa chave, não a edita.
+        const tipoPixSaque = document.getElementById('perfilTipoPix')?.value || 'CPF';
+        const chavePixSaque = document.getElementById('perfilChavePix')?.value || '';
 
         if (!chavePixSaque) {
             mostrarToast('⚠️ Cadastre sua chave PIX no Perfil antes de solicitar um saque.', 'warning');
