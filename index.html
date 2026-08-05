@@ -287,17 +287,42 @@
             <section id="view-equipe" class="view-section" style="display: none;">
                 <h2>Minha Equipe</h2>
                 <p style="color: var(--text-muted); margin-bottom: 20px;">Acompanhe aqui os indicados e comissões da sua rede.</p>
-                
+
+                <!-- Link de Indicação -->
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 10px;">Seu Link de Indicação</h3>
+                    <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Compartilhe o link abaixo. Toda pessoa que se cadastrar através dele entra automaticamente na sua equipe, e você recebe 15% de comissão sobre os planos que ela ativar.</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" id="linkIndicacao" readonly style="flex: 1; min-width: 220px; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.03); color: #fff; border: 1px solid var(--border-color-strong);">
+                        <button class="btn" id="btnCopiarLinkIndicacao" style="white-space: nowrap;">Copiar Link</button>
+                    </div>
+                </div>
+
                 <div class="stats-grid" style="margin-bottom: 25px;">
                     <div class="stat-card">
                         <h3>Comissões (1º Nível - 15%)</h3>
                         <p id="comissaoTotalEquipe">R$ 0,00</p>
                     </div>
+                    <div class="stat-card">
+                        <h3>Total de Indicados</h3>
+                        <p id="totalIndicados">0</p>
+                    </div>
                 </div>
 
-                <div class="card">
+                <div class="table-container">
                     <h3>Membros da Rede</h3>
-                    <p style="color: var(--text-muted); margin-top: 10px;">Nenhum indicado cadastrado ainda.</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data de Cadastro</th>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaMembrosEquipe">
+                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum indicado cadastrado ainda.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
