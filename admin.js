@@ -1,5 +1,5 @@
 import { auth, db, mostrarToast } from './auth.js';
-import { ref, onValue, update, push, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { ref, onValue, update, push, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -150,9 +150,57 @@ function renderizarTabelaDepositos(depositos, usuarios) {
 }
 
 /**
- * Aprova um depósito: marca o status como "aprovado" e cria o plano
- * correspondente em planos/{uid}/{id}, que é o que faz o plano aparecer
- * na aba "Carteira" do usuário.
+ * Percentual de comissão de indicação (1º nível), pago sobre o valor
+ * do plano ativado por um indicado.
+ */
+const PERCENTUAL_COMISSAO_INDICACAO = 0.15;
+
+/**
+ * Se o dono do depósito (uid) foi indicado por alguém (campo
+ * indicadoPor em usuarios/{uid}), credita 15% do valor do plano para
+ * o indicador — tanto na comissão acumulada quanto no saldo sacável —
+ * e registra o lançamento em extrato/{uidIndicador}, que é o que faz
+ * a comissão aparecer em tempo real na Equipe e no Extrato do
+ * indicador.
+ */
+async function creditarComissaoIndicacao(uidIndicado, valorPlano) {
+    try {
+        const indicadoSnap = await get(ref(db, 'usuarios/' + uidIndicado));
+        const dadosIndicado = indicadoSnap.val();
+        const uidIndicador = dadosIndicado?.indicadoPor;
+        if (!uidIndicador) return;
+
+        const indicadorRef = ref(db, 'usuarios/' + uidIndicador);
+        const indicadorSnap = await get(indicadorRef);
+        const dadosIndicador = indicadorSnap.val();
+        if (!dadosIndicador) return; // link de indicação inválido / indicador não existe mais
+
+        const valorComissao = (parseFloat(valorPlano) || 0) * PERCENTUAL_COMISSAO_INDICACAO;
+        const comissaoAtual = parseFloat(dadosIndicador.comissao || 0);
+        const saldoAtual = parseFloat(dadosIndicador.saldo || 0);
+
+        await update(indicadorRef, {
+            comissao: comissaoAtual + valorComissao,
+            saldo: saldoAtual + valorComissao,
+        });
+
+        const extratoRef = ref(db, 'extrato/' + uidIndicador);
+        const novoExtratoRef = push(extratoRef);
+        await set(novoExtratoRef, {
+            data: new Date().toISOString(),
+            descricao: `Comissão de indicação (15%) — plano de ${dadosIndicado?.nome || 'um indicado'}`,
+            valor: valorComissao,
+        });
+    } catch (error) {
+        console.error('Erro ao creditar comissão de indicação:', error);
+    }
+}
+
+/**
+ * Aprova um depósito: marca o status como "aprovado", cria o plano
+ * correspondente em planos/{uid}/{id} (que é o que faz o plano aparecer
+ * na aba "Carteira" do usuário) e credita a comissão de indicação para
+ * quem o indicou, se houver.
  */
 async function aprovarDeposito(uid, depositoId, valorPlano) {
     try {
@@ -172,6 +220,8 @@ async function aprovarDeposito(uid, depositoId, valorPlano) {
 
         const depositoRef = ref(db, 'depositos/' + uid + '/' + depositoId);
         await update(depositoRef, { status: 'aprovado' });
+
+        await creditarComissaoIndicacao(uid, valorPlano);
 
         mostrarToast('✅ Depósito aprovado! O plano já está ativo na Carteira do usuário.', 'success');
     } catch (error) {
