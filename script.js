@@ -1,5 +1,5 @@
 import { auth, db, mostrarToast } from './auth.js';
-import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { ref, push, set, onValue, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const CONFIG = {
@@ -41,6 +41,7 @@ function atualizarPainel(dados) {
         saldoDisponivel: dados.saldo,
         rendimentoTotal: dados.rendimento,
         comissaoTotal: dados.comissao,
+        comissaoTotalEquipe: dados.comissao,
     };
 
     for (const [idCampo, valor] of Object.entries(campos)) {
@@ -196,6 +197,124 @@ function inicializarCarteiraUsuario(userId) {
     const planosRef = ref(db, 'planos/' + userId);
     onValue(planosRef, (snapshot) => {
         renderizarTabelaCarteira(snapshot.val());
+    });
+}
+
+/**
+ * Extrato: escuta em tempo real extrato/{userId}, onde cada registro
+ * (comissões recebidas, etc.) é lançado assim que acontece — por
+ * exemplo pelo admin.js ao aprovar o depósito de um indicado.
+ */
+function inicializarExtratoUsuario(userId) {
+    const tbody = getEl('tabelaExtratoGeral');
+    if (!tbody) return;
+
+    const formatadorMesAno = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
+    const formatadorDataHora = new Intl.DateTimeFormat('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+
+    const extratoRef = ref(db, 'extrato/' + userId);
+    onValue(extratoRef, (snapshot) => {
+        const dados = snapshot.val();
+        const registros = dados
+            ? Object.entries(dados).map(([id, info]) => ({ id, ...info }))
+            : [];
+
+        if (!registros.length) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum registro no extrato ainda.</td></tr>';
+            return;
+        }
+
+        registros.sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
+
+        tbody.innerHTML = registros.map(registro => {
+            const data = new Date(registro.data || Date.now());
+            let mesAno = formatadorMesAno.format(data);
+            mesAno = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
+
+            return `
+                <tr>
+                    <td>${formatadorDataHora.format(data)}</td>
+                    <td>${mesAno}</td>
+                    <td>${registro.descricao || '—'}</td>
+                    <td style="color: #51cf66; font-weight: 600;">${formatadorMoeda.format(registro.valor || 0)}</td>
+                </tr>
+            `;
+        }).join('');
+    });
+}
+
+/**
+ * Equipe: gera o link de indicação do usuário, permite copiá-lo e
+ * escuta em tempo real quem se cadastrou usando aquele link
+ * (usuarios cujo campo indicadoPor === userId).
+ *
+ * IMPORTANTE: essa consulta usa orderByChild('indicadoPor'), então as
+ * Regras do Firebase Realtime Database precisam ter
+ * ".indexOn": "indicadoPor" dentro do nó "usuarios" (e permitir a
+ * leitura filtrada), senão o Firebase recusa a consulta.
+ */
+function gerarLinkIndicacao(userId) {
+    const baseUrl = window.location.href.split('index.html')[0].replace(/\/$/, '');
+    return `${baseUrl}/register.html?ref=${userId}`;
+}
+
+function inicializarEquipeUsuario(userId) {
+    const inputLink = getEl('linkIndicacao');
+    if (inputLink) {
+        inputLink.value = gerarLinkIndicacao(userId);
+    }
+
+    const btnCopiar = getEl('btnCopiarLinkIndicacao');
+    if (btnCopiar && !btnCopiar.dataset.listenerAtivo) {
+        btnCopiar.addEventListener('click', async () => {
+            const link = inputLink?.value || '';
+            if (!link) return;
+
+            try {
+                await navigator.clipboard.writeText(link);
+                mostrarToast('🔗 Link de indicação copiado!', 'success');
+            } catch (error) {
+                console.error('Erro ao copiar link:', error);
+                inputLink?.select();
+                mostrarToast('⚠️ Não foi possível copiar automaticamente. Selecione o link e copie manualmente.', 'warning');
+            }
+        });
+        btnCopiar.dataset.listenerAtivo = 'true';
+    }
+
+    const tbody = getEl('tabelaMembrosEquipe');
+    if (!tbody) return;
+
+    const usuariosRef = ref(db, 'usuarios');
+    const consultaIndicados = query(usuariosRef, orderByChild('indicadoPor'), equalTo(userId));
+
+    onValue(consultaIndicados, (snapshot) => {
+        const dados = snapshot.val();
+        const membros = dados
+            ? Object.entries(dados).map(([uid, info]) => ({ uid, ...info }))
+            : [];
+
+        const elTotalIndicados = getEl('totalIndicados');
+        if (elTotalIndicados) elTotalIndicados.innerText = membros.length;
+
+        if (!membros.length) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum indicado cadastrado ainda.</td></tr>';
+            return;
+        }
+
+        membros.sort((a, b) => new Date(b.dataCadastro || 0) - new Date(a.dataCadastro || 0));
+
+        tbody.innerHTML = membros.map(membro => `
+            <tr>
+                <td>${membro.dataCadastro ? formatadorData.format(new Date(membro.dataCadastro)) : '—'}</td>
+                <td>${membro.nome || '—'}</td>
+                <td>${membro.email || '—'}</td>
+            </tr>
+        `).join('');
+    }, (error) => {
+        console.error('Erro ao carregar indicados (verifique as Regras/index do Firebase):', error);
     });
 }
 
@@ -526,6 +645,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         inicializarPerfilUsuario(userId);
         inicializarCarteiraUsuario(userId);
+        inicializarExtratoUsuario(userId);
+        inicializarEquipeUsuario(userId);
     });
 });
 
