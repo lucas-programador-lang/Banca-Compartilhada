@@ -22,6 +22,25 @@ const formatadorData = new Intl.DateTimeFormat('pt-BR', {
     year: 'numeric',
 });
 
+/**
+ * Retorna o dia da semana (0 = domingo, ..., 6 = sábado) sempre no fuso
+ * de Brasília (UTC-3, fixo — Brasil não tem mais horário de verão desde
+ * 2019), em vez de usar new Date().getDay(), que depende do fuso horário
+ * configurado no dispositivo do usuário. Sem isso, alguém em outro fuso
+ * podia ver "domingo liberado" quando na verdade já era sábado ou
+ * segunda em Brasília.
+ *
+ * ⚠️ Isso só corrige a EXIBIÇÃO/validação no navegador. A escrita do
+ * saque ainda acontece direto pelo Firebase SDK no cliente — alguém
+ * que quiser burlar a regra de "só domingo" pode fazer isso via
+ * DevTools, porque não há checagem no servidor. Ver observação no
+ * Worker sobre mover essa rota pra lá se precisar de segurança real.
+ */
+function obterDiaSemanaBrasilia() {
+    const brasiliaMs = Date.now() - 3 * 60 * 60 * 1000;
+    return new Date(brasiliaMs).getUTCDay();
+}
+
 function getEl(id) {
     return document.getElementById(id);
 }
@@ -597,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
             boxSaldoModal.innerHTML = `<span>Saldo Disponível:</span> <strong>${formatadorMoeda.format(saldoAtualUsuario)}</strong>`;
         }
 
-        const diaHoje = new Date().getDay();
+        const diaHoje = obterDiaSemanaBrasilia();
         if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
             if (btnConfirmarModalSaque) {
                 btnConfirmarModalSaque.disabled = true;
@@ -633,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     inputValSaque?.addEventListener('input', (e) => {
         const val = parseFloat(e.target.value);
-        const diaHoje = new Date().getDay();
+        const diaHoje = obterDiaSemanaBrasilia();
 
         if (!isNaN(val) && val > 0) {
             const taxa = val * CONFIG.TAXA_SAQUE_PERCENTUAL;
@@ -678,7 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const diaHoje = new Date().getDay();
+        const diaHoje = obterDiaSemanaBrasilia();
         const valorSaque = parseFloat(inputValSaque?.value || 0);
 
         if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
