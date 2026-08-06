@@ -238,17 +238,24 @@ function gerarLinkIndicacao(userId, codigoIndicacao) {
     return `${baseUrl}/register.html?ref=${codigoIndicacao || userId}`;
 }
 
-// FIX: antes, o link de indicação era escrito em DOIS lugares — uma vez
-// dentro do onValue(userRef,...) com o código curto correto, e outra vez
-// aqui dentro (chamada sem o 2º argumento, codigoIndicacao chegava
-// undefined). Como onValue é assíncrono e a chamada abaixo era síncrona,
-// o UID cru do usuário era escrito no campo ANTES do código correto
-// sobrescrever — abrindo uma janela onde, se o usuário copiasse o link
-// rápido demais (ou a rede estivesse lenta), ele levava o UID em vez do
-// código curto, e o vínculo de indicação nunca era resolvido no cadastro
-// (codigosIndicacao/{UID} não existe — só existe codigosIndicacao/{CODIGO}).
-// Agora só o listener em onValue(userRef,...) escreve o link, e esta
-// função para de tentar escrevê-lo também — elimina a corrida.
+// FIX (do usuário, mantido): o link de indicação só é escrito dentro do
+// onValue(userRef,...) — esta função não tenta mais escrevê-lo, evitando
+// a corrida de condição descrita no comentário original.
+//
+// FIX (desta revisão): a consulta de indicados usava
+// query(ref(db,'usuarios'), orderByChild('indicadoPor'), equalTo(userId)).
+// O nó "usuarios" tem dados sensíveis (saldo, chavePix, comissao) e por
+// isso as Regras do Firebase restringem sua leitura geral a apenas
+// admins — um usuário comum tentando essa consulta recebia erro de
+// permissão do servidor (silencioso na tela, mas visível no console via
+// o callback de erro abaixo), e a tabela nunca preenchia.
+//
+// A consulta agora aponta para 'perfisPublicos', um nó espelho criado
+// no cadastro (ver auth.js) contendo apenas nome, email, indicadoPor e
+// dataCadastro — sem nenhum dado sensível — e que tem leitura liberada
+// para qualquer usuário autenticado nas Regras do Firebase. Isso exige
+// as Regras atualizadas em FIREBASE_REGRAS.txt (nó perfisPublicos com
+// ".indexOn": ["indicadoPor"]).
 function inicializarEquipeUsuario(userId) {
     const btnCopiar = getEl('btnCopiarLinkIndicacao');
     if (btnCopiar && !btnCopiar.dataset.listenerAtivo) {
@@ -273,8 +280,8 @@ function inicializarEquipeUsuario(userId) {
     if (!tbody || tbody.dataset.listenerAtivo) return;
     tbody.dataset.listenerAtivo = 'true';
 
-    const usuariosRef = ref(db, 'usuarios');
-    const consultaIndicados = query(usuariosRef, orderByChild('indicadoPor'), equalTo(userId));
+    const perfisPublicosRef = ref(db, 'perfisPublicos');
+    const consultaIndicados = query(perfisPublicosRef, orderByChild('indicadoPor'), equalTo(userId));
 
     onValue(consultaIndicados, (snapshot) => {
         const dados = snapshot.val();
@@ -300,7 +307,7 @@ function inicializarEquipeUsuario(userId) {
             </tr>
         `).join('');
     }, (error) => {
-        console.error('Erro ao carregar indicados (verifique as Regras/index do Firebase):', error);
+        console.error('Erro ao carregar indicados (verifique as Regras/index do Firebase em perfisPublicos):', error);
     });
 }
 
