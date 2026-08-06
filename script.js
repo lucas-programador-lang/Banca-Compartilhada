@@ -6,7 +6,10 @@ const CONFIG = {
     VALOR_SAQUE_MINIMO: 35,
     DIA_SAQUE_PERMITIDO: 0,
     TAXA_SAQUE_PERCENTUAL: 0.14,
-    VALORES_PLANOS_PERMITIDOS: [30, 50, 100, 300, 500, 1000]
+    VALORES_PLANOS_PERMITIDOS: [30, 50, 100, 300, 500, 1000],
+    // Troque pela URL real do seu Worker depois do "wrangler deploy"
+    // (ex.: "https://banca-compartilhada-pix.seu-usuario.workers.dev")
+    WORKER_BASE_URL: 'https://banca-compartilhada-pix.SEU-SUBDOMINIO.workers.dev',
 };
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
@@ -326,6 +329,8 @@ function inicializarEquipeUsuario(userId) {
 document.addEventListener('DOMContentLoaded', () => {
     let saldoAtualUsuario = 0;
     let userIdAtual = null;
+    let nomeUsuarioAtual = '';
+    let emailUsuarioAtual = '';
 
     document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -353,20 +358,62 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalDep = document.getElementById('modalDeposito') || document.getElementById('modalDepositoSistema');
     const modalToast = document.getElementById('modalToast');
     const areaQrCodePix = document.getElementById('areaQrCodePix');
+    const statusPagamentoPix = document.getElementById('statusPagamentoPix');
     const btnConfirmarModalDep = document.getElementById('btnConfirmarModalDep') || document.getElementById('btnConfirmarModalDepositar');
+
+    // Handle da função que cancela o listener de confirmação de pagamento
+    // (onValue retorna sua própria função de "unsubscribe" no SDK v9+).
+    let pararEscutaPagamento = null;
+
+    function pararEscutaConfirmacaoPagamento() {
+        if (pararEscutaPagamento) {
+            pararEscutaPagamento();
+            pararEscutaPagamento = null;
+        }
+    }
+
+    /**
+     * Fica de olho em depositos/{uid}/{depositoId} enquanto o modal está
+     * aberto. Quando o webhook da Vizzion Pay (via Worker) marcar o
+     * depósito como "aprovado", fecha o modal e avisa o usuário — sem
+     * precisar de nenhuma ação manual dele ou de um admin.
+     */
+    function escutarConfirmacaoPagamento(uid, depositoId) {
+        pararEscutaConfirmacaoPagamento();
+        const depositoRef = ref(db, `depositos/${uid}/${depositoId}`);
+        pararEscutaPagamento = onValue(depositoRef, (snapshot) => {
+            const dados = snapshot.val();
+            if (dados?.status === 'aprovado') {
+                pararEscutaConfirmacaoPagamento();
+                fecharModalDeposito();
+                mostrarToast('✅ Pagamento confirmado! Seu plano já está ativo na Carteira.', 'success');
+            } else if (dados?.status === 'recusado') {
+                pararEscutaConfirmacaoPagamento();
+                if (statusPagamentoPix) statusPagamentoPix.textContent = '❌ Pagamento não confirmado.';
+                mostrarToast('❌ O pagamento não foi confirmado. Tente novamente.', 'error');
+            }
+        });
+    }
 
     function abrirModalDeposito() {
         if (modalToast) modalToast.classList.remove('ativo');
         if (areaQrCodePix) areaQrCodePix.classList.remove('ativo');
+        if (statusPagamentoPix) {
+            statusPagamentoPix.style.display = 'none';
+            statusPagamentoPix.textContent = '⏳ Aguardando confirmação do pagamento...';
+        }
+        pararEscutaConfirmacaoPagamento();
         if (btnConfirmarModalDep) {
             btnConfirmarModalDep.textContent = "Gerar QR Code Pix";
             btnConfirmarModalDep.style.display = 'block';
+            btnConfirmarModalDep.disabled = false;
         }
         if (modalDep) modalDep.style.display = 'flex';
     }
 
     function fecharModalDeposito() {
         if (modalDep) modalDep.style.display = 'none';
+        pararEscutaConfirmacaoPagamento();
     }
 
     document.getElementById('fecharModalDepX')?.addEventListener('click', fecharModalDeposito);
@@ -380,6 +427,8 @@ document.addEventListener('DOMContentLoaded', () => {
     btnConfirmarModalDep?.addEventListener('click', async () => {
         const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
         const valorAtual = parseFloat(modalInput?.value || 0);
+        const inputCpf = document.getElementById('modalDepositoCpf');
+        const inputTelefone = document.getElementById('modalDepositoTelefone');
 
         if (valorAtual < 30) {
             if (modalToast) {
@@ -390,44 +439,83 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // A área do QR Code só fica visível depois que o Pix é gerado —
+        // se ainda não tem a classe "ativo", é a primeira vez que o
+        // botão é clicado.
         if (areaQrCodePix && !areaQrCodePix.classList.contains('ativo')) {
-            const qrImg = document.getElementById('imgQrCode');
-            const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
-
-            if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BancaCompartilhadaR$${valorAtual}`;
-            if (pixCopiaCola) pixCopiaCola.textContent = `00020126580014br.gov.bcb.pix0136banca-compartilhada-pix-${valorAtual}5204000053039865802BR5925Banca Compartilhada6009Sao Paulo62070503***6304`;
-
-            areaQrCodePix.classList.add('ativo');
-            btnConfirmarModalDep.textContent = "Concluir Pagamento";
-        } else {
             if (!userIdAtual) {
                 mostrarToast('❌ Você precisa estar logado para solicitar um depósito.', 'error');
                 return;
             }
 
-            setBotaoCarregando(btnConfirmarModalDep, true, 'Enviando...');
+            const cpf = inputCpf?.value.trim() || '';
+            const telefone = inputTelefone?.value.trim() || '';
+
+            if (!cpf || !telefone) {
+                mostrarToast('⚠️ Informe CPF e telefone para gerar o Pix.', 'warning');
+                return;
+            }
+
+            setBotaoCarregando(btnConfirmarModalDep, true, 'Gerando Pix...');
             try {
+                // 1. Cria o registro do depósito (status "pendente") — o
+                //    Worker/webhook vai atualizar esse mesmo registro
+                //    quando o pagamento for confirmado.
                 const depositosRef = ref(db, 'depositos/' + userIdAtual);
                 const novoDepositoRef = push(depositosRef);
+                const depositoId = novoDepositoRef.key;
+
                 await set(novoDepositoRef, {
                     valorPlano: valorAtual,
                     status: 'pendente',
-                    dataSolicitacao: new Date().toISOString()
+                    dataSolicitacao: new Date().toISOString(),
                 });
 
-                fecharModalDeposito();
-                const inputPlano = document.getElementById('valorPlano');
-                if (inputPlano && modalInput) inputPlano.value = modalInput.value;
+                // 2. Pede pro Worker gerar a cobrança Pix de verdade na
+                //    Vizzion Pay (as chaves da API ficam só no Worker).
+                const respostaPix = await fetch(`${CONFIG.WORKER_BASE_URL}/api/pix/criar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        uid: userIdAtual,
+                        depositoId,
+                        valorPlano: valorAtual,
+                        nome: nomeUsuarioAtual || 'Cliente',
+                        email: emailUsuarioAtual || '',
+                        telefone,
+                        cpf,
+                    }),
+                });
 
-                const btnDepReal = document.getElementById('btnDepositar');
-                if (btnDepReal) {
-                    btnDepReal.click();
-                } else {
-                    mostrarToast('✅ Solicitação de depósito gerada! Assim que o pagamento for confirmado, o plano aparecerá na sua Carteira.', 'success');
+                const dadosPix = await respostaPix.json();
+                if (!respostaPix.ok) {
+                    throw new Error(dadosPix.error || 'Erro ao gerar o Pix.');
                 }
+
+                await update(novoDepositoRef, { transactionId: dadosPix.transactionId });
+
+                // 3. Mostra o QR Code / copia-e-cola reais devolvidos pela
+                //    Vizzion Pay.
+                const qrImg = document.getElementById('imgQrCode');
+                const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
+
+                if (qrImg) {
+                    qrImg.src = dadosPix.pixImage
+                        ? dadosPix.pixImage
+                        : `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(dadosPix.pixCode)}`;
+                }
+                if (pixCopiaCola) pixCopiaCola.textContent = dadosPix.pixCode || '—';
+
+                if (areaQrCodePix) areaQrCodePix.classList.add('ativo');
+                if (statusPagamentoPix) statusPagamentoPix.style.display = 'block';
+                btnConfirmarModalDep.style.display = 'none'; // a confirmação agora é automática via webhook
+
+                // 4. Fica escutando em tempo real até o webhook confirmar
+                //    o pagamento (ou recusar).
+                escutarConfirmacaoPagamento(userIdAtual, depositoId);
             } catch (error) {
-                console.error('Erro ao registrar depósito:', error);
-                mostrarToast('❌ Erro ao registrar depósito: ' + error.message, 'error');
+                console.error('Erro ao gerar Pix:', error);
+                mostrarToast('❌ ' + error.message, 'error');
             } finally {
                 setBotaoCarregando(btnConfirmarModalDep, false);
             }
@@ -613,12 +701,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!user) return;
         const userId = user.uid;
         userIdAtual = userId;
+        emailUsuarioAtual = user.email || '';
 
         const userRef = ref(db, 'usuarios/' + userId);
         onValue(userRef, (snapshot) => {
             const dados = snapshot.val();
             if (dados) {
                 saldoAtualUsuario = parseFloat(dados.saldo || 0);
+                nomeUsuarioAtual = dados.nome || user.email || 'Usuário';
                 atualizarPainel(dados);
 
                 const nomeUsuario = dados.nome || user.email || 'Usuário';
