@@ -233,34 +233,38 @@ function inicializarExtratoUsuario(userId) {
     });
 }
 
-function gerarLinkIndicacao(userId, codigoIndicacao) {
-    const baseUrl = window.location.href.split('index.html')[0].replace(/\/$/, '');
-    return `${baseUrl}/register.html?ref=${codigoIndicacao || userId}`;
+// Gera um código numérico de 6 dígitos, estável para o mesmo usuário
+// (mesmo UID sempre produz o mesmo número). Usado no link de indicação
+// no lugar do nome do usuário ou do UID cru do Firebase.
+function gerarCodigoNumericoIndicacao(uid) {
+    let hash = 0;
+    for (let i = 0; i < uid.length; i++) {
+        hash = (hash * 31 + uid.charCodeAt(i)) >>> 0;
+    }
+    return String(hash % 1000000).padStart(6, '0');
 }
 
-// FIX (do usuário, mantido): o link de indicação só é escrito dentro do
-// onValue(userRef,...) — esta função não tenta mais escrevê-lo, evitando
-// a corrida de condição descrita no comentário original.
-//
-// FIX (desta revisão): a consulta de indicados usava
-// query(ref(db,'usuarios'), orderByChild('indicadoPor'), equalTo(userId)).
-// O nó "usuarios" tem dados sensíveis (saldo, chavePix, comissao) e por
-// isso as Regras do Firebase restringem sua leitura geral a apenas
-// admins — um usuário comum tentando essa consulta recebia erro de
-// permissão do servidor (silencioso na tela, mas visível no console via
-// o callback de erro abaixo), e a tabela nunca preenchia.
-//
-// A consulta agora aponta para 'perfisPublicos', um nó espelho criado
-// no cadastro (ver auth.js) contendo apenas nome, email, indicadoPor e
-// dataCadastro — sem nenhum dado sensível — e que tem leitura liberada
-// para qualquer usuário autenticado nas Regras do Firebase. Isso exige
-// as Regras atualizadas em FIREBASE_REGRAS.txt (nó perfisPublicos com
-// ".indexOn": ["indicadoPor"]).
+function gerarLinkIndicacao(codigoIndicacao) {
+    const baseUrl = window.location.href.split('index.html')[0].replace(/\/$/, '');
+    return `${baseUrl}/register.html?ref=${codigoIndicacao}`;
+}
+
+// Só atualiza o valor do input — chamada toda vez que os dados do
+// usuário mudam. Separada de inicializarEquipeUsuario, que registra
+// listeners (copiar / tabela de membros) e só deve rodar uma vez.
+function atualizarLinkIndicacao(codigoIndicacao) {
+    const inputLink = getEl('linkIndicacao');
+    if (inputLink && codigoIndicacao) {
+        inputLink.value = gerarLinkIndicacao(codigoIndicacao);
+    }
+}
+
 function inicializarEquipeUsuario(userId) {
+    const inputLink = getEl('linkIndicacao');
+
     const btnCopiar = getEl('btnCopiarLinkIndicacao');
     if (btnCopiar && !btnCopiar.dataset.listenerAtivo) {
         btnCopiar.addEventListener('click', async () => {
-            const inputLink = getEl('linkIndicacao');
             const link = inputLink?.value || '';
             if (!link) return;
 
@@ -277,11 +281,10 @@ function inicializarEquipeUsuario(userId) {
     }
 
     const tbody = getEl('tabelaMembrosEquipe');
-    if (!tbody || tbody.dataset.listenerAtivo) return;
-    tbody.dataset.listenerAtivo = 'true';
+    if (!tbody) return;
 
-    const perfisPublicosRef = ref(db, 'perfisPublicos');
-    const consultaIndicados = query(perfisPublicosRef, orderByChild('indicadoPor'), equalTo(userId));
+    const usuariosRef = ref(db, 'usuarios');
+    const consultaIndicados = query(usuariosRef, orderByChild('indicadoPor'), equalTo(userId));
 
     onValue(consultaIndicados, (snapshot) => {
         const dados = snapshot.val();
@@ -307,7 +310,7 @@ function inicializarEquipeUsuario(userId) {
             </tr>
         `).join('');
     }, (error) => {
-        console.error('Erro ao carregar indicados (verifique as Regras/index do Firebase em perfisPublicos):', error);
+        console.error('Erro ao carregar indicados (verifique as Regras/index do Firebase):', error);
     });
 }
 
@@ -616,8 +619,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (elNome) elNome.innerText = nomeUsuario;
                 if (elInicial) elInicial.innerText = nomeUsuario.charAt(0).toUpperCase();
 
-                const inputLink = getEl('linkIndicacao');
-                if (inputLink) inputLink.value = gerarLinkIndicacao(userId, dados.codigoIndicacao);
+                // O código de indicação precisa ser numérico, não o nome
+                // nem o UID cru. Se ainda não existir um salvo (ou se o
+                // valor salvo não for só dígitos — ex.: versões antigas
+                // que guardaram o nome), gera um estável a partir do UID
+                // e salva uma única vez.
+                let codigo = dados.codigoIndicacao;
+                if (!codigo || !/^\d+$/.test(String(codigo))) {
+                    codigo = gerarCodigoNumericoIndicacao(userId);
+                    update(userRef, { codigoIndicacao: codigo }).catch((error) => {
+                        console.error('Erro ao salvar código de indicação:', error);
+                    });
+                }
+
+                atualizarLinkIndicacao(codigo);
             }
         });
 
