@@ -1,5 +1,5 @@
 import { auth, db, mostrarToast } from './auth.js';
-import { ref, push, set, onValue, update, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const CONFIG = {
@@ -288,10 +288,14 @@ function inicializarEquipeUsuario(userId) {
     const tbody = getEl('tabelaMembrosEquipe');
     if (!tbody) return;
 
-    const usuariosRef = ref(db, 'usuarios');
-    const consultaIndicados = query(usuariosRef, orderByChild('indicadoPor'), equalTo(userId));
+    // Lê diretamente equipe/{userId}, que já contém uma entrada por
+    // indicado (gravada no momento do cadastro em auth.js). Evita a
+    // query orderByChild('indicadoPor') em usuarios/, que é barrada
+    // pelas regras do Realtime Database para usuários não-admin
+    // (a leitura da raiz de usuarios/ exige isAdmin).
+    const equipeRef = ref(db, 'equipe/' + userId);
 
-    onValue(consultaIndicados, (snapshot) => {
+    onValue(equipeRef, (snapshot) => {
         const dados = snapshot.val();
         const membros = dados
             ? Object.entries(dados).map(([uid, info]) => ({ uid, ...info }))
