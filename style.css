@@ -1772,6 +1772,43 @@ tbody tr:last-child td {
     transform: scale(0.97);
 }
 
+.status-admin {
+    background: var(--primary-soft);
+    color: var(--primary-hover);
+}
+
+/* Campo de busca acima de uma tabela (ex.: buscar usuário por nome/e-mail) */
+.table-search {
+    margin-bottom: var(--space-sm);
+    max-width: 320px;
+}
+
+.table-search input {
+    width: 100%;
+    padding: 10px 14px;
+    background-color: var(--bg-color-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: 0.88rem;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.table-search input::placeholder {
+    color: var(--text-faint);
+}
+
+.table-search input:hover {
+    border-color: var(--border-color-strong);
+}
+
+.table-search input:focus {
+    border-color: var(--primary);
+    outline: none;
+    background-color: var(--card-bg-hover);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
 @media (max-width: 480px) {
     .admin-header__icon {
         width: 38px;
@@ -1782,5 +1819,9 @@ tbody tr:last-child td {
     .admin-back {
         padding: 8px 12px;
         font-size: 0.85rem;
+    }
+
+    .table-search {
+        max-width: 100%;
     }
 }
