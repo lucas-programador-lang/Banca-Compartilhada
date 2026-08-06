@@ -82,44 +82,39 @@ function nomeDoUsuario(usuarios, uid) {
     return dados.nome || dados.email || uid;
 }
 
+/**
+ * Escapa caracteres especiais de HTML antes de inserir qualquer dado
+ * vindo do Firebase (nome, chave PIX etc.) dentro de innerHTML. Sem
+ * isso, alguém poderia se cadastrar com um "nome" contendo tags/script
+ * e esse código executaria no navegador de quem visualizar aquele
+ * dado — inclusive o admin, ao abrir este painel.
+ */
+function escapeHTML(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    }[c]));
+}
+
 function renderizarTabelaSaques(saques, usuarios) {
     const tbody = document.getElementById('tabelaSaquesAdmin');
     if (!tbody) return;
 
     if (!saques.length) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Nenhum saque solicitado ainda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum saque solicitado ainda.</td></tr>';
     } else {
-        tbody.innerHTML = saques.map(saque => {
-            const status = (saque.status || 'pendente').toLowerCase();
-            const acoes = status === 'pendente'
-                ? `
-                    <button
-                        class="btn btn-aprovar-saque"
-                        data-uid="${saque.uid}"
-                        data-id="${saque.id}"
-                        data-valor-liquido="${saque.valorLiquido ?? saque.valorSolicitado ?? 0}"
-                        style="padding: 6px 12px; font-size: 12px; margin-right: 6px; background: #2ecc71; border-color: #2ecc71;"
-                    >Aprovar</button>
-                    <button
-                        class="btn btn-recusar-saque"
-                        data-uid="${saque.uid}"
-                        data-id="${saque.id}"
-                        style="padding: 6px 12px; font-size: 12px; background: transparent; border: 1px solid var(--danger); color: var(--danger);"
-                    >Recusar</button>
-                `
-                : '—';
-
-            return `
-                <tr>
-                    <td>${formatarDataHora(saque.dataSolicitacao)}</td>
-                    <td>${nomeDoUsuario(usuarios, saque.uid)}</td>
-                    <td>${saque.chavePix || '—'}</td>
-                    <td>${formatadorMoeda.format(saque.valorSolicitado || 0)}</td>
-                    <td>${badgeStatus(saque.status)}</td>
-                    <td>${acoes}</td>
-                </tr>
-            `;
-        }).join('');
+        tbody.innerHTML = saques.map(saque => `
+            <tr>
+                <td>${formatarDataHora(saque.dataSolicitacao)}</td>
+                <td>${escapeHTML(nomeDoUsuario(usuarios, saque.uid))}</td>
+                <td>${escapeHTML(saque.chavePix) || '—'}</td>
+                <td>${formatadorMoeda.format(saque.valorSolicitado || 0)}</td>
+                <td>${badgeStatus(saque.status)}</td>
+            </tr>
+        `).join('');
     }
 
     const pendentes = saques.filter(s => (s.status || 'pendente').toLowerCase() === 'pendente').length;
@@ -157,7 +152,7 @@ function renderizarTabelaDepositos(depositos, usuarios) {
             return `
                 <tr>
                     <td>${formatarDataHora(deposito.dataSolicitacao)}</td>
-                    <td>${nomeDoUsuario(usuarios, deposito.uid)}</td>
+                    <td>${escapeHTML(nomeDoUsuario(usuarios, deposito.uid))}</td>
                     <td>${formatadorMoeda.format(deposito.valorPlano || 0)}</td>
                     <td>${badgeStatus(deposito.status)}</td>
                     <td>${acoes}</td>
@@ -263,60 +258,6 @@ async function recusarDeposito(uid, depositoId) {
     }
 }
 
-/**
- * Aprova um saque: marca o status como "aprovado" e lança o valor
- * líquido recebido em extrato/{uid} — é esse lançamento que faz o
- * saque aparecer na aba Extrato do usuário, com o valor que ele
- * efetivamente recebeu (já descontada a taxa de 14%).
- */
-async function aprovarSaque(uid, saqueId, valorLiquido) {
-    try {
-        const saqueRef = ref(db, 'saques/' + uid + '/' + saqueId);
-        await update(saqueRef, { status: 'aprovado' });
-
-        const extratoRef = ref(db, 'extrato/' + uid);
-        const novoExtratoRef = push(extratoRef);
-        await set(novoExtratoRef, {
-            data: new Date().toISOString(),
-            descricao: 'Saque via PIX',
-            valor: parseFloat(valorLiquido) || 0,
-        });
-
-        mostrarToast('✅ Saque aprovado! Já aparece no Extrato do usuário.', 'success');
-    } catch (error) {
-        console.error('Erro ao aprovar saque:', error);
-        mostrarToast('❌ Erro ao aprovar saque: ' + error.message, 'error');
-    }
-}
-
-/**
- * Recusa um saque. O valor solicitado já havia sido debitado do saldo
- * do usuário no momento em que ele pediu o saque (ver script.js), então
- * a recusa devolve esse valor de volta ao saldo dele.
- */
-async function recusarSaque(uid, saqueId) {
-    try {
-        const saqueSnap = await get(ref(db, 'saques/' + uid + '/' + saqueId));
-        const dadosSaque = saqueSnap.val();
-        const valorSolicitado = parseFloat(dadosSaque?.valorSolicitado || 0);
-
-        const saqueRef = ref(db, 'saques/' + uid + '/' + saqueId);
-        await update(saqueRef, { status: 'recusado' });
-
-        if (valorSolicitado > 0) {
-            const usuarioRef = ref(db, 'usuarios/' + uid);
-            const usuarioSnap = await get(usuarioRef);
-            const saldoAtual = parseFloat(usuarioSnap.val()?.saldo || 0);
-            await update(usuarioRef, { saldo: saldoAtual + valorSolicitado });
-        }
-
-        mostrarToast('Saque recusado. O valor foi devolvido ao saldo do usuário.', 'warning');
-    } catch (error) {
-        console.error('Erro ao recusar saque:', error);
-        mostrarToast('❌ Erro ao recusar saque: ' + error.message, 'error');
-    }
-}
-
 // Delegação de eventos: os botões de aprovar/recusar são recriados a
 // cada render da tabela, então o listener fica no tbody (que existe
 // desde o carregamento da página) em vez de nos botões individuais.
@@ -347,35 +288,6 @@ function iniciarDelegacaoAcoesDepositos() {
 }
 
 /**
- * Mesma lógica de delegação de eventos, agora para a tabela de saques.
- */
-function iniciarDelegacaoAcoesSaques() {
-    const tbody = document.getElementById('tabelaSaquesAdmin');
-    if (!tbody || tbody.dataset.listenerAtivo) return;
-
-    tbody.addEventListener('click', (e) => {
-        const btnAprovar = e.target.closest('.btn-aprovar-saque');
-        const btnRecusar = e.target.closest('.btn-recusar-saque');
-
-        if (btnAprovar) {
-            const { uid, id, valorLiquido } = btnAprovar.dataset;
-            btnAprovar.disabled = true;
-            btnAprovar.textContent = 'Aprovando...';
-            aprovarSaque(uid, id, valorLiquido);
-        }
-
-        if (btnRecusar) {
-            const { uid, id } = btnRecusar.dataset;
-            btnRecusar.disabled = true;
-            btnRecusar.textContent = 'Recusando...';
-            recusarSaque(uid, id);
-        }
-    });
-
-    tbody.dataset.listenerAtivo = 'true';
-}
-
-/**
  * Mantém em memória a última versão de cada fonte de dados (usuários,
  * saques, depósitos), já que os três chegam de listeners independentes
  * e as tabelas precisam sempre do cruzamento mais recente dos três.
@@ -397,7 +309,6 @@ function rerenderizarTudo() {
 
 function iniciarListenersAdmin() {
     iniciarDelegacaoAcoesDepositos();
-    iniciarDelegacaoAcoesSaques();
 
     const usuariosRef = ref(db, 'usuarios');
     onValue(usuariosRef, (snapshot) => {
