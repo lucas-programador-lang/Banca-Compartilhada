@@ -1,4 +1,4 @@
-Import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -178,46 +178,46 @@ document.querySelectorAll('.toggle-senha').forEach((botao) => {
 /* ==========================================================================
    Indicação (register.html)
    ==========================================================================
-   Em vez de usar o UID puro do Firebase (algo como "31PGrmPA8Nei...")
-   no link de indicação, cada usuário ganha um código curto e legível
-   (baseado no nome, tipo "joao" ou "joao23" se "joao" já existir),
-   salvo em codigosIndicacao/{codigo} -> uid. O link de indicação vira
-   "register.html?ref=joao23" e, ao cadastrar, resolvemos esse código
-   de volta para o UID real de quem indicou.
+   Cada usuário ganha um código curto ALEATÓRIO (6 caracteres
+   alfanuméricos, ex: "a1b2c3" — sem nenhuma relação com nome ou
+   sobrenome), salvo em codigosIndicacao/{codigo} -> uid. O link de
+   indicação vira "register.html?ref=a1b2c3" e, ao cadastrar, resolvemos
+   esse código de volta para o UID real de quem indicou.
+
+   Observação: contas criadas ANTES dessa mudança já têm um código
+   salvo em outro formato (numérico ou baseado no nome). Esses códigos
+   antigos continuam funcionando normalmente pois a resolução abaixo
+   só faz um lookup em codigosIndicacao/{codigo} — não importa qual
+   formato o código tem.
    ========================================================================== */
 
 /**
- * Remove acentos, espaços e caracteres especiais, deixando só letras e
- * números em minúsculo — a base do código de indicação.
+ * Gera um código curto aleatório alfanumérico (padrão: 6 caracteres,
+ * ex: "a1b2c3") para uso como código de indicação.
  */
-function gerarSlugNome(nome) {
-    const slug = (nome || 'user')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // remove acentos (João -> joao)
-        .replace(/[^a-z0-9]/g, '')
-        .slice(0, 12);
-    return slug || 'user';
+function gerarCodigoAleatorioCurto(tamanho = 6) {
+    const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let codigo = '';
+    for (let i = 0; i < tamanho; i++) {
+        codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    return codigo;
 }
 
 /**
- * Gera um código de indicação único a partir do nome do usuário,
- * tentando "joao", depois "joao2", "joao57", etc. até achar um que
- * ainda não exista em codigosIndicacao/.
+ * Gera um código de indicação único e aleatório, testando até achar
+ * um que ainda não exista em codigosIndicacao/.
  */
-async function gerarCodigoIndicacaoUnico(nome) {
-    const base = gerarSlugNome(nome);
-    let tentativa = base;
-
+async function gerarCodigoIndicacaoUnico() {
     for (let i = 0; i < 25; i++) {
+        const tentativa = gerarCodigoAleatorioCurto(6);
         const snap = await get(ref(db, 'codigosIndicacao/' + tentativa));
         if (!snap.exists()) return tentativa;
-        tentativa = `${base}${Math.floor(10 + Math.random() * 90)}`;
     }
 
     // Fallback extremamente improvável: se 25 tentativas colidirem,
-    // usa um sufixo baseado no tempo atual para garantir unicidade.
-    return `${base}${Date.now().toString(36).slice(-5)}`;
+    // usa um código maior (aleatório + timestamp) para garantir unicidade.
+    return `${gerarCodigoAleatorioCurto(4)}${Date.now().toString(36).slice(-4)}`;
 }
 
 /**
@@ -273,7 +273,7 @@ if (registerForm) {
             const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
             const user = userCredential.user;
 
-            // 2. Resolve o código de indicação digitado (ex.: "joao23")
+            // 2. Resolve o código de indicação digitado (ex.: "a1b2c3")
             //    para o UID de quem indicou, consultando codigosIndicacao/.
             //    Se o código não existir (link inválido/expirado), o
             //    cadastro segue normalmente sem indicador.
@@ -283,9 +283,10 @@ if (registerForm) {
                 uidIndicador = indicadorSnap.exists() ? indicadorSnap.val() : null;
             }
 
-            // 3. Gera o código de indicação único deste novo usuário,
-            //    para que ele também possa indicar outras pessoas depois.
-            const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico(nome);
+            // 3. Gera o código de indicação único e aleatório deste novo
+            //    usuário, para que ele também possa indicar outras
+            //    pessoas depois.
+            const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico();
 
             // 4. Grava o perfil do usuário e o mapeamento código -> uid
             await set(ref(db, 'usuarios/' + user.uid), {
