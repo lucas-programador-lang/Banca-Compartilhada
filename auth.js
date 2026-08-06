@@ -1,5 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
+    initializeAppCheck,
+    ReCaptchaV3Provider
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check.js";
+import {
     getAuth,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -22,6 +26,36 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+/* ==========================================================================
+   Firebase App Check (reCAPTCHA v3)
+   ==========================================================================
+   Protege as chamadas de Auth e Realtime Database contra bots/abuso.
+   A verificação acontece do lado do Firebase — não precisa de backend
+   próprio para validar o token.
+
+   1. Vá em Firebase Console > App Check > Apps > (seu app web)
+      > Registrar provedor > reCAPTCHA v3 > cole a "Site Key" abaixo.
+   2. Depois de registrar, vá em App Check > APIs e ative "Enforce"
+      para Authentication e Realtime Database (senão o App Check fica
+      só monitorando, sem bloquear nada).
+   3. Para testar em localhost, o Firebase gera um "debug token" no
+      console do navegador (F12) na primeira execução — copie e
+      cadastre em App Check > Apps > Gerenciar tokens de depuração.
+      NÃO deixe debug token ativo em produção.
+   ========================================================================== */
+const RECAPTCHA_SITE_KEY = "COLE_AQUI_SUA_SITE_KEY_DO_RECAPTCHA_V3";
+
+// Descomente a linha abaixo apenas durante testes em localhost, para
+// gerar um debug token automaticamente no console (F12). Remova antes
+// de publicar em produção.
+// self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+
+initializeAppCheck(app, {
+    provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
+    isTokenAutoRefreshEnabled: true
+});
+
 export const auth = getAuth(app);
 export const db = getDatabase(app);
 
