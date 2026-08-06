@@ -377,6 +377,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const areaQrCodePix = document.getElementById('areaQrCodePix');
     const statusPagamentoPix = document.getElementById('statusPagamentoPix');
     const btnConfirmarModalDep = document.getElementById('btnConfirmarModalDep') || document.getElementById('btnConfirmarModalDepositar');
+    const btnCopiarPix = document.getElementById('btnCopiarPix');
+
+    // O botão de copiar só faz sentido depois que o código Pix real
+    // foi gerado (antes disso, txtChaveCopiaCola mostra um texto de
+    // exemplo estático). Fica escondido até areaQrCodePix ganhar a
+    // classe "ativo".
+    if (btnCopiarPix) btnCopiarPix.style.display = 'none';
+
+    btnCopiarPix?.addEventListener('click', async () => {
+        const pixEl = document.getElementById('txtChaveCopiaCola');
+        const codigo = pixEl?.textContent.trim() || '';
+        if (!codigo) return;
+
+        try {
+            await navigator.clipboard.writeText(codigo);
+            mostrarToast('✅ Código Pix copiado!', 'success');
+        } catch (error) {
+            console.error('Erro ao copiar código Pix:', error);
+            mostrarToast('⚠️ Não foi possível copiar automaticamente. Selecione o código manualmente.', 'warning');
+        }
+    });
 
     // Handle da função que cancela o listener de confirmação de pagamento
     // (onValue retorna sua própria função de "unsubscribe" no SDK v9+).
@@ -419,6 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statusPagamentoPix.style.display = 'none';
             statusPagamentoPix.textContent = '⏳ Aguardando confirmação do pagamento...';
         }
+        if (btnCopiarPix) btnCopiarPix.style.display = 'none';
         pararEscutaConfirmacaoPagamento();
         if (btnConfirmarModalDep) {
             btnConfirmarModalDep.textContent = "Gerar QR Code Pix";
@@ -525,6 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (areaQrCodePix) areaQrCodePix.classList.add('ativo');
                 if (statusPagamentoPix) statusPagamentoPix.style.display = 'block';
+                if (btnCopiarPix && dadosPix.pixCode) btnCopiarPix.style.display = 'block';
                 btnConfirmarModalDep.style.display = 'none'; // a confirmação agora é automática via webhook
 
                 // 4. Fica escutando em tempo real até o webhook confirmar
