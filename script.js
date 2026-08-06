@@ -76,8 +76,9 @@ function setBotaoCarregando(botao, carregando, textoCarregando = 'Enviando...') 
 }
 
 function atualizarPainel(dados) {
+    const saldoTotal = parseFloat(dados.saldoRendimento || 0) + parseFloat(dados.saldoComissao || 0);
     const campos = {
-        saldoDisponivel: dados.saldo,
+        saldoDisponivel: saldoTotal,
         rendimentoTotal: dados.rendimento,
         comissaoTotal: dados.comissao,
         comissaoTotalEquipe: dados.comissao,
@@ -791,7 +792,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const financeiroRef = ref(db, 'financeiro/' + userId);
         onValue(financeiroRef, (snapshot) => {
             const dadosFinanceiros = snapshot.val() || {};
-            saldoAtualUsuario = parseFloat(dadosFinanceiros.saldo || 0);
+            // saldoAtualUsuario é usado só pra checagem rápida de UX no
+            // modal de saque (feedback antes de chamar o Worker) — soma
+            // os dois potes porque o usuário não sabe, e não precisa
+            // saber, de onde veio cada parte; quem decide de verdade se
+            // a comissão está liberada é o Worker.
+            saldoAtualUsuario = parseFloat(dadosFinanceiros.saldoRendimento || 0) + parseFloat(dadosFinanceiros.saldoComissao || 0);
             atualizarPainel(dadosFinanceiros);
         });
 
