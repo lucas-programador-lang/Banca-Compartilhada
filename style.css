@@ -5,40 +5,42 @@
     /* Superfícies */
     --bg-color: #080503;
     --bg-color-elevated: #150f0a;
-    --card-bg: #1b130d;
-    --card-bg-hover: #22190f;
-    --border-color: #362715;
-    --border-color-strong: #55401f;
+    --card-bg: #1c140d;
+    --card-bg-hover: #241a10;
+    --border-color: #3a2a17;
+    --border-color-strong: #5c4522;
 
     /* Marca / Acento (bronze → champanhe) */
-    --primary: #bd7c3f;
-    --primary-deep: #7c4a24;
-    --primary-hover: #f0c98c;
-    --primary-soft: rgba(189, 124, 63, 0.14);
+    --primary: #c48849;
+    --primary-deep: #8a5429;
+    --primary-hover: #f2ce97;
+    --primary-soft: rgba(196, 136, 73, 0.14);
 
-    /* Texto */
-    --text-main: #f7ecd9;
-    --text-muted: #ab8e6f;
-    --text-faint: #6f5842;
+    /* Texto — contraste ajustado para AA em fundos escuros */
+    --text-main: #f8eedd;
+    --text-muted: #c2a583;
+    --text-faint: #8a7256;
 
     /* Estados */
-    --danger: #e5484d;
-    --danger-soft: rgba(229, 72, 77, 0.12);
-    --success: #3fae74;
-    --success-soft: rgba(63, 174, 116, 0.12);
-    --warning: #d9a441;
-    --warning-soft: rgba(217, 164, 65, 0.12);
+    --danger: #ec5b60;
+    --danger-soft: rgba(236, 91, 96, 0.12);
+    --success: #22b06b;
+    --success-hover: #3ddc84;
+    --success-soft: rgba(34, 176, 107, 0.12);
+    --success-deep: #147239;
+    --warning: #dcac4d;
+    --warning-soft: rgba(220, 172, 77, 0.12);
 
     /* Tipografia */
     --font-body: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --font-display: 'Fraunces', 'Georgia', 'Times New Roman', serif;
 
-    /* Escala de espaçamento */
-    --space-xs: 8px;
-    --space-sm: 12px;
-    --space-md: 20px;
-    --space-lg: 32px;
-    --space-xl: 48px;
+    /* Escala de espaçamento (fluida — se ajusta entre mobile e desktop) */
+    --space-xs: clamp(6px, 0.6vw + 4px, 8px);
+    --space-sm: clamp(10px, 0.9vw + 7px, 12px);
+    --space-md: clamp(16px, 1.6vw + 11px, 20px);
+    --space-lg: clamp(24px, 2.4vw + 16px, 32px);
+    --space-xl: clamp(32px, 3.2vw + 22px, 48px);
 
     /* Raios e sombras */
     --radius-sm: 8px;
@@ -46,6 +48,7 @@
     --radius-lg: 20px;
     --shadow-card: 0 24px 60px rgba(0, 0, 0, 0.6), 0 2px 10px rgba(0, 0, 0, 0.45);
     --shadow-elevated: 0 24px 60px rgba(0, 0, 0, 0.6);
+    --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.4);
 
     /* Transições */
     --transition-fast: 0.15s ease;
@@ -61,18 +64,21 @@
     box-sizing: border-box;
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 html {
     font-size: 16px;
+    scrollbar-color: var(--border-color-strong) var(--bg-color-elevated);
+    scrollbar-width: thin;
 }
 
 body {
     position: relative;
     background:
-        radial-gradient(circle at 18% -12%, rgba(189, 124, 63, 0.16), transparent 45%),
-        radial-gradient(circle at 88% 12%, rgba(124, 74, 36, 0.12), transparent 42%),
-        radial-gradient(circle at 50% 115%, rgba(189, 124, 63, 0.09), transparent 55%),
+        radial-gradient(circle at 18% -12%, rgba(196, 136, 73, 0.17), transparent 45%),
+        radial-gradient(circle at 88% 12%, rgba(138, 84, 41, 0.13), transparent 42%),
+        radial-gradient(circle at 50% 115%, rgba(196, 136, 73, 0.10), transparent 55%),
         linear-gradient(180deg, #0a0603, var(--bg-color) 30%);
     color: var(--text-main);
     min-height: 100vh;
@@ -81,6 +87,15 @@ body {
     align-items: center;
     line-height: 1.5;
     overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+    line-height: 1.25;
+}
+
+img, svg {
+    display: block;
+    max-width: 100%;
 }
 
 /* Textura sutil de grão — dá profundidade ao fundo sem pesar a página */
@@ -102,6 +117,27 @@ body.protected-page {
 :focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Scrollbar customizada (Webkit) — reforça o clima premium em áreas roláveis */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-color-elevated);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--border-color-strong);
+    border-radius: 20px;
+    border: 2px solid var(--bg-color-elevated);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--primary-deep);
 }
 
 /* ==========================================================================
@@ -116,14 +152,14 @@ body.protected-page {
 .card {
     position: relative;
     background:
-        linear-gradient(180deg, rgba(189, 124, 63, 0.05), transparent 35%),
+        linear-gradient(180deg, rgba(196, 136, 73, 0.06), transparent 35%),
         var(--card-bg);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
     padding: var(--space-xl) var(--space-lg);
     box-shadow:
         var(--shadow-card),
-        inset 0 1px 0 rgba(240, 201, 140, 0.08),
+        inset 0 1px 0 rgba(242, 206, 151, 0.08),
         0 0 0 1px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -159,7 +195,7 @@ body.protected-page {
     padding: 4px;
     border-radius: 50%;
     background: conic-gradient(from 180deg, var(--primary-deep), var(--primary-hover), var(--primary), var(--primary-deep));
-    box-shadow: 0 12px 28px rgba(124, 74, 36, 0.45);
+    box-shadow: 0 12px 28px rgba(138, 84, 41, 0.45);
 }
 
 /* Halo suave por trás do anel, reforça a sensação de selo/medalha */
@@ -196,7 +232,6 @@ body.protected-page {
     width: 120px;
     height: 120px;
     object-fit: contain;
-    display: block;
 }
 
 .card .eyebrow {
@@ -227,7 +262,7 @@ h2 {
     color: var(--text-main);
     margin-bottom: var(--space-md);
     text-align: center;
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 1.1rem + 1.5vw, 2rem);
     font-weight: 600;
     letter-spacing: -0.01em;
 }
@@ -299,8 +334,6 @@ h2::after {
 .input-wrapper:has(.toggle-senha) input {
     padding-right: 42px;
 }
-
-
 
 .toggle-senha {
     position: absolute;
@@ -375,7 +408,7 @@ h2::after {
     background: linear-gradient(135deg, var(--primary-deep), var(--primary) 55%, var(--primary-hover));
     background-size: 200% 100%;
     background-position: 0% 0%;
-    color: #150f0b;
+    color: #17100a;
     border: none;
     border-radius: var(--radius-sm);
     font-weight: 700;
@@ -384,7 +417,7 @@ h2::after {
     cursor: pointer;
     transition: background-position var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-fast);
     margin-top: var(--space-sm);
-    box-shadow: 0 8px 20px rgba(124, 74, 36, 0.35);
+    box-shadow: 0 8px 20px rgba(138, 84, 41, 0.35);
     overflow: hidden;
 }
 
@@ -409,7 +442,7 @@ h2::after {
 .btn:hover {
     background-position: 100% 0%;
     transform: translateY(-1px);
-    box-shadow: 0 10px 26px rgba(124, 74, 36, 0.45);
+    box-shadow: 0 10px 26px rgba(138, 84, 41, 0.45);
 }
 
 .btn:active {
@@ -465,7 +498,7 @@ h2::after {
    Dashboard
    ========================================================================== */
 .dashboard-container {
-    max-width: 1000px;
+    max-width: 1100px;
     margin: var(--space-md) auto;
     padding: var(--space-md);
     width: 100%;
@@ -473,12 +506,12 @@ h2::after {
 
 .warning-banner {
     background-color: var(--danger-soft);
-    border: 1px solid rgba(229, 72, 77, 0.35);
+    border: 1px solid rgba(236, 91, 96, 0.35);
     padding: var(--space-sm) var(--space-md);
     border-radius: var(--radius-sm);
     margin-bottom: var(--space-md);
     font-size: 0.85rem;
-    color: #ff9a9d;
+    color: #ffb0b3;
     text-align: center;
 }
 
@@ -492,7 +525,7 @@ h2::after {
 .stat-card {
     position: relative;
     background:
-        linear-gradient(180deg, rgba(189, 124, 63, 0.05), transparent 40%),
+        linear-gradient(180deg, rgba(196, 136, 73, 0.06), transparent 40%),
         var(--card-bg);
     border: 1px solid var(--border-color);
     padding: var(--space-md);
@@ -509,18 +542,18 @@ h2::after {
     right: 0;
     height: 2px;
     background: linear-gradient(90deg, var(--primary-deep), var(--primary-hover));
-    opacity: 0.7;
+    opacity: 0.75;
 }
 
 .stat-card:hover {
     border-color: var(--border-color-strong);
     transform: translateY(-3px);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--shadow-soft);
 }
 
 .stat-card h3 {
     font-size: 0.78rem;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--text-muted);
     margin-bottom: 10px;
     text-transform: uppercase;
@@ -529,7 +562,7 @@ h2::after {
 
 .stat-card p {
     font-family: var(--font-display);
-    font-size: 1.75rem;
+    font-size: clamp(1.4rem, 1.1rem + 1vw, 1.75rem);
     font-weight: 600;
     color: var(--primary-hover);
     letter-spacing: -0.01em;
@@ -543,11 +576,13 @@ h2::after {
     padding: var(--space-md);
     margin-top: var(--space-md);
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .grid-planos {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-md);
 }
 
 table {
@@ -593,7 +628,7 @@ tbody tr:last-child td {
     justify-content: center;
     gap: 8px;
     text-align: center;
-    background-color: #1fa855;
+    background-color: var(--success);
     color: #fff;
     padding: 13px;
     border-radius: var(--radius-sm);
@@ -678,93 +713,6 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   Responsivo
-   ========================================================================== */
-
-/* Tablets */
-@media (max-width: 768px) {
-    .dashboard-container {
-        padding: var(--space-sm);
-        margin: var(--space-sm) auto;
-    }
-
-    .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    }
-
-    .card {
-        padding: var(--space-lg) var(--space-md);
-    }
-}
-
-/* Celulares */
-@media (max-width: 480px) {
-    body {
-        align-items: flex-start;
-    }
-
-    .container {
-        max-width: 100%;
-        padding: var(--space-sm);
-    }
-
-    .card {
-        padding: var(--space-lg) var(--space-md);
-        border-radius: var(--radius-md);
-    }
-
-    h2 {
-        font-size: 1.35rem;
-        margin-bottom: var(--space-md);
-    }
-
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .grid-planos {
-        grid-template-columns: 1fr;
-    }
-
-    .stat-card p {
-        font-size: 1.4rem;
-    }
-
-    .table-container {
-        padding: var(--space-sm);
-    }
-
-    th, td {
-        padding: 10px 8px;
-        font-size: 0.82rem;
-    }
-
-    #toast-container {
-        left: var(--space-sm);
-        right: var(--space-sm);
-        bottom: var(--space-sm);
-        align-items: stretch;
-    }
-
-    .toast {
-        min-width: 0;
-        max-width: 100%;
-        width: 100%;
-    }
-}
-
-/* Telas grandes (desktop) — cartão de login um pouco mais respirado */
-@media (min-width: 1024px) {
-    .container {
-        max-width: 460px;
-    }
-
-    .card {
-        padding: var(--space-xl) var(--space-lg);
-    }
-}
-
-/* ==========================================================================
    Layout com Sidebar & Conteúdo Principal
    ========================================================================== */
 .app-layout {
@@ -786,6 +734,7 @@ tbody tr:last-child td {
     bottom: 0;
     left: 0;
     z-index: 100;
+    overflow-y: auto;
 }
 
 .sidebar-nav {
@@ -820,12 +769,12 @@ tbody tr:last-child td {
     color: var(--text-main);
 }
 
-/* Item Ativo (Estilo igual ao print com brilho e borda verde) */
+/* Item Ativo */
 .nav-item.active {
-    background: linear-gradient(90deg, rgba(31, 168, 85, 0.18), rgba(31, 168, 85, 0.05));
+    background: linear-gradient(90deg, var(--success-soft), rgba(34, 176, 107, 0.02));
     color: #fff;
-    border: 1px solid rgba(31, 168, 85, 0.4);
-    box-shadow: 0 4px 15px rgba(31, 168, 85, 0.15);
+    border: 1px solid rgba(34, 176, 107, 0.4);
+    box-shadow: 0 4px 15px rgba(34, 176, 107, 0.15);
 }
 
 .nav-item.active::before {
@@ -835,9 +784,9 @@ tbody tr:last-child td {
     top: 6px;
     bottom: 6px;
     width: 3px;
-    background-color: #1fa855;
+    background-color: var(--success);
     border-radius: 0 2px 2px 0;
-    box-shadow: 0 0 8px #1fa855;
+    box-shadow: 0 0 8px var(--success);
 }
 
 /* Botão de suporte WhatsApp na sidebar, logo abaixo do menu de navegação */
@@ -847,10 +796,10 @@ tbody tr:last-child td {
     gap: 12px;
     margin-top: var(--space-sm);
     padding: 12px 16px;
-    background: rgba(31, 168, 85, 0.1);
-    border: 1px solid rgba(31, 168, 85, 0.3);
+    background: var(--success-soft);
+    border: 1px solid rgba(34, 176, 107, 0.3);
     border-radius: var(--radius-sm);
-    color: #3ddc84;
+    color: var(--success-hover);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
@@ -864,8 +813,8 @@ tbody tr:last-child td {
 }
 
 .sidebar-support-btn:hover {
-    background: rgba(31, 168, 85, 0.18);
-    border-color: rgba(31, 168, 85, 0.5);
+    background: rgba(34, 176, 107, 0.18);
+    border-color: rgba(34, 176, 107, 0.5);
 }
 
 /* Card do usuário no rodapé da Sidebar */
@@ -883,7 +832,7 @@ tbody tr:last-child td {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #1fa855, #147239);
+    background: linear-gradient(135deg, var(--success), var(--success-deep));
     color: #fff;
     display: flex;
     align-items: center;
@@ -910,7 +859,7 @@ tbody tr:last-child td {
 
 .user-status {
     font-size: 0.7rem;
-    color: #1fa855;
+    color: var(--success);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -948,8 +897,8 @@ tbody tr:last-child td {
 
 .btn-sair:hover {
     background-color: var(--danger-soft);
-    color: #ff9a9d;
-    border-color: rgba(229, 72, 77, 0.4);
+    color: #ffb0b3;
+    border-color: rgba(236, 91, 96, 0.4);
 }
 
 /* Ajuste do container principal para abrir espaço para a sidebar */
@@ -997,8 +946,71 @@ tbody tr:last-child td {
     z-index: 99;
 }
 
-/* Responsivo para celulares/tablets: sidebar vira um menu deslizante (drawer) */
+/* ==========================================================================
+   Responsivo
+   ========================================================================== */
+
+/* Desktops grandes — mais respiro, sidebar um pouco mais larga */
+@media (min-width: 1440px) {
+    .sidebar {
+        width: 280px;
+    }
+
+    .main-content {
+        margin-left: 280px;
+        padding: var(--space-xl);
+    }
+
+    .dashboard-container {
+        max-width: 1240px;
+    }
+}
+
+/* Telas grandes (desktop) — cartão de login um pouco mais respirado */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 460px;
+    }
+
+    .card {
+        padding: var(--space-xl) var(--space-lg);
+    }
+}
+
+/* Laptops/telas médias — sidebar levemente mais estreita para dar mais
+   espaço útil ao conteúdo antes de virar drawer */
+@media (min-width: 769px) and (max-width: 1180px) {
+    .sidebar {
+        width: 220px;
+        padding: var(--space-sm);
+    }
+
+    .main-content {
+        margin-left: 220px;
+        padding: var(--space-md);
+    }
+
+    .nav-item {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Tablets */
 @media (max-width: 768px) {
+    .dashboard-container {
+        padding: var(--space-sm);
+        margin: var(--space-sm) auto;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+
+    .card {
+        padding: var(--space-lg) var(--space-md);
+    }
+
     .mobile-menu-toggle {
         display: flex;
     }
@@ -1022,5 +1034,88 @@ tbody tr:last-child td {
         margin-left: 0;
         padding: var(--space-md);
         padding-top: calc(var(--space-md) + 52px);
+    }
+}
+
+/* Celulares médios (portrait comum, 481–600px) */
+@media (max-width: 600px) {
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+
+    .grid-planos {
+        gap: var(--space-sm);
+    }
+}
+
+/* Celulares */
+@media (max-width: 480px) {
+    body {
+        align-items: flex-start;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: var(--space-sm);
+    }
+
+    .card {
+        padding: var(--space-lg) var(--space-md);
+        border-radius: var(--radius-md);
+    }
+
+    h2 {
+        margin-bottom: var(--space-md);
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .grid-planos {
+        grid-template-columns: 1fr;
+    }
+
+    .table-container {
+        padding: var(--space-sm);
+    }
+
+    th, td {
+        padding: 10px 8px;
+        font-size: 0.82rem;
+    }
+
+    #toast-container {
+        left: var(--space-sm);
+        right: var(--space-sm);
+        bottom: var(--space-sm);
+        align-items: stretch;
+    }
+
+    .toast {
+        min-width: 0;
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+/* Celulares pequenos (iPhone SE e afins) */
+@media (max-width: 360px) {
+    .logo-ring {
+        width: 88px;
+        height: 88px;
+    }
+
+    .sidebar-logo img {
+        width: 90px;
+        height: 90px;
+    }
+
+    .btn, .support-btn, .sidebar-support-btn, .btn-sair {
+        font-size: 0.85rem;
+    }
+
+    .stat-card {
+        padding: var(--space-sm);
     }
 }
