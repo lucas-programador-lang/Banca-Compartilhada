@@ -306,6 +306,7 @@ if (registerForm) {
             // 3. Gera o código de indicação único deste novo usuário,
             //    para que ele também possa indicar outras pessoas depois.
             const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico();
+            const dataCadastro = new Date().toISOString();
 
             // 4. Grava o perfil do usuário e o mapeamento código -> uid
             await set(ref(db, 'usuarios/' + user.uid), {
@@ -318,10 +319,26 @@ if (registerForm) {
                 chavePix: '',
                 indicadoPor: uidIndicador,
                 codigoIndicacao: meuCodigoIndicacao,
-                dataCadastro: new Date().toISOString()
+                dataCadastro: dataCadastro
             });
 
             await set(ref(db, 'codigosIndicacao/' + meuCodigoIndicacao), user.uid);
+
+            // 5. Grava também em perfisPublicos/{uid} — uma cópia
+            //    deliberadamente enxuta (só nome, email, indicadoPor,
+            //    dataCadastro), SEM saldo/comissao/chavePix. Esse nó
+            //    separado existe porque o nó "usuarios" tem dados
+            //    sensíveis e não pode ser aberto para consulta geral,
+            //    mas a aba Equipe (script.js) precisa poder perguntar
+            //    "quem foi indicado por mim?" — e isso exige uma
+            //    leitura/consulta que varra todos os usuários. Ver
+            //    FIREBASE_REGRAS.txt para as regras completas.
+            await set(ref(db, 'perfisPublicos/' + user.uid), {
+                nome: nome,
+                email: email,
+                indicadoPor: uidIndicador,
+                dataCadastro: dataCadastro
+            });
 
             mostrarToast('🎉 Conta criada com sucesso!', 'success');
             setTimeout(() => {
