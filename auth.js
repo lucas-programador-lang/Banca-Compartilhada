@@ -200,24 +200,35 @@ function gerarSlugNome(nome) {
     return slug || 'user';
 }
 
-/**
- * Gera um código de indicação único a partir do nome do usuário,
- * tentando "joao", depois "joao2", "joao57", etc. até achar um que
- * ainda não exista em codigosIndicacao/.
- */
-async function gerarCodigoIndicacaoUnico(nome) {
-    const base = gerarSlugNome(nome);
-    let tentativa = base;
+/* ==========================================================================
+   Indicação (register.html) - Código Aleatório Curto
+   ========================================================================== */
 
-    for (let i = 0; i < 25; i++) {
+/**
+ * Gera um código de indicação curto e totalmente aleatório (Ex: K9X2M4)
+ * Sem letras confusas (como O, 0, I, l) para facilitar a leitura.
+ */
+async function gerarCodigoIndicacaoUnico() {
+    const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let tentativa = '';
+    let existe = true;
+    let tentativasMaximas = 0;
+
+    while (existe && tentativasMaximas < 20) {
+        tentativa = '';
+        for (let i = 0; i < 6; i++) {
+            const indice = Math.floor(Math.random() * caracteres.length);
+            tentativa += caracteres[indice];
+        }
+
         const snap = await get(ref(db, 'codigosIndicacao/' + tentativa));
-        if (!snap.exists()) return tentativa;
-        tentativa = `${base}${Math.floor(10 + Math.random() * 90)}`;
+        if (!snap.exists()) {
+            existe = false; // Código livre encontrado!
+        }
+        tentativasMaximas++;
     }
 
-    // Fallback extremamente improvável: se 25 tentativas colidirem,
-    // usa um sufixo baseado no tempo atual para garantir unicidade.
-    return `${base}${Date.now().toString(36).slice(-5)}`;
+    return tentativa;
 }
 
 /**
@@ -232,11 +243,11 @@ function capturarCodigoIndicacao() {
     const avisoIndicacao = getEl('avisoIndicacao');
 
     if (codigoRef && campoRefIndicador) {
-        campoRefIndicador.value = codigoRef.trim().toLowerCase();
+        campoRefIndicador.value = codigoRef.trim().toUpperCase();
         if (avisoIndicacao) avisoIndicacao.style.display = 'block';
     }
 
-    return codigoRef ? codigoRef.trim().toLowerCase() : null;
+    return codigoRef ? codigoRef.trim().toUpperCase() : null;
 }
 
 capturarCodigoIndicacao();
