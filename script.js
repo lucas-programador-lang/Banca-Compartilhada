@@ -238,15 +238,22 @@ function gerarLinkIndicacao(userId, codigoIndicacao) {
     return `${baseUrl}/register.html?ref=${codigoIndicacao || userId}`;
 }
 
-function inicializarEquipeUsuario(userId, codigoIndicacao) {
-    const inputLink = getEl('linkIndicacao');
-    if (inputLink) {
-        inputLink.value = gerarLinkIndicacao(userId, codigoIndicacao);
-    }
-
+// FIX: antes, o link de indicação era escrito em DOIS lugares — uma vez
+// dentro do onValue(userRef,...) com o código curto correto, e outra vez
+// aqui dentro (chamada sem o 2º argumento, codigoIndicacao chegava
+// undefined). Como onValue é assíncrono e a chamada abaixo era síncrona,
+// o UID cru do usuário era escrito no campo ANTES do código correto
+// sobrescrever — abrindo uma janela onde, se o usuário copiasse o link
+// rápido demais (ou a rede estivesse lenta), ele levava o UID em vez do
+// código curto, e o vínculo de indicação nunca era resolvido no cadastro
+// (codigosIndicacao/{UID} não existe — só existe codigosIndicacao/{CODIGO}).
+// Agora só o listener em onValue(userRef,...) escreve o link, e esta
+// função para de tentar escrevê-lo também — elimina a corrida.
+function inicializarEquipeUsuario(userId) {
     const btnCopiar = getEl('btnCopiarLinkIndicacao');
     if (btnCopiar && !btnCopiar.dataset.listenerAtivo) {
         btnCopiar.addEventListener('click', async () => {
+            const inputLink = getEl('linkIndicacao');
             const link = inputLink?.value || '';
             if (!link) return;
 
@@ -263,7 +270,8 @@ function inicializarEquipeUsuario(userId, codigoIndicacao) {
     }
 
     const tbody = getEl('tabelaMembrosEquipe');
-    if (!tbody) return;
+    if (!tbody || tbody.dataset.listenerAtivo) return;
+    tbody.dataset.listenerAtivo = 'true';
 
     const usuariosRef = ref(db, 'usuarios');
     const consultaIndicados = query(usuariosRef, orderByChild('indicadoPor'), equalTo(userId));
