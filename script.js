@@ -26,6 +26,24 @@ function getEl(id) {
     return document.getElementById(id);
 }
 
+/**
+ * Escapa caracteres especiais de HTML antes de inserir qualquer dado
+ * vindo do Firebase (nome, e-mail, descrição, chave PIX, etc.) dentro
+ * de innerHTML. Sem isso, alguém poderia se cadastrar com um "nome"
+ * contendo tags/script e esse código executaria no navegador de quem
+ * visualizasse aquele dado (ex.: no painel Equipe de outro usuário, ou
+ * no painel admin) — um XSS armazenado clássico.
+ */
+function escapeHTML(texto) {
+    return String(texto ?? '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+    }[c]));
+}
+
 function setBotaoCarregando(botao, carregando, textoCarregando = 'Enviando...') {
     if (!botao) return;
     if (carregando) {
@@ -227,7 +245,7 @@ function inicializarExtratoUsuario(userId) {
                 <tr>
                     <td>${formatadorDataHora.format(data)}</td>
                     <td>${mesAno}</td>
-                    <td>${registro.descricao || '—'}</td>
+                    <td>${escapeHTML(registro.descricao) || '—'}</td>
                     <td class="plan-row__value plan-row__value--positive">${formatadorMoeda.format(registro.valor || 0)}</td>
                 </tr>
             `;
@@ -316,8 +334,8 @@ function inicializarEquipeUsuario(userId) {
         tbody.innerHTML = membros.map(membro => `
             <tr>
                 <td>${membro.dataCadastro ? formatadorData.format(new Date(membro.dataCadastro)) : '—'}</td>
-                <td>${membro.nome || '—'}</td>
-                <td>${membro.email || '—'}</td>
+                <td>${escapeHTML(membro.nome) || '—'}</td>
+                <td>${escapeHTML(membro.email) || '—'}</td>
             </tr>
         `).join('');
     }, (error) => {
