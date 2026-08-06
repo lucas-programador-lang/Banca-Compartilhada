@@ -44,7 +44,7 @@ const app = initializeApp(firebaseConfig);
       cadastre em App Check > Apps > Gerenciar tokens de depuração.
       NÃO deixe debug token ativo em produção.
    ========================================================================== */
-const RECAPTCHA_SITE_KEY = "COLE_AQUI_SUA_SITE_KEY_DO_RECAPTCHA_V3";
+const RECAPTCHA_SITE_KEY = "6Lfs-3gtAAAAACZId43LTsWWSDroAMI7uXED4KU9";
 
 // Descomente a linha abaixo apenas durante testes em localhost, para
 // gerar um debug token automaticamente no console (F12). Remova antes
