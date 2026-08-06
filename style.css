@@ -1533,3 +1533,59 @@ tbody tr:last-child td {
         min-width: 120px;
     }
 }
+
+/* ==========================================================================
+   Estados controlados via JS (campo travado, breakdown de saque, saldo no modal)
+   — antes eram cores hardcoded inline no script.js, fora do token system
+   ========================================================================== */
+
+/* Campo de PIX travado após primeiro cadastro (perfil) */
+.input-group input.is-locked,
+.input-group select.is-locked {
+    background-color: var(--bg-color-elevated);
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+/* Chave PIX ausente, exibida dentro do modal de saque */
+.modal-info-box--key strong.is-missing {
+    color: var(--danger);
+    font-weight: 500;
+}
+
+/* Caixa de saldo disponível injetada no topo do modal de saque */
+.modal-balance-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-balance-box strong {
+    color: var(--success-hover);
+    font-size: 1rem;
+}
+
+/* Breakdown de taxa/valor líquido do saque (linhas dentro de .amount-note) */
+.amount-note__row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+}
+
+.amount-note__row + .amount-note__row {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.amount-note__row--negative {
+    color: var(--danger);
+}
+
+.amount-note__row--positive {
+    color: var(--success-hover);
+}
