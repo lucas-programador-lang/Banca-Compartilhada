@@ -365,6 +365,7 @@ function inicializarEquipeUsuario(userId) {
 document.addEventListener('DOMContentLoaded', () => {
     let saldoAtualUsuario = 0;
     let userIdAtual = null;
+    let userAtual = null; // referência ao User do Firebase Auth — necessária pra pegar o ID Token na hora do saque
     let nomeUsuarioAtual = '';
     let emailUsuarioAtual = '';
 
@@ -692,19 +693,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnConfirmarModalSaque?.addEventListener('click', async () => {
-        if (!userIdAtual) {
+        if (!userIdAtual || !userAtual) {
             mostrarToast('❌ Você precisa estar logado para solicitar um saque.', 'error');
             return;
         }
 
-        const diaHoje = obterDiaSemanaBrasilia();
         const valorSaque = parseFloat(inputValSaque?.value || 0);
 
-        if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
-            mostrarToast('⚠️ Saques só podem ser solicitados aos domingos.', 'warning');
-            return;
-        }
-
+        // As checagens aqui são só feedback rápido pro usuário (evita uma
+        // ida e volta ao servidor por engano). Quem decide de verdade —
+        // dia da semana em horário de Brasília, saldo real, chave PIX — é
+        // o Worker, que não confia em nada vindo do navegador.
         if (isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
             mostrarToast(`⚠️ O valor mínimo para saque é ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`, 'warning');
             return;
@@ -715,42 +714,29 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // A chave PIX usada no saque vem sempre do Perfil (fonte de
-        // verdade) — o modal de saque só EXIBE essa chave, não a edita.
-        const tipoPixSaque = document.getElementById('perfilTipoPix')?.value || 'CPF';
-        const chavePixSaque = document.getElementById('perfilChavePix')?.value || '';
-
-        if (!chavePixSaque) {
-            mostrarToast('⚠️ Cadastre sua chave PIX no Perfil antes de solicitar um saque.', 'warning');
-            return;
-        }
-
-        const taxa = valorSaque * CONFIG.TAXA_SAQUE_PERCENTUAL;
-        const valorLiquido = valorSaque - taxa;
-        const novoSaldo = saldoAtualUsuario - valorSaque;
-
         setBotaoCarregando(btnConfirmarModalSaque, true, 'Processando...');
         try {
-            const saquesRef = ref(db, 'saques/' + userIdAtual);
-            const novoSaqueRef = push(saquesRef);
-            await set(novoSaqueRef, {
-                valorSolicitado: valorSaque,
-                taxa: taxa,
-                valorLiquido: valorLiquido,
-                tipoPix: tipoPixSaque,
-                chavePix: chavePixSaque,
-                status: 'pendente',
-                dataSolicitacao: new Date().toISOString()
+            const idToken = await userAtual.getIdToken();
+
+            const respostaSaque = await fetch(`${CONFIG.WORKER_BASE_URL}/api/saque/solicitar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ valorSaque }),
             });
 
-            const userRef = ref(db, 'usuarios/' + userIdAtual);
-            await update(userRef, { saldo: novoSaldo });
+            const dadosResposta = await respostaSaque.json();
+            if (!respostaSaque.ok) {
+                throw new Error(dadosResposta.error || 'Erro ao solicitar o saque.');
+            }
 
             mostrarToast('✅ Saque solicitado com sucesso!', 'success');
             fecharModalSaque();
         } catch (error) {
             console.error('Erro ao solicitar saque:', error);
-            mostrarToast('❌ Erro ao solicitar saque: ' + error.message, 'error');
+            mostrarToast('❌ ' + error.message, 'error');
         } finally {
             setBotaoCarregando(btnConfirmarModalSaque, false);
         }
@@ -760,15 +746,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!user) return;
         const userId = user.uid;
         userIdAtual = userId;
+        userAtual = user;
         emailUsuarioAtual = user.email || '';
 
         const userRef = ref(db, 'usuarios/' + userId);
         onValue(userRef, (snapshot) => {
             const dados = snapshot.val();
             if (dados) {
-                saldoAtualUsuario = parseFloat(dados.saldo || 0);
                 nomeUsuarioAtual = dados.nome || user.email || 'Usuário';
-                atualizarPainel(dados);
 
                 const nomeUsuario = dados.nome || user.email || 'Usuário';
                 const elNome = getEl('userNameDisplay');
@@ -794,6 +779,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 atualizarLinkIndicacao(codigo);
             }
+        });
+
+        // Saldo, comissão e rendimento moram em financeiro/{uid}, separado
+        // de usuarios/{uid} — as Regras do Firebase só deixam o Worker
+        // (com credenciais de admin) escrever aqui. O usuário só lê. Isso
+        // fecha a brecha de alguém editar o próprio saldo direto pelo
+        // Firebase SDK/DevTools, que existia enquanto saldo ficava dentro
+        // de usuarios/{uid} (nó que o dono da conta sempre pode escrever,
+        // por causa do Perfil).
+        const financeiroRef = ref(db, 'financeiro/' + userId);
+        onValue(financeiroRef, (snapshot) => {
+            const dadosFinanceiros = snapshot.val() || {};
+            saldoAtualUsuario = parseFloat(dadosFinanceiros.saldo || 0);
+            atualizarPainel(dadosFinanceiros);
         });
 
         inicializarPerfilUsuario(userId);
