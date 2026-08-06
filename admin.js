@@ -104,7 +104,7 @@ function renderizarTabelaSaques(saques, usuarios) {
     if (!tbody) return;
 
     if (!saques.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum saque solicitado ainda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum saque solicitado ainda.</td></tr>';
     } else {
         tbody.innerHTML = saques.map(saque => `
             <tr>
@@ -127,25 +127,25 @@ function renderizarTabelaDepositos(depositos, usuarios) {
     if (!tbody) return;
 
     if (!depositos.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum depósito registrado.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum depósito registrado.</td></tr>';
     } else {
         tbody.innerHTML = depositos.map(deposito => {
             const status = (deposito.status || 'pendente').toLowerCase();
             const acoes = status === 'pendente'
                 ? `
-                    <button
-                        class="btn btn-aprovar-deposito"
-                        data-uid="${deposito.uid}"
-                        data-id="${deposito.id}"
-                        data-valor="${deposito.valorPlano || 0}"
-                        style="padding: 6px 12px; font-size: 12px; margin-right: 6px; background: #2ecc71; border-color: #2ecc71;"
-                    >Aprovar</button>
-                    <button
-                        class="btn btn-recusar-deposito"
-                        data-uid="${deposito.uid}"
-                        data-id="${deposito.id}"
-                        style="padding: 6px 12px; font-size: 12px; background: transparent; border: 1px solid var(--danger); color: var(--danger);"
-                    >Recusar</button>
+                    <div class="admin-actions">
+                        <button
+                            class="btn-approve btn-aprovar-deposito"
+                            data-uid="${deposito.uid}"
+                            data-id="${deposito.id}"
+                            data-valor="${deposito.valorPlano || 0}"
+                        >Aprovar</button>
+                        <button
+                            class="btn-reject btn-recusar-deposito"
+                            data-uid="${deposito.uid}"
+                            data-id="${deposito.id}"
+                        >Recusar</button>
+                    </div>
                 `
                 : '—';
 
@@ -164,6 +164,56 @@ function renderizarTabelaDepositos(depositos, usuarios) {
     const pendentes = depositos.filter(d => (d.status || 'pendente').toLowerCase() === 'pendente').length;
     const elTotal = document.getElementById('totalDepositosPendentes');
     if (elTotal) elTotal.textContent = pendentes;
+}
+
+/**
+ * Lista de Usuários e Saldos — mostra, para cada cliente cadastrado em
+ * usuarios/{uid}, o saldo sacável atual (campo "saldo") e a comissão de
+ * indicação acumulada (campo "comissao"). Aceita um termo de busca para
+ * filtrar por nome ou e-mail sem precisar buscar de novo no Firebase.
+ */
+function renderizarTabelaUsuarios(usuariosObj, filtro) {
+    const tbody = document.getElementById('tabelaUsuariosAdmin');
+    if (!tbody) return;
+
+    const termo = (filtro || '').trim().toLowerCase();
+    let lista = Object.entries(usuariosObj || {}).map(([uid, dados]) => ({ uid, ...dados }));
+
+    if (termo) {
+        lista = lista.filter(u =>
+            (u.nome || '').toLowerCase().includes(termo) ||
+            (u.email || '').toLowerCase().includes(termo)
+        );
+    }
+
+    // Maior saldo primeiro — é normalmente o que o admin quer ver de cara.
+    lista.sort((a, b) => (parseFloat(b.saldo) || 0) - (parseFloat(a.saldo) || 0));
+
+    if (!lista.length) {
+        const mensagem = termo ? 'Nenhum usuário encontrado para essa busca.' : 'Nenhum usuário cadastrado ainda.';
+        tbody.innerHTML = `<tr><td colspan="5" class="table-empty">${mensagem}</td></tr>`;
+    } else {
+        tbody.innerHTML = lista.map(u => `
+            <tr>
+                <td>${escapeHTML(u.nome) || '—'}</td>
+                <td>${escapeHTML(u.email) || '—'}</td>
+                <td>${formatadorMoeda.format(parseFloat(u.saldo) || 0)}</td>
+                <td>${formatadorMoeda.format(parseFloat(u.comissao) || 0)}</td>
+                <td>${u.isAdmin ? '<span class="status-badge status-admin">Admin</span>' : '—'}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Total e contagem sempre refletem TODOS os usuários, não só o
+    // resultado filtrado da busca.
+    const todos = Object.values(usuariosObj || {});
+    const somaSaldos = todos.reduce((soma, u) => soma + (parseFloat(u?.saldo) || 0), 0);
+
+    const elTotalSaldo = document.getElementById('totalSaldoUsuarios');
+    if (elTotalSaldo) elTotalSaldo.textContent = formatadorMoeda.format(somaSaldos);
+
+    const elTotalUsuarios = document.getElementById('totalUsuariosCadastrados');
+    if (elTotalUsuarios) elTotalUsuarios.textContent = todos.length;
 }
 
 /**
@@ -287,6 +337,20 @@ function iniciarDelegacaoAcoesDepositos() {
     tbody.dataset.listenerAtivo = 'true';
 }
 
+// Campo de busca da tabela de Usuários — filtra em memória (sem nova
+// consulta ao Firebase) por nome ou e-mail a cada tecla digitada.
+function iniciarBuscaUsuarios() {
+    const input = document.getElementById('buscaUsuarios');
+    if (!input || input.dataset.listenerAtivo) return;
+
+    input.addEventListener('input', (e) => {
+        estado.filtroUsuarios = e.target.value;
+        renderizarTabelaUsuarios(estado.usuarios || {}, estado.filtroUsuarios);
+    });
+
+    input.dataset.listenerAtivo = 'true';
+}
+
 /**
  * Mantém em memória a última versão de cada fonte de dados (usuários,
  * saques, depósitos), já que os três chegam de listeners independentes
@@ -296,6 +360,7 @@ const estado = {
     usuarios: null,
     saques: null,
     depositos: null,
+    filtroUsuarios: '',
 };
 
 function rerenderizarTudo() {
@@ -305,10 +370,14 @@ function rerenderizarTudo() {
     if (estado.depositos !== null) {
         renderizarTabelaDepositos(achatarPorUsuario(estado.depositos), estado.usuarios || {});
     }
+    if (estado.usuarios !== null) {
+        renderizarTabelaUsuarios(estado.usuarios, estado.filtroUsuarios);
+    }
 }
 
 function iniciarListenersAdmin() {
     iniciarDelegacaoAcoesDepositos();
+    iniciarBuscaUsuarios();
 
     const usuariosRef = ref(db, 'usuarios');
     onValue(usuariosRef, (snapshot) => {
