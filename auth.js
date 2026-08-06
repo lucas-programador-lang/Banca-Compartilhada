@@ -207,6 +207,9 @@ function gerarSlugNome(nome) {
 /**
  * Gera um código de indicação curto e totalmente aleatório (Ex: K9X2M4)
  * Sem letras confusas (como O, 0, I, l) para facilitar a leitura.
+ * O código é SEMPRE gerado em MAIÚSCULO — a busca do indicador no
+ * cadastro precisa normalizar para maiúsculo também (ver mais abaixo),
+ * senão a chave nunca bate (RTDB é case-sensitive).
  */
 async function gerarCodigoIndicacaoUnico() {
     const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -269,7 +272,13 @@ if (registerForm) {
         const nome = getEl('nome')?.value.trim() || 'Usuário';
         const email = getEl('emailReg').value.trim();
         const senha = getEl('senhaReg').value;
-        const codigoIndicadorDigitado = getEl('refIndicador')?.value.trim().toLowerCase() || null;
+        // FIX: os códigos de indicação são gerados e salvos em MAIÚSCULO
+        // (ver gerarCodigoIndicacaoUnico). Antes este campo era normalizado
+        // com .toLowerCase(), o que fazia a busca abaixo NUNCA encontrar o
+        // indicador (chaves do Realtime Database são case-sensitive) —
+        // o cadastro seguia normalmente, sem erro, mas indicadoPor ficava
+        // sempre null.
+        const codigoIndicadorDigitado = getEl('refIndicador')?.value.trim().toUpperCase() || null;
         const botao = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('button');
 
         const erroValidacao = validarEmailSenha(email, senha);
@@ -284,7 +293,7 @@ if (registerForm) {
             const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
             const user = userCredential.user;
 
-            // 2. Resolve o código de indicação digitado (ex.: "joao23")
+            // 2. Resolve o código de indicação digitado (ex.: "K9X2M4")
             //    para o UID de quem indicou, consultando codigosIndicacao/.
             //    Se o código não existir (link inválido/expirado), o
             //    cadastro segue normalmente sem indicador.
@@ -296,7 +305,7 @@ if (registerForm) {
 
             // 3. Gera o código de indicação único deste novo usuário,
             //    para que ele também possa indicar outras pessoas depois.
-            const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico(nome);
+            const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico();
 
             // 4. Grava o perfil do usuário e o mapeamento código -> uid
             await set(ref(db, 'usuarios/' + user.uid), {
