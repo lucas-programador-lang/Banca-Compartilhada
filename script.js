@@ -233,15 +233,20 @@ function inicializarExtratoUsuario(userId) {
     });
 }
 
-// Gera um código numérico de 6 dígitos, estável para o mesmo usuário
-// (mesmo UID sempre produz o mesmo número). Usado no link de indicação
-// no lugar do nome do usuário ou do UID cru do Firebase.
-function gerarCodigoNumericoIndicacao(uid) {
-    let hash = 0;
-    for (let i = 0; i < uid.length; i++) {
-        hash = (hash * 31 + uid.charCodeAt(i)) >>> 0;
+// Gera um código curto aleatório (fallback), usado apenas se por
+// algum motivo o usuário ainda não tiver nenhum codigoIndicacao salvo
+// (ex.: contas muito antigas criadas antes desse campo existir).
+// Usuários criados normalmente já recebem esse código no cadastro
+// (ver auth.js). Contas antigas com código no formato anterior
+// (numérico ou baseado no nome) MANTÊM o código que já têm — este
+// gerador só entra em ação quando não existe nenhum código salvo.
+function gerarCodigoAleatorioCurto(tamanho = 6) {
+    const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let codigo = '';
+    for (let i = 0; i < tamanho; i++) {
+        codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
     }
-    return String(hash % 1000000).padStart(6, '0');
+    return codigo;
 }
 
 function gerarLinkIndicacao(codigoIndicacao) {
@@ -619,14 +624,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (elNome) elNome.innerText = nomeUsuario;
                 if (elInicial) elInicial.innerText = nomeUsuario.charAt(0).toUpperCase();
 
-                // O código de indicação precisa ser numérico, não o nome
-                // nem o UID cru. Se ainda não existir um salvo (ou se o
-                // valor salvo não for só dígitos — ex.: versões antigas
-                // que guardaram o nome), gera um estável a partir do UID
-                // e salva uma única vez.
+                // O código de indicação já deve ter sido salvo no cadastro
+                // (ver auth.js — gerarCodigoIndicacaoUnico). Se, por algum
+                // motivo, uma conta antiga não tiver NENHUM código salvo,
+                // geramos um curto aleatório aqui como fallback único e
+                // gravamos para sempre. Contas que já têm um código
+                // (qualquer formato, incluindo os antigos) NÃO são
+                // alteradas — o valor salvo é sempre respeitado.
                 let codigo = dados.codigoIndicacao;
-                if (!codigo || !/^\d+$/.test(String(codigo))) {
-                    codigo = gerarCodigoNumericoIndicacao(userId);
+                if (!codigo) {
+                    codigo = gerarCodigoAleatorioCurto(6);
                     update(userRef, { codigoIndicacao: codigo }).catch((error) => {
                         console.error('Erro ao salvar código de indicação:', error);
                     });
