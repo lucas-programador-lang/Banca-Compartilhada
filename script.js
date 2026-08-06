@@ -59,24 +59,22 @@ function inicializarPerfilUsuario(userId) {
     if (!btnSalvarPerfil) return;
 
     const userRef = ref(db, 'usuarios/' + userId);
-    
+
     onValue(userRef, (snapshot) => {
         const dados = snapshot.val();
         if (dados) {
             if (perfilNome && dados.nome && !perfilNome.value) perfilNome.value = dados.nome;
             if (perfilTipoPix && dados.tipoPix) perfilTipoPix.value = dados.tipoPix;
-            
+
             if (dados.chavePix) {
                 if (perfilChavePix) {
                     perfilChavePix.value = dados.chavePix;
                     perfilChavePix.disabled = true;
-                    perfilChavePix.style.backgroundColor = '#2a2a2a';
-                    perfilChavePix.style.cursor = 'not-allowed';
+                    perfilChavePix.classList.add('is-locked');
                 }
                 if (perfilTipoPix) {
                     perfilTipoPix.disabled = true;
-                    perfilTipoPix.style.backgroundColor = '#2a2a2a';
-                    perfilTipoPix.style.cursor = 'not-allowed';
+                    perfilTipoPix.classList.add('is-locked');
                 }
                 if (btnSalvarPerfil) {
                     btnSalvarPerfil.style.display = 'none';
@@ -149,7 +147,7 @@ function renderizarTabelaCarteira(planosObj) {
         : [];
 
     if (!planos.length) {
-        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Nenhum plano ativo no momento.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum plano ativo no momento.</td></tr>';
         if (elTotalInvestido) elTotalInvestido.innerText = formatadorMoeda.format(0);
         if (elTotalRendimento) elTotalRendimento.innerText = formatadorMoeda.format(0);
         return;
@@ -168,7 +166,7 @@ function renderizarTabelaCarteira(planosObj) {
         totalRendimento += rendimentoAcumulado;
 
         const statusTexto = finalizado ? 'Finalizado' : 'Ativo';
-        const statusCor = finalizado ? 'var(--text-muted)' : '#51cf66';
+        const statusClasse = finalizado ? 'plan-row__value' : 'plan-row__value plan-row__value--positive';
 
         return `
             <tr>
@@ -176,7 +174,7 @@ function renderizarTabelaCarteira(planosObj) {
                 <td>${formatadorMoeda.format(valor)}</td>
                 <td>${formatadorMoeda.format(rendimentoDiario)}</td>
                 <td>${formatadorMoeda.format(rendimentoAcumulado)}</td>
-                <td><span style="color: ${statusCor}; font-weight: 600;">${statusTexto}</span></td>
+                <td><span class="${statusClasse}" style="font-weight: 600;">${statusTexto}</span></td>
             </tr>
         `;
     }).join('');
@@ -212,7 +210,7 @@ function inicializarExtratoUsuario(userId) {
             : [];
 
         if (!registros.length) {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Nenhum registro no extrato ainda.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="table-empty">Nenhum registro no extrato ainda.</td></tr>';
             return;
         }
 
@@ -228,7 +226,7 @@ function inicializarExtratoUsuario(userId) {
                     <td>${formatadorDataHora.format(data)}</td>
                     <td>${mesAno}</td>
                     <td>${registro.descricao || '—'}</td>
-                    <td style="color: #51cf66; font-weight: 600;">${formatadorMoeda.format(registro.valor || 0)}</td>
+                    <td class="plan-row__value plan-row__value--positive">${formatadorMoeda.format(registro.valor || 0)}</td>
                 </tr>
             `;
         }).join('');
@@ -280,7 +278,7 @@ function inicializarEquipeUsuario(userId, codigoIndicacao) {
         if (elTotalIndicados) elTotalIndicados.innerText = membros.length;
 
         if (!membros.length) {
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Nenhum indicado cadastrado ainda.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="table-empty">Nenhum indicado cadastrado ainda.</td></tr>';
             return;
         }
 
@@ -307,10 +305,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const valor = btn.getAttribute('data-valor');
             const inputPlano = document.getElementById('valorPlano');
             if (inputPlano) inputPlano.value = valor;
-            
+
             const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
             if (modalInput) modalInput.value = valor;
-            
+
             abrirModalDeposito();
         });
     });
@@ -331,8 +329,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnConfirmarModalDep = document.getElementById('btnConfirmarModalDep') || document.getElementById('btnConfirmarModalDepositar');
 
     function abrirModalDeposito() {
-        if (modalToast) modalToast.style.display = 'none';
-        if (areaQrCodePix) areaQrCodePix.style.display = 'none';
+        if (modalToast) modalToast.classList.remove('ativo');
+        if (areaQrCodePix) areaQrCodePix.classList.remove('ativo');
         if (btnConfirmarModalDep) {
             btnConfirmarModalDep.textContent = "Gerar QR Code Pix";
             btnConfirmarModalDep.style.display = 'block';
@@ -347,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('fecharModalDepX')?.addEventListener('click', fecharModalDeposito);
     document.getElementById('fecharModalDeposito')?.addEventListener('click', fecharModalDeposito);
     document.getElementById('btnCancelarModalDep')?.addEventListener('click', fecharModalDeposito);
-    
+
     modalDep?.addEventListener('click', (e) => {
         if (e.target === modalDep) fecharModalDeposito();
     });
@@ -358,21 +356,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (valorAtual < 30) {
             if (modalToast) {
-                modalToast.style.display = 'block';
+                modalToast.classList.add('ativo');
                 modalToast.textContent = "⚠️ O valor mínimo de depósito/plano é R$ 30,00.";
-                setTimeout(() => { if (modalToast) modalToast.style.display = 'none'; }, 4000);
+                setTimeout(() => { if (modalToast) modalToast.classList.remove('ativo'); }, 4000);
             }
             return;
         }
 
-        if (areaQrCodePix && (areaQrCodePix.style.display === 'none' || areaQrCodePix.style.display === '')) {
+        if (areaQrCodePix && !areaQrCodePix.classList.contains('ativo')) {
             const qrImg = document.getElementById('imgQrCode');
             const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
-            
+
             if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=BancaCompartilhadaR$${valorAtual}`;
             if (pixCopiaCola) pixCopiaCola.textContent = `00020126580014br.gov.bcb.pix0136banca-compartilhada-pix-${valorAtual}5204000053039865802BR5925Banca Compartilhada6009Sao Paulo62070503***6304`;
-            
-            areaQrCodePix.style.display = 'block';
+
+            areaQrCodePix.classList.add('ativo');
             btnConfirmarModalDep.textContent = "Concluir Pagamento";
         } else {
             if (!userIdAtual) {
@@ -429,33 +427,29 @@ document.addEventListener('DOMContentLoaded', () => {
             // textContent (não .value) e avisar quando não há chave
             // cadastrada ainda no Perfil.
             elChave.textContent = chavePixPerfil || 'Nenhuma chave cadastrada — vá em Perfil e cadastre uma.';
-            elChave.style.color = chavePixPerfil ? '#fff' : 'var(--danger)';
+            elChave.classList.toggle('is-missing', !chavePixPerfil);
         }
 
         let boxSaldoModal = document.getElementById('boxSaldoDisponivelModal');
         if (!boxSaldoModal && modalSaque) {
             boxSaldoModal = document.createElement('div');
             boxSaldoModal.id = 'boxSaldoDisponivelModal';
-            boxSaldoModal.style.cssText = "background: #1e1e1e; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333;";
-            const containerInsercao = modalSaque.querySelector('.modal-body') || modalSaque.querySelector('div');
+            boxSaldoModal.className = 'modal-info-box modal-balance-box';
+            const containerInsercao = modalSaque.querySelector('.modal-body') || modalSaque.querySelector('.modal-card');
             if (containerInsercao) containerInsercao.prepend(boxSaldoModal);
         }
         if (boxSaldoModal) {
-            boxSaldoModal.innerHTML = `<span style="color: #aaa;">Saldo Disponível:</span> <strong style="color: #4ade80; font-size: 16px;">${formatadorMoeda.format(saldoAtualUsuario)}</strong>`;
+            boxSaldoModal.innerHTML = `<span>Saldo Disponível:</span> <strong>${formatadorMoeda.format(saldoAtualUsuario)}</strong>`;
         }
 
         const diaHoje = new Date().getDay();
         if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
             if (btnConfirmarModalSaque) {
                 btnConfirmarModalSaque.disabled = true;
-                btnConfirmarModalSaque.style.opacity = '0.6';
-                btnConfirmarModalSaque.style.cursor = 'not-allowed';
             }
         } else {
             if (btnConfirmarModalSaque) {
                 btnConfirmarModalSaque.disabled = false;
-                btnConfirmarModalSaque.style.opacity = '1';
-                btnConfirmarModalSaque.style.cursor = 'pointer';
             }
         }
 
@@ -491,46 +485,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const liquido = val - taxa;
 
             if (boxResumo) {
-                boxResumo.style.display = 'block';
-                boxResumo.style.background = '#18181b';
-                boxResumo.style.border = '1px solid #27272a';
-                boxResumo.style.borderRadius = '8px';
-                boxResumo.style.padding = '12px';
-                boxResumo.style.marginTop = '10px';
-                
+                boxResumo.classList.add('ativo');
                 boxResumo.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 13px; color: #a1a1aa;">
-                        <span>💡 Taxa (14%):</span>
-                        <span style="color: #f87171;">- ${formatadorMoeda.format(taxa)}</span>
+                    <div class="amount-note__row amount-note__row--negative">
+                        <span>Taxa (14%):</span>
+                        <span>- ${formatadorMoeda.format(taxa)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: bold; color: #f4f4f5; border-top: 1px solid #27272a; pt: 6px;">
+                    <div class="amount-note__row amount-note__row--positive">
                         <span>Você vai receber:</span>
-                        <span style="color: #4ade80;">${formatadorMoeda.format(liquido)}</span>
+                        <span>${formatadorMoeda.format(liquido)}</span>
                     </div>
                 `;
             }
 
             if (btnConfirmarModalSaque) {
-                if (val > saldoAtualUsuario) {
+                if (val > saldoAtualUsuario || val < CONFIG.VALOR_SAQUE_MINIMO || diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
                     btnConfirmarModalSaque.disabled = true;
-                    btnConfirmarModalSaque.style.opacity = '0.5';
-                    btnConfirmarModalSaque.style.cursor = 'not-allowed';
-                } else if (val < CONFIG.VALOR_SAQUE_MINIMO) {
-                    btnConfirmarModalSaque.disabled = true;
-                    btnConfirmarModalSaque.style.opacity = '0.5';
-                    btnConfirmarModalSaque.style.cursor = 'not-allowed';
-                } else if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
-                    btnConfirmarModalSaque.disabled = true;
-                    btnConfirmarModalSaque.style.opacity = '0.5';
-                    btnConfirmarModalSaque.style.cursor = 'not-allowed';
                 } else {
                     btnConfirmarModalSaque.disabled = false;
-                    btnConfirmarModalSaque.style.opacity = '1';
-                    btnConfirmarModalSaque.style.cursor = 'pointer';
                 }
             }
         } else {
-            if (boxResumo) boxResumo.style.display = 'none';
+            if (boxResumo) boxResumo.classList.remove('ativo');
         }
     });
 
