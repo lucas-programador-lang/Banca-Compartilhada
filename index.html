@@ -392,6 +392,20 @@
                 <input type="number" id="modalValorPlano" placeholder="30.00" value="30" readonly>
             </div>
 
+            <div class="input-group">
+                <label>CPF (obrigatório para gerar o Pix)</label>
+                <input type="text" id="modalDepositoCpf" placeholder="000.000.000-00" inputmode="numeric">
+            </div>
+
+            <div class="input-group">
+                <label>Telefone (obrigatório para gerar o Pix)</label>
+                <input type="text" id="modalDepositoTelefone" placeholder="(11) 99999-9999" inputmode="tel">
+            </div>
+
+            <p id="statusPagamentoPix" style="display: none; text-align: center; font-size: 13px; font-weight: 600; margin-top: 12px;">
+                ⏳ Aguardando confirmação do pagamento...
+            </p>
+
             <div id="areaQrCodePix" class="qr-area">
                 <div class="qr-area__hint">Escaneie o QR Code abaixo para pagar:</div>
                 <div class="qr-area__frame">
