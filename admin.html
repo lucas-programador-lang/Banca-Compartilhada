@@ -14,7 +14,7 @@
                 <div class="admin-header__icon" aria-hidden="true">⚙️</div>
                 <div>
                     <h2>Painel Administrativo</h2>
-                    <p>Todos os saques e depósitos da plataforma, em tempo real.</p>
+                    <p>Todos os saques, depósitos e saldos da plataforma, em tempo real.</p>
                 </div>
             </div>
             <a href="index.html" class="link-text admin-back">&larr; Voltar ao Painel</a>
@@ -35,7 +35,41 @@
                     <h3>Total de Depósitos Pendentes</h3>
                     <p id="totalDepositosPendentes">0</p>
                 </div>
+                <div class="stat-card">
+                    <h3>Saldo Total dos Usuários</h3>
+                    <p id="totalSaldoUsuarios">R$ 0,00</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Usuários Cadastrados</h3>
+                    <p id="totalUsuariosCadastrados">0</p>
+                </div>
             </div>
+
+            <section class="table-section">
+                <div class="table-section__head">
+                    <h3>Usuários e Saldos</h3>
+                </div>
+                <p class="table-hint">Saldo sacável e comissão de indicação acumulada de cada cliente cadastrado.</p>
+                <div class="table-search">
+                    <input type="text" id="buscaUsuarios" placeholder="Buscar por nome ou e-mail...">
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>E-mail</th>
+                                <th>Saldo</th>
+                                <th>Comissão Acumulada</th>
+                                <th>Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaUsuariosAdmin">
+                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
             <section class="table-section">
                 <div class="table-section__head">
@@ -51,11 +85,10 @@
                                 <th>Chave PIX</th>
                                 <th>Valor Solicitado</th>
                                 <th>Status</th>
-                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaSaquesAdmin">
-                            <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
+                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
