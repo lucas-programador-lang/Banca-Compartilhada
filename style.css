@@ -1298,6 +1298,18 @@ tbody tr:last-child td {
 .referral-link-row input {
     flex: 1;
     min-width: 220px;
+    padding: 13px 14px;
+    background-color: var(--bg-color-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: 0.88rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.referral-link-row input:hover {
+    border-color: var(--border-color-strong);
 }
 
 .referral-link-row .btn {
