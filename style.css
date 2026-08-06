@@ -1442,12 +1442,17 @@ tbody tr:last-child td {
 
 /* Resultado calculado (valor líquido do saque) */
 .amount-note {
+    display: none;
     background: rgba(0, 0, 0, 0.2);
     border-radius: var(--radius-sm);
     padding: 10px 12px;
     margin-bottom: var(--space-md);
     font-size: 0.85rem;
     color: var(--success-hover);
+}
+
+.amount-note.ativo {
+    display: block;
 }
 
 /* Área do QR Code Pix */
