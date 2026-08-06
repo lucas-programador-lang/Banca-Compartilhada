@@ -31,6 +31,11 @@
     --warning: #dcac4d;
     --warning-soft: rgba(220, 172, 77, 0.12);
 
+    /* Superfície auxiliar para inputs/boxes de informação dentro de cards
+       (era referenciada via var(--bg-card, #1a1a1a) sem existir no token
+       system — o fallback sempre disparava e destoava de --card-bg) */
+    --bg-card: var(--bg-color-elevated);
+
     /* Tipografia */
     --font-body: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     --font-display: 'Fraunces', 'Georgia', 'Times New Roman', serif;
@@ -1117,5 +1122,414 @@ tbody tr:last-child td {
 
     .stat-card {
         padding: var(--space-sm);
+    }
+}
+
+/* ==========================================================================
+   Componentes — Saldo, Planos, Modais
+   (extraídos dos estilos inline do index.html para virarem reutilizáveis)
+   ========================================================================== */
+
+/* Card de saldo (topo da aba Início) */
+.balance-card {
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--space-lg);
+}
+
+.balance-card__label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-xs);
+}
+
+.balance-card__label svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.balance-amount {
+    font-family: var(--font-display);
+    font-size: clamp(1.9rem, 1.4rem + 2vw, 2.6rem);
+    font-weight: 700;
+    color: var(--primary-hover);
+    margin-bottom: var(--space-lg);
+    font-variant-numeric: tabular-nums;
+}
+
+.action-row {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.action-row .btn {
+    flex: 1;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 0;
+}
+
+.action-row .btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Variante secundária do .btn — contorno em vez de preenchido */
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-color-strong);
+    color: var(--primary-hover);
+    box-shadow: none;
+}
+
+.btn-outline::after {
+    display: none;
+}
+
+.btn-outline:hover {
+    background: var(--card-bg-hover);
+    transform: translateY(-1px);
+    box-shadow: none;
+}
+
+/* Texto de apoio abaixo de um h2 de seção */
+.section-lead {
+    color: var(--text-muted);
+    margin-bottom: var(--space-lg);
+    font-size: 0.92rem;
+}
+
+/* Card de plano (Investir) */
+.plan-card {
+    position: relative;
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-card__title {
+    color: var(--primary-hover);
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: var(--space-xs);
+}
+
+.plan-badge {
+    display: inline-block;
+    align-self: flex-start;
+    background: var(--primary-soft);
+    color: var(--primary-hover);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: var(--space-md);
+    border: 1px solid var(--border-color-strong);
+}
+
+.plan-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-sm);
+    font-size: 0.88rem;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.plan-row:last-of-type {
+    border-bottom: none;
+    margin-bottom: var(--space-md);
+}
+
+.plan-row__label {
+    color: var(--text-muted);
+}
+
+.plan-row__value {
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.plan-row__value--positive {
+    color: var(--success-hover);
+}
+
+.plan-card .btn {
+    margin-top: auto;
+}
+
+/* Card de indicação (Equipe) */
+.referral-card {
+    margin-bottom: var(--space-lg);
+}
+
+.referral-card h3 {
+    margin-bottom: 10px;
+}
+
+.referral-card__hint {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: var(--space-md);
+}
+
+.referral-link-row {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.referral-link-row input {
+    flex: 1;
+    min-width: 220px;
+}
+
+.referral-link-row .btn {
+    width: auto;
+    white-space: nowrap;
+    margin-top: 0;
+}
+
+/* Estado vazio em tabelas */
+.table-empty {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Modais (Depósito / Saque)
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.modal-overlay.ativo {
+    display: flex;
+}
+
+.modal-card {
+    width: 100%;
+    max-width: 420px;
+    max-height: calc(100vh - 2 * var(--space-md));
+    overflow-y: auto;
+    position: relative;
+    margin: 0;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-elevated);
+    animation: cardIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.modal-card--wide {
+    max-width: 480px;
+}
+
+.modal-close {
+    position: absolute;
+    top: var(--space-md);
+    right: var(--space-md);
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    font-weight: 700;
+    padding: 4px;
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--text-main);
+}
+
+.modal-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--primary-hover);
+    margin-bottom: 8px;
+    padding-right: var(--space-lg);
+}
+
+.modal-lead {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: var(--space-md);
+}
+
+.modal-lead--warning {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+/* Alerta de erro dentro do modal (ex.: valor mínimo) */
+.modal-alert {
+    display: none;
+    background: var(--danger-soft);
+    border: 1px solid rgba(236, 91, 96, 0.35);
+    color: #ffb0b3;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: var(--space-md);
+    text-align: center;
+}
+
+.modal-alert.ativo {
+    display: block;
+}
+
+/* Caixa de informação (mínimo/taxa, chave PIX) */
+.modal-info-box {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 12px var(--space-md);
+    margin-bottom: var(--space-md);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.modal-info-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.modal-info-row + .modal-info-row {
+    margin-top: 4px;
+}
+
+.modal-info-row strong {
+    color: var(--text-main);
+}
+
+.modal-info-box--key strong {
+    word-break: break-all;
+}
+
+.modal-info-box--key .modal-info-row__label {
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    display: block;
+}
+
+/* Resultado calculado (valor líquido do saque) */
+.amount-note {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    margin-bottom: var(--space-md);
+    font-size: 0.85rem;
+    color: var(--success-hover);
+}
+
+/* Área do QR Code Pix */
+.qr-area {
+    display: none;
+    text-align: center;
+    margin-top: var(--space-md);
+    padding: var(--space-sm);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.qr-area.ativo {
+    display: block;
+}
+
+.qr-area__hint {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--primary-hover);
+    margin-bottom: 10px;
+}
+
+.qr-area__frame {
+    background: #fff;
+    padding: 10px;
+    display: inline-block;
+    border-radius: var(--radius-sm);
+    margin-bottom: 10px;
+}
+
+.qr-area__frame img {
+    width: 150px;
+    height: 150px;
+    display: block;
+}
+
+.qr-area__code {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    word-break: break-all;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px;
+    border-radius: 6px;
+    max-height: 60px;
+    overflow-y: auto;
+}
+
+/* Ações do rodapé do modal */
+.modal-actions {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+}
+
+.modal-actions .btn {
+    flex: 1;
+    margin-top: 0;
+}
+
+/* Input readonly (valor do plano pré-definido no modal de depósito) */
+.input-group input[readonly] {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+/* Selects fora do form de login (ex.: Perfil) usam a mesma base de
+   .input-group select, então nenhum estilo extra é necessário além
+   de garantir que ocupem a largura total dentro de qualquer card. */
+
+@media (max-width: 480px) {
+    .modal-card, .modal-card--wide {
+        max-width: 100%;
+    }
+
+    .plan-card {
+        padding: var(--space-md);
+    }
+
+    .action-row .btn {
+        min-width: 120px;
     }
 }
