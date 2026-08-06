@@ -1,4 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+Import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
     getAuth,
     createUserWithEmailAndPassword,
@@ -200,38 +200,24 @@ function gerarSlugNome(nome) {
     return slug || 'user';
 }
 
-/* ==========================================================================
-   Indicação (register.html) - Código Aleatório Curto
-   ========================================================================== */
-
 /**
- * Gera um código de indicação curto e totalmente aleatório (Ex: K9X2M4)
- * Sem letras confusas (como O, 0, I, l) para facilitar a leitura.
- * O código é SEMPRE gerado em MAIÚSCULO — a busca do indicador no
- * cadastro precisa normalizar para maiúsculo também (ver mais abaixo),
- * senão a chave nunca bate (RTDB é case-sensitive).
+ * Gera um código de indicação único a partir do nome do usuário,
+ * tentando "joao", depois "joao2", "joao57", etc. até achar um que
+ * ainda não exista em codigosIndicacao/.
  */
-async function gerarCodigoIndicacaoUnico() {
-    const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let tentativa = '';
-    let existe = true;
-    let tentativasMaximas = 0;
+async function gerarCodigoIndicacaoUnico(nome) {
+    const base = gerarSlugNome(nome);
+    let tentativa = base;
 
-    while (existe && tentativasMaximas < 20) {
-        tentativa = '';
-        for (let i = 0; i < 6; i++) {
-            const indice = Math.floor(Math.random() * caracteres.length);
-            tentativa += caracteres[indice];
-        }
-
+    for (let i = 0; i < 25; i++) {
         const snap = await get(ref(db, 'codigosIndicacao/' + tentativa));
-        if (!snap.exists()) {
-            existe = false; // Código livre encontrado!
-        }
-        tentativasMaximas++;
+        if (!snap.exists()) return tentativa;
+        tentativa = `${base}${Math.floor(10 + Math.random() * 90)}`;
     }
 
-    return tentativa;
+    // Fallback extremamente improvável: se 25 tentativas colidirem,
+    // usa um sufixo baseado no tempo atual para garantir unicidade.
+    return `${base}${Date.now().toString(36).slice(-5)}`;
 }
 
 /**
@@ -246,11 +232,11 @@ function capturarCodigoIndicacao() {
     const avisoIndicacao = getEl('avisoIndicacao');
 
     if (codigoRef && campoRefIndicador) {
-        campoRefIndicador.value = codigoRef.trim().toUpperCase();
+        campoRefIndicador.value = codigoRef.trim().toLowerCase();
         if (avisoIndicacao) avisoIndicacao.style.display = 'block';
     }
 
-    return codigoRef ? codigoRef.trim().toUpperCase() : null;
+    return codigoRef ? codigoRef.trim().toLowerCase() : null;
 }
 
 capturarCodigoIndicacao();
@@ -272,13 +258,7 @@ if (registerForm) {
         const nome = getEl('nome')?.value.trim() || 'Usuário';
         const email = getEl('emailReg').value.trim();
         const senha = getEl('senhaReg').value;
-        // FIX: os códigos de indicação são gerados e salvos em MAIÚSCULO
-        // (ver gerarCodigoIndicacaoUnico). Antes este campo era normalizado
-        // com .toLowerCase(), o que fazia a busca abaixo NUNCA encontrar o
-        // indicador (chaves do Realtime Database são case-sensitive) —
-        // o cadastro seguia normalmente, sem erro, mas indicadoPor ficava
-        // sempre null.
-        const codigoIndicadorDigitado = getEl('refIndicador')?.value.trim().toUpperCase() || null;
+        const codigoIndicadorDigitado = getEl('refIndicador')?.value.trim().toLowerCase() || null;
         const botao = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('button');
 
         const erroValidacao = validarEmailSenha(email, senha);
@@ -293,7 +273,7 @@ if (registerForm) {
             const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
             const user = userCredential.user;
 
-            // 2. Resolve o código de indicação digitado (ex.: "K9X2M4")
+            // 2. Resolve o código de indicação digitado (ex.: "joao23")
             //    para o UID de quem indicou, consultando codigosIndicacao/.
             //    Se o código não existir (link inválido/expirado), o
             //    cadastro segue normalmente sem indicador.
@@ -305,8 +285,7 @@ if (registerForm) {
 
             // 3. Gera o código de indicação único deste novo usuário,
             //    para que ele também possa indicar outras pessoas depois.
-            const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico();
-            const dataCadastro = new Date().toISOString();
+            const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico(nome);
 
             // 4. Grava o perfil do usuário e o mapeamento código -> uid
             await set(ref(db, 'usuarios/' + user.uid), {
@@ -319,26 +298,10 @@ if (registerForm) {
                 chavePix: '',
                 indicadoPor: uidIndicador,
                 codigoIndicacao: meuCodigoIndicacao,
-                dataCadastro: dataCadastro
+                dataCadastro: new Date().toISOString()
             });
 
             await set(ref(db, 'codigosIndicacao/' + meuCodigoIndicacao), user.uid);
-
-            // 5. Grava também em perfisPublicos/{uid} — uma cópia
-            //    deliberadamente enxuta (só nome, email, indicadoPor,
-            //    dataCadastro), SEM saldo/comissao/chavePix. Esse nó
-            //    separado existe porque o nó "usuarios" tem dados
-            //    sensíveis e não pode ser aberto para consulta geral,
-            //    mas a aba Equipe (script.js) precisa poder perguntar
-            //    "quem foi indicado por mim?" — e isso exige uma
-            //    leitura/consulta que varra todos os usuários. Ver
-            //    FIREBASE_REGRAS.txt para as regras completas.
-            await set(ref(db, 'perfisPublicos/' + user.uid), {
-                nome: nome,
-                email: email,
-                indicadoPor: uidIndicador,
-                dataCadastro: dataCadastro
-            });
 
             mostrarToast('🎉 Conta criada com sucesso!', 'success');
             setTimeout(() => {
