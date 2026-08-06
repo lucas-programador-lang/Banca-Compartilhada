@@ -304,6 +304,21 @@ if (registerForm) {
 
             await set(ref(db, 'codigosIndicacao/' + meuCodigoIndicacao), user.uid);
 
+            // 5. Se esta conta foi indicada por alguém, grava também uma
+            //    entrada em equipe/{uidIndicador}/{meuUid} com os dados
+            //    básicos exibidos na tabela "Membros da Rede". Essa lista
+            //    invertida existe porque o indicador não tem permissão
+            //    para ler a coleção usuarios/ inteira (só o próprio nó
+            //    dele) — sem ela, a query orderByChild('indicadoPor')
+            //    seria barrada pelas regras do Realtime Database.
+            if (uidIndicador) {
+                await set(ref(db, `equipe/${uidIndicador}/${user.uid}`), {
+                    nome: nome,
+                    email: email,
+                    dataCadastro: new Date().toISOString()
+                });
+            }
+
             mostrarToast('🎉 Conta criada com sucesso!', 'success');
             setTimeout(() => {
                 window.location.href = 'index.html';
