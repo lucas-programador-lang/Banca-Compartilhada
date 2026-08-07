@@ -36,6 +36,10 @@
                     <p id="totalDepositosPendentes">0</p>
                 </div>
                 <div class="stat-card">
+                    <h3>Pendências de Plano</h3>
+                    <p id="totalPendenciasPlano">0</p>
+                </div>
+                <div class="stat-card">
                     <h3>Saldo Total dos Usuários</h3>
                     <p id="totalSaldoUsuarios">R$ 0,00</p>
                 </div>
@@ -65,6 +69,29 @@
                             </tr>
                         </thead>
                         <tbody id="tabelaUsuariosAdmin">
+                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="table-section">
+                <div class="table-section__head">
+                    <h3>Pendências de Plano</h3>
+                </div>
+                <p class="table-hint">Pix confirmado e dinheiro recebido, mas o usuário já tinha um plano ativo desse valor no momento da confirmação — precisa de uma decisão manual: criar o plano mesmo assim (ignora o limite) ou marcar como resolvido sem criar plano (ex.: reembolso feito fora do sistema).</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Horário</th>
+                                <th>Usuário</th>
+                                <th>Valor</th>
+                                <th>Observação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPendenciasPlano">
                             <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
                         </tbody>
                     </table>
