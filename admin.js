@@ -1,5 +1,5 @@
 import { auth, db, mostrarToast } from './auth.js';
-import { ref, onValue, update, push, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -40,20 +40,6 @@ function badgeStatus(status) {
     const label = STATUS_LABELS[chave] || status || 'Pendente';
     const cor = STATUS_CORES[chave] || 'var(--text-muted)';
     return `<span style="color: ${cor}; font-weight: 600;">${label}</span>`;
-}
-
-/**
- * Regras de rendimento por valor de plano, espelhando o que é mostrado
- * na aba "Investir" do index.html:
- *   R$ 30 / R$ 50   -> 3% ao dia, teto de 70% sobre o capital
- *   R$ 100 a 1000   -> 2% ao dia, teto de 60% sobre o capital
- */
-function obterConfigPlano(valor) {
-    const valorNumerico = parseFloat(valor) || 0;
-    if (valorNumerico === 30 || valorNumerico === 50) {
-        return { percentualDiario: 0.03, tetoPercentual: 0.70 };
-    }
-    return { percentualDiario: 0.02, tetoPercentual: 0.60 };
 }
 
 /**
@@ -168,16 +154,23 @@ function renderizarTabelaDepositos(depositos, usuarios) {
 
 /**
  * Lista de Usuários e Saldos — mostra, para cada cliente cadastrado em
- * usuarios/{uid}, o saldo sacável atual (campo "saldo") e a comissão de
- * indicação acumulada (campo "comissao"). Aceita um termo de busca para
- * filtrar por nome ou e-mail sem precisar buscar de novo no Firebase.
+ * usuarios/{uid}, o saldo sacável atual e a comissão de indicação
+ * acumulada. Esses dois valores agora moram em financeiro/{uid}
+ * (saldoRendimento + saldoComissao para o saldo, comissao para o total
+ * histórico) — não mais em usuarios/{uid}, que só guarda dados de
+ * perfil (nome, e-mail, chave PIX, isAdmin).
  */
-function renderizarTabelaUsuarios(usuariosObj, filtro) {
+function renderizarTabelaUsuarios(usuariosObj, financeiroObj, filtro) {
     const tbody = document.getElementById('tabelaUsuariosAdmin');
     if (!tbody) return;
 
     const termo = (filtro || '').trim().toLowerCase();
-    let lista = Object.entries(usuariosObj || {}).map(([uid, dados]) => ({ uid, ...dados }));
+    let lista = Object.entries(usuariosObj || {}).map(([uid, dados]) => {
+        const financeiro = (financeiroObj || {})[uid] || {};
+        const saldo = parseFloat(financeiro.saldoRendimento || 0) + parseFloat(financeiro.saldoComissao || 0);
+        const comissao = parseFloat(financeiro.comissao || 0);
+        return { uid, ...dados, saldo, comissao };
+    });
 
     if (termo) {
         lista = lista.filter(u =>
@@ -187,7 +180,7 @@ function renderizarTabelaUsuarios(usuariosObj, filtro) {
     }
 
     // Maior saldo primeiro — é normalmente o que o admin quer ver de cara.
-    lista.sort((a, b) => (parseFloat(b.saldo) || 0) - (parseFloat(a.saldo) || 0));
+    lista.sort((a, b) => b.saldo - a.saldo);
 
     if (!lista.length) {
         const mensagem = termo ? 'Nenhum usuário encontrado para essa busca.' : 'Nenhum usuário cadastrado ainda.';
@@ -197,8 +190,8 @@ function renderizarTabelaUsuarios(usuariosObj, filtro) {
             <tr>
                 <td>${escapeHTML(u.nome) || '—'}</td>
                 <td>${escapeHTML(u.email) || '—'}</td>
-                <td>${formatadorMoeda.format(parseFloat(u.saldo) || 0)}</td>
-                <td>${formatadorMoeda.format(parseFloat(u.comissao) || 0)}</td>
+                <td>${formatadorMoeda.format(u.saldo)}</td>
+                <td>${formatadorMoeda.format(u.comissao)}</td>
                 <td>${u.isAdmin ? '<span class="status-badge status-admin">Admin</span>' : '—'}</td>
             </tr>
         `).join('');
@@ -206,89 +199,54 @@ function renderizarTabelaUsuarios(usuariosObj, filtro) {
 
     // Total e contagem sempre refletem TODOS os usuários, não só o
     // resultado filtrado da busca.
-    const todos = Object.values(usuariosObj || {});
-    const somaSaldos = todos.reduce((soma, u) => soma + (parseFloat(u?.saldo) || 0), 0);
+    const todosUids = Object.keys(usuariosObj || {});
+    const somaSaldos = todosUids.reduce((soma, uid) => {
+        const financeiro = (financeiroObj || {})[uid] || {};
+        return soma + parseFloat(financeiro.saldoRendimento || 0) + parseFloat(financeiro.saldoComissao || 0);
+    }, 0);
 
     const elTotalSaldo = document.getElementById('totalSaldoUsuarios');
     if (elTotalSaldo) elTotalSaldo.textContent = formatadorMoeda.format(somaSaldos);
 
     const elTotalUsuarios = document.getElementById('totalUsuariosCadastrados');
-    if (elTotalUsuarios) elTotalUsuarios.textContent = todos.length;
+    if (elTotalUsuarios) elTotalUsuarios.textContent = todosUids.length;
 }
 
 /**
- * Percentual de comissão de indicação (1º nível), pago sobre o valor
- * do plano ativado por um indicado.
+ * URL base do mesmo Worker que já processa o Pix — as ações de admin
+ * (aprovar/recusar depósito) agora passam por ele, autenticadas com o
+ * ID Token do admin logado, em vez de escrever direto no Firebase pelo
+ * SDK do navegador. Isso elimina a duplicação de creditarComissaoIndicacao
+ * que existia aqui (schema antigo, causou o bug de comissão não
+ * aparecer em Início/Equipe) — agora só existe uma implementação dessa
+ * regra, dentro do worker.js, reaproveitada tanto pelo webhook real da
+ * Vizzion Pay quanto pela aprovação manual.
  */
-const PERCENTUAL_COMISSAO_INDICACAO = 0.15;
+const WORKER_BASE_URL = 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev';
 
 /**
- * Se o dono do depósito (uid) foi indicado por alguém (campo
- * indicadoPor em usuarios/{uid}), credita 15% do valor do plano para
- * o indicador — tanto na comissão acumulada quanto no saldo sacável —
- * e registra o lançamento em extrato/{uidIndicador}, que é o que faz
- * a comissão aparecer em tempo real na Equipe e no Extrato do
- * indicador.
- */
-async function creditarComissaoIndicacao(uidIndicado, valorPlano) {
-    try {
-        const indicadoSnap = await get(ref(db, 'usuarios/' + uidIndicado));
-        const dadosIndicado = indicadoSnap.val();
-        const uidIndicador = dadosIndicado?.indicadoPor;
-        if (!uidIndicador) return;
-
-        const indicadorRef = ref(db, 'usuarios/' + uidIndicador);
-        const indicadorSnap = await get(indicadorRef);
-        const dadosIndicador = indicadorSnap.val();
-        if (!dadosIndicador) return; // link de indicação inválido / indicador não existe mais
-
-        const valorComissao = (parseFloat(valorPlano) || 0) * PERCENTUAL_COMISSAO_INDICACAO;
-        const comissaoAtual = parseFloat(dadosIndicador.comissao || 0);
-        const saldoAtual = parseFloat(dadosIndicador.saldo || 0);
-
-        await update(indicadorRef, {
-            comissao: comissaoAtual + valorComissao,
-            saldo: saldoAtual + valorComissao,
-        });
-
-        const extratoRef = ref(db, 'extrato/' + uidIndicador);
-        const novoExtratoRef = push(extratoRef);
-        await set(novoExtratoRef, {
-            data: new Date().toISOString(),
-            descricao: `Comissão de indicação (15%) — plano de ${dadosIndicado?.nome || 'um indicado'}`,
-            valor: valorComissao,
-        });
-    } catch (error) {
-        console.error('Erro ao creditar comissão de indicação:', error);
-    }
-}
-
-/**
- * Aprova um depósito: marca o status como "aprovado", cria o plano
- * correspondente em planos/{uid}/{id} (que é o que faz o plano aparecer
- * na aba "Carteira" do usuário) e credita a comissão de indicação para
- * quem o indicou, se houver.
+ * Aprova um depósito chamando o Worker, que verifica se quem está
+ * pedindo é admin de verdade (via ID Token + isAdmin no Firebase),
+ * cria o plano, credita a comissão de indicação (se houver) e marca o
+ * depósito como aprovado — tudo numa única fonte de verdade.
  */
 async function aprovarDeposito(uid, depositoId, valorPlano) {
     try {
-        const { percentualDiario, tetoPercentual } = obterConfigPlano(valorPlano);
+        const idToken = await auth.currentUser.getIdToken();
 
-        const planosRef = ref(db, 'planos/' + uid);
-        const novoPlanoRef = push(planosRef);
-
-        await set(novoPlanoRef, {
-            valor: parseFloat(valorPlano) || 0,
-            percentualDiario,
-            tetoPercentual,
-            dataAtivacao: new Date().toISOString(),
-            origemDepositoId: depositoId,
-            status: 'ativo',
+        const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/aprovar-deposito`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ uid, depositoId, valorPlano }),
         });
 
-        const depositoRef = ref(db, 'depositos/' + uid + '/' + depositoId);
-        await update(depositoRef, { status: 'aprovado' });
-
-        await creditarComissaoIndicacao(uid, valorPlano);
+        const dadosResposta = await resposta.json();
+        if (!resposta.ok) {
+            throw new Error(dadosResposta.error || 'Erro ao aprovar depósito.');
+        }
 
         mostrarToast('✅ Depósito aprovado! O plano já está ativo na Carteira do usuário.', 'success');
     } catch (error) {
@@ -299,8 +257,22 @@ async function aprovarDeposito(uid, depositoId, valorPlano) {
 
 async function recusarDeposito(uid, depositoId) {
     try {
-        const depositoRef = ref(db, 'depositos/' + uid + '/' + depositoId);
-        await update(depositoRef, { status: 'recusado' });
+        const idToken = await auth.currentUser.getIdToken();
+
+        const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/recusar-deposito`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ uid, depositoId }),
+        });
+
+        const dadosResposta = await resposta.json();
+        if (!resposta.ok) {
+            throw new Error(dadosResposta.error || 'Erro ao recusar depósito.');
+        }
+
         mostrarToast('Depósito recusado.', 'warning');
     } catch (error) {
         console.error('Erro ao recusar depósito:', error);
@@ -345,7 +317,7 @@ function iniciarBuscaUsuarios() {
 
     input.addEventListener('input', (e) => {
         estado.filtroUsuarios = e.target.value;
-        renderizarTabelaUsuarios(estado.usuarios || {}, estado.filtroUsuarios);
+        renderizarTabelaUsuarios(estado.usuarios || {}, estado.financeiro || {}, estado.filtroUsuarios);
     });
 
     input.dataset.listenerAtivo = 'true';
@@ -353,11 +325,13 @@ function iniciarBuscaUsuarios() {
 
 /**
  * Mantém em memória a última versão de cada fonte de dados (usuários,
- * saques, depósitos), já que os três chegam de listeners independentes
- * e as tabelas precisam sempre do cruzamento mais recente dos três.
+ * financeiro, saques, depósitos), já que os quatro chegam de listeners
+ * independentes e as tabelas precisam sempre do cruzamento mais
+ * recente de todos.
  */
 const estado = {
     usuarios: null,
+    financeiro: null,
     saques: null,
     depositos: null,
     filtroUsuarios: '',
@@ -371,7 +345,7 @@ function rerenderizarTudo() {
         renderizarTabelaDepositos(achatarPorUsuario(estado.depositos), estado.usuarios || {});
     }
     if (estado.usuarios !== null) {
-        renderizarTabelaUsuarios(estado.usuarios, estado.filtroUsuarios);
+        renderizarTabelaUsuarios(estado.usuarios, estado.financeiro || {}, estado.filtroUsuarios);
     }
 }
 
@@ -382,6 +356,12 @@ function iniciarListenersAdmin() {
     const usuariosRef = ref(db, 'usuarios');
     onValue(usuariosRef, (snapshot) => {
         estado.usuarios = snapshot.val();
+        rerenderizarTudo();
+    });
+
+    const financeiroRef = ref(db, 'financeiro');
+    onValue(financeiroRef, (snapshot) => {
+        estado.financeiro = snapshot.val();
         rerenderizarTudo();
     });
 
@@ -407,8 +387,9 @@ auth.onAuthStateChanged((user) => {
     // Verifica a flag isAdmin do usuário logado antes de exibir qualquer
     // dado. Isto é só uma camada de conveniência de interface — a
     // segurança de verdade precisa vir das Regras do Realtime Database,
-    // que devem bloquear a leitura de "usuarios", "saques" e "depositos"
-    // para quem não tiver essa mesma flag marcada no servidor.
+    // que devem bloquear a leitura de "usuarios", "financeiro", "saques"
+    // e "depositos" para quem não tiver essa mesma flag marcada no
+    // servidor.
     const perfilRef = ref(db, 'usuarios/' + user.uid + '/isAdmin');
     onValue(perfilRef, (snapshot) => {
         const ehAdmin = snapshot.val() === true;
