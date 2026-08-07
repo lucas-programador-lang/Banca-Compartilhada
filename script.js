@@ -230,6 +230,32 @@ function inicializarCarteiraUsuario(userId) {
     const planosRef = ref(db, 'planos/' + userId);
     onValue(planosRef, (snapshot) => {
         renderizarTabelaCarteira(snapshot.val());
+        atualizarDisponibilidadePlanos(snapshot.val());
+    });
+}
+
+/**
+ * Desabilita o botão "APLICAR AGORA" de cada valor de plano que o
+ * usuário já tem ativo agora (status !== 'finalizado') — limite de 1
+ * plano por valor, por vez. Isso é só UX (evita a pessoa preencher
+ * CPF/telefone pra um Pix que o Worker vai recusar); a validação que
+ * importa de verdade acontece no servidor, em /api/pix/criar.
+ */
+function atualizarDisponibilidadePlanos(planosObj) {
+    const planos = planosObj ? Object.values(planosObj) : [];
+    const valoresAtivos = new Set(
+        planos.filter(p => p.status !== 'finalizado').map(p => parseFloat(p.valor))
+    );
+
+    document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
+        const valor = parseFloat(btn.getAttribute('data-valor'));
+        if (valoresAtivos.has(valor)) {
+            btn.disabled = true;
+            btn.textContent = 'PLANO JÁ ATIVO';
+        } else {
+            btn.disabled = false;
+            btn.textContent = 'APLICAR AGORA';
+        }
     });
 }
 
