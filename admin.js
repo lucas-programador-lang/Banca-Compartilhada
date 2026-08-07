@@ -108,6 +108,48 @@ function renderizarTabelaSaques(saques, usuarios) {
     if (elTotal) elTotal.textContent = pendentes;
 }
 
+/**
+ * Depósitos travados em 'aprovado_sem_plano' — Pix confirmado de
+ * verdade, mas o Worker recusou criar o plano porque o usuário já
+ * tinha um ativo do mesmo valor. Precisa de decisão manual do admin.
+ */
+function renderizarTabelaPendenciasPlano(depositos, usuarios) {
+    const tbody = document.getElementById('tabelaPendenciasPlano');
+    if (!tbody) return;
+
+    const pendencias = depositos.filter(d => d.status === 'aprovado_sem_plano');
+
+    if (!pendencias.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhuma pendência de plano no momento.</td></tr>';
+    } else {
+        tbody.innerHTML = pendencias.map(deposito => `
+            <tr>
+                <td>${formatarDataHora(deposito.dataAprovacao || deposito.dataSolicitacao)}</td>
+                <td>${escapeHTML(nomeDoUsuario(usuarios, deposito.uid))}</td>
+                <td>${formatadorMoeda.format(deposito.valorPlano || 0)}</td>
+                <td style="max-width: 320px; white-space: normal;">${escapeHTML(deposito.obsAdmin) || '—'}</td>
+                <td>
+                    <div class="admin-actions">
+                        <button
+                            class="btn-approve btn-criar-plano-mesmo-assim"
+                            data-uid="${deposito.uid}"
+                            data-id="${deposito.id}"
+                        >Criar plano mesmo assim</button>
+                        <button
+                            class="btn-reject btn-marcar-resolvido"
+                            data-uid="${deposito.uid}"
+                            data-id="${deposito.id}"
+                        >Marcar resolvido (sem plano)</button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    const elTotal = document.getElementById('totalPendenciasPlano');
+    if (elTotal) elTotal.textContent = pendencias.length;
+}
+
 function renderizarTabelaDepositos(depositos, usuarios) {
     const tbody = document.getElementById('tabelaDepositosAdmin');
     if (!tbody) return;
@@ -280,6 +322,40 @@ async function recusarDeposito(uid, depositoId) {
     }
 }
 
+/**
+ * Resolve uma pendência de plano (depósito com status
+ * 'aprovado_sem_plano'), chamando o Worker com a ação escolhida pelo
+ * admin: criar o plano mesmo com o limite, ou só marcar como resolvido
+ * sem criar plano nenhum.
+ */
+async function resolverPendenciaPlano(uid, depositoId, acao) {
+    try {
+        const idToken = await auth.currentUser.getIdToken();
+
+        const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/resolver-pendencia-plano`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ uid, depositoId, acao }),
+        });
+
+        const dadosResposta = await resposta.json();
+        if (!resposta.ok) {
+            throw new Error(dadosResposta.error || 'Erro ao resolver pendência.');
+        }
+
+        mostrarToast(
+            acao === 'criar_plano' ? '✅ Plano criado manualmente.' : '✅ Pendência marcada como resolvida.',
+            'success'
+        );
+    } catch (error) {
+        console.error('Erro ao resolver pendência de plano:', error);
+        mostrarToast('❌ Erro ao resolver pendência: ' + error.message, 'error');
+    }
+}
+
 // Delegação de eventos: os botões de aprovar/recusar são recriados a
 // cada render da tabela, então o listener fica no tbody (que existe
 // desde o carregamento da página) em vez de nos botões individuais.
@@ -303,6 +379,34 @@ function iniciarDelegacaoAcoesDepositos() {
             btnRecusar.disabled = true;
             btnRecusar.textContent = 'Recusando...';
             recusarDeposito(uid, id);
+        }
+    });
+
+    tbody.dataset.listenerAtivo = 'true';
+}
+
+// Mesma ideia da delegação acima, mas pros botões da tabela de
+// Pendências de Plano (tbody diferente, recriado a cada render).
+function iniciarDelegacaoPendenciasPlano() {
+    const tbody = document.getElementById('tabelaPendenciasPlano');
+    if (!tbody || tbody.dataset.listenerAtivo) return;
+
+    tbody.addEventListener('click', (e) => {
+        const btnCriarPlano = e.target.closest('.btn-criar-plano-mesmo-assim');
+        const btnMarcarResolvido = e.target.closest('.btn-marcar-resolvido');
+
+        if (btnCriarPlano) {
+            const { uid, id } = btnCriarPlano.dataset;
+            btnCriarPlano.disabled = true;
+            btnCriarPlano.textContent = 'Criando...';
+            resolverPendenciaPlano(uid, id, 'criar_plano');
+        }
+
+        if (btnMarcarResolvido) {
+            const { uid, id } = btnMarcarResolvido.dataset;
+            btnMarcarResolvido.disabled = true;
+            btnMarcarResolvido.textContent = 'Marcando...';
+            resolverPendenciaPlano(uid, id, 'marcar_resolvido');
         }
     });
 
@@ -342,7 +446,9 @@ function rerenderizarTudo() {
         renderizarTabelaSaques(achatarPorUsuario(estado.saques), estado.usuarios || {});
     }
     if (estado.depositos !== null) {
-        renderizarTabelaDepositos(achatarPorUsuario(estado.depositos), estado.usuarios || {});
+        const depositosLista = achatarPorUsuario(estado.depositos);
+        renderizarTabelaDepositos(depositosLista, estado.usuarios || {});
+        renderizarTabelaPendenciasPlano(depositosLista, estado.usuarios || {});
     }
     if (estado.usuarios !== null) {
         renderizarTabelaUsuarios(estado.usuarios, estado.financeiro || {}, estado.filtroUsuarios);
@@ -351,6 +457,7 @@ function rerenderizarTudo() {
 
 function iniciarListenersAdmin() {
     iniciarDelegacaoAcoesDepositos();
+    iniciarDelegacaoPendenciasPlano();
     iniciarBuscaUsuarios();
 
     const usuariosRef = ref(db, 'usuarios');
