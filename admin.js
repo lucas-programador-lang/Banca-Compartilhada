@@ -455,10 +455,82 @@ function rerenderizarTudo() {
     }
 }
 
+/**
+ * Chama o Worker pra rodar o cálculo de rendimentos na hora (mesma
+ * lógica do Cron Trigger diário) e mostra o resumo — quantos foram
+ * creditados e, principalmente, quem ficou de fora e por quê.
+ */
+function iniciarBotaoRodarRendimentos() {
+    const btn = document.getElementById('btnRodarRendimentos');
+    const resumoEl = document.getElementById('resumoRendimentos');
+    if (!btn || btn.dataset.listenerAtivo) return;
+
+    btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.textContent = 'Rodando...';
+        if (resumoEl) {
+            resumoEl.style.display = 'none';
+            resumoEl.textContent = '';
+        }
+
+        try {
+            const idToken = await auth.currentUser.getIdToken();
+
+            const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/rodar-rendimentos-agora`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
+            });
+
+            const dadosResposta = await resposta.json();
+            if (!resposta.ok) {
+                throw new Error(dadosResposta.error || 'Erro ao rodar cálculo de rendimentos.');
+            }
+
+            const { resumo } = dadosResposta;
+            mostrarToast(`✅ ${resumo.usuariosCreditados} usuário(s) creditado(s) agora.`, 'success');
+
+            if (resumoEl) {
+                const linhas = [`Usuários creditados: ${resumo.usuariosCreditados}`];
+
+                if (resumo.usuariosSemConta?.length) {
+                    linhas.push(`\n⚠️ Usuários com plano mas sem conta encontrada (dado órfão): ${resumo.usuariosSemConta.join(', ')}`);
+                }
+                if (resumo.planosComDataInvalida?.length) {
+                    linhas.push(`\n⚠️ Planos com data de ativação inválida (não creditados até corrigir manualmente):`);
+                    resumo.planosComDataInvalida.forEach(p => {
+                        linhas.push(`  - uid: ${p.uid} | planoId: ${p.planoId} | dataAtivacao: ${JSON.stringify(p.dataAtivacao)}`);
+                    });
+                }
+                if (resumo.usuariosComErro?.length) {
+                    linhas.push(`\n❌ Usuários com erro ao creditar:`);
+                    resumo.usuariosComErro.forEach(u => {
+                        linhas.push(`  - uid: ${u.uid} | erro: ${u.erro}`);
+                    });
+                }
+
+                resumoEl.textContent = linhas.join('\n');
+                resumoEl.style.display = 'block';
+            }
+        } catch (error) {
+            console.error('Erro ao rodar cálculo de rendimentos:', error);
+            mostrarToast('❌ ' + error.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Rodar cálculo de rendimentos agora';
+        }
+    });
+
+    btn.dataset.listenerAtivo = 'true';
+}
+
 function iniciarListenersAdmin() {
     iniciarDelegacaoAcoesDepositos();
     iniciarDelegacaoPendenciasPlano();
     iniciarBuscaUsuarios();
+    iniciarBotaoRodarRendimentos();
 
     const usuariosRef = ref(db, 'usuarios');
     onValue(usuariosRef, (snapshot) => {
