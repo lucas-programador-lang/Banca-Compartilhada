@@ -26,6 +26,11 @@
         </div>
 
         <div id="conteudoAdmin" style="display: none;">
+            <div class="table-section" style="margin-bottom: var(--space-lg);">
+                <button class="btn" id="btnRodarRendimentos" type="button" style="width: auto; padding: 12px 24px;">Rodar cálculo de rendimentos agora</button>
+                <p class="table-hint" style="margin-top: 8px;">Roda o mesmo cálculo do Cron Trigger diário na hora, e mostra abaixo quem foi creditado ou por que alguém ficou de fora (conta não encontrada, data de ativação inválida, etc.).</p>
+                <div id="resumoRendimentos" style="display: none; margin-top: var(--space-sm); font-size: 0.85rem; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: var(--space-sm);"></div>
+            </div>
             <div class="stats-grid">
                 <div class="stat-card">
                     <h3>Total de Saques Pendentes</h3>
