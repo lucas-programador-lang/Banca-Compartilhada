@@ -1318,6 +1318,10 @@ tbody tr:last-child td {
     color: var(--success-hover);
 }
 
+.plan-row__value--negative {
+    color: var(--danger);
+}
+
 .plan-card .btn {
     margin-top: auto;
 }
