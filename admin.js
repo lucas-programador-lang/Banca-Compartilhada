@@ -26,6 +26,7 @@ const STATUS_LABELS = {
     aprovado: 'Aprovado',
     recusado: 'Recusado',
     concluido: 'Concluído',
+    pago: 'Pago',
 };
 
 const STATUS_CORES = {
@@ -33,6 +34,7 @@ const STATUS_CORES = {
     aprovado: 'var(--success)',
     concluido: 'var(--success)',
     recusado: 'var(--danger)',
+    pago: 'var(--success)',
 };
 
 function badgeStatus(status) {
@@ -90,17 +92,33 @@ function renderizarTabelaSaques(saques, usuarios) {
     if (!tbody) return;
 
     if (!saques.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum saque solicitado ainda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhum saque solicitado ainda.</td></tr>';
     } else {
-        tbody.innerHTML = saques.map(saque => `
-            <tr>
-                <td>${formatarDataHora(saque.dataSolicitacao)}</td>
-                <td>${escapeHTML(nomeDoUsuario(usuarios, saque.uid))}</td>
-                <td>${escapeHTML(saque.chavePix) || '—'}</td>
-                <td>${formatadorMoeda.format(saque.valorSolicitado || 0)}</td>
-                <td>${badgeStatus(saque.status)}</td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = saques.map(saque => {
+            const status = (saque.status || 'pendente').toLowerCase();
+            const acoes = status === 'pendente'
+                ? `
+                    <div class="admin-actions">
+                        <button
+                            class="btn-approve btn-marcar-saque-pago"
+                            data-uid="${saque.uid}"
+                            data-id="${saque.id}"
+                        >Marcar como pago</button>
+                    </div>
+                `
+                : '—';
+
+            return `
+                <tr>
+                    <td>${formatarDataHora(saque.dataSolicitacao)}</td>
+                    <td>${escapeHTML(nomeDoUsuario(usuarios, saque.uid))}</td>
+                    <td>${escapeHTML(saque.chavePix) || '—'}</td>
+                    <td>${formatadorMoeda.format(saque.valorSolicitado || 0)}</td>
+                    <td>${badgeStatus(saque.status)}</td>
+                    <td>${acoes}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     const pendentes = saques.filter(s => (s.status || 'pendente').toLowerCase() === 'pendente').length;
@@ -356,6 +374,55 @@ async function resolverPendenciaPlano(uid, depositoId, acao) {
     }
 }
 
+/**
+ * Marca um saque como pago chamando o Worker, que atualiza tanto o
+ * registro em saques/{uid} quanto a entrada correspondente no Extrato
+ * do usuário — as duas usam o mesmo id, então ficam sempre em sincronia.
+ */
+async function marcarSaquePago(uid, saqueId) {
+    try {
+        const idToken = await auth.currentUser.getIdToken();
+
+        const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/marcar-saque-pago`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ uid, saqueId }),
+        });
+
+        const dadosResposta = await resposta.json();
+        if (!resposta.ok) {
+            throw new Error(dadosResposta.error || 'Erro ao marcar saque como pago.');
+        }
+
+        mostrarToast('✅ Saque marcado como pago.', 'success');
+    } catch (error) {
+        console.error('Erro ao marcar saque como pago:', error);
+        mostrarToast('❌ Erro ao marcar saque como pago: ' + error.message, 'error');
+    }
+}
+
+// Delegação de eventos pra tabela de Saques — mesmo padrão das outras
+// tabelas (botões recriados a cada render).
+function iniciarDelegacaoAcoesSaques() {
+    const tbody = document.getElementById('tabelaSaquesAdmin');
+    if (!tbody || tbody.dataset.listenerAtivo) return;
+
+    tbody.addEventListener('click', (e) => {
+        const btnMarcarPago = e.target.closest('.btn-marcar-saque-pago');
+        if (btnMarcarPago) {
+            const { uid, id } = btnMarcarPago.dataset;
+            btnMarcarPago.disabled = true;
+            btnMarcarPago.textContent = 'Marcando...';
+            marcarSaquePago(uid, id);
+        }
+    });
+
+    tbody.dataset.listenerAtivo = 'true';
+}
+
 // Delegação de eventos: os botões de aprovar/recusar são recriados a
 // cada render da tabela, então o listener fica no tbody (que existe
 // desde o carregamento da página) em vez de nos botões individuais.
@@ -528,6 +595,7 @@ function iniciarBotaoRodarRendimentos() {
 
 function iniciarListenersAdmin() {
     iniciarDelegacaoAcoesDepositos();
+    iniciarDelegacaoAcoesSaques();
     iniciarDelegacaoPendenciasPlano();
     iniciarBuscaUsuarios();
     iniciarBotaoRodarRendimentos();
