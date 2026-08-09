@@ -276,7 +276,7 @@ function inicializarExtratoUsuario(userId) {
             : [];
 
         if (!registros.length) {
-            tbody.innerHTML = '<tr><td colspan="4" class="table-empty">Nenhum registro no extrato ainda.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum registro no extrato ainda.</td></tr>';
             return;
         }
 
@@ -287,12 +287,26 @@ function inicializarExtratoUsuario(userId) {
             let mesAno = formatadorMesAno.format(data);
             mesAno = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
 
+            const valor = parseFloat(registro.valor || 0);
+            const classeValor = valor < 0 ? 'plan-row__value plan-row__value--negative' : 'plan-row__value plan-row__value--positive';
+
+            // Só saques têm status (pendente/pago) — comissão e rendimento
+            // já são créditos concluídos no momento em que aparecem aqui,
+            // não precisam de badge nenhum.
+            let statusHtml = '—';
+            if (registro.status === 'pendente') {
+                statusHtml = '<span class="status-badge status-pendente">Pendente</span>';
+            } else if (registro.status === 'pago') {
+                statusHtml = '<span class="status-badge status-aprovado">Pago</span>';
+            }
+
             return `
                 <tr>
                     <td>${formatadorDataHora.format(data)}</td>
                     <td>${mesAno}</td>
                     <td>${escapeHTML(registro.descricao) || '—'}</td>
-                    <td class="plan-row__value plan-row__value--positive">${formatadorMoeda.format(registro.valor || 0)}</td>
+                    <td class="${classeValor}">${formatadorMoeda.format(valor)}</td>
+                    <td>${statusHtml}</td>
                 </tr>
             `;
         }).join('');
