@@ -81,9 +81,10 @@ html {
 body {
     position: relative;
     background:
-        radial-gradient(circle at 18% -12%, rgba(196, 136, 73, 0.17), transparent 45%),
-        radial-gradient(circle at 88% 12%, rgba(138, 84, 41, 0.13), transparent 42%),
-        radial-gradient(circle at 50% 115%, rgba(196, 136, 73, 0.10), transparent 55%),
+        radial-gradient(circle at 18% -12%, rgba(196, 136, 73, 0.22), transparent 46%),
+        radial-gradient(circle at 88% 10%, rgba(138, 84, 41, 0.17), transparent 44%),
+        radial-gradient(circle at 8% 60%, rgba(196, 136, 73, 0.07), transparent 40%),
+        radial-gradient(circle at 50% 118%, rgba(196, 136, 73, 0.13), transparent 55%),
         linear-gradient(180deg, #0a0603, var(--bg-color) 30%);
     color: var(--text-main);
     min-height: 100vh;
@@ -168,6 +169,21 @@ body.protected-page {
         0 0 0 1px rgba(0, 0, 0, 0.4);
     overflow: hidden;
     animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Moldura em degradê muito sutil — reforça o acabamento sem competir
+   com o fio dourado do topo, que continua sendo o único acento forte */
+.card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(160deg, rgba(196, 136, 73, 0.28), transparent 30%, transparent 70%, rgba(196, 136, 73, 0.12));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 /* Fio dourado no topo do cartão — o único acento de destaque do design */
@@ -422,7 +438,7 @@ h2::after {
     cursor: pointer;
     transition: background-position var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-fast);
     margin-top: var(--space-sm);
-    box-shadow: 0 8px 20px rgba(138, 84, 41, 0.35);
+    box-shadow: 0 10px 24px rgba(138, 84, 41, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.16);
     overflow: hidden;
 }
 
@@ -545,15 +561,15 @@ h2::after {
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
+    height: 2.5px;
     background: linear-gradient(90deg, var(--primary-deep), var(--primary-hover));
-    opacity: 0.75;
+    box-shadow: 0 0 12px rgba(196, 136, 73, 0.35);
 }
 
 .stat-card:hover {
     border-color: var(--border-color-strong);
     transform: translateY(-3px);
-    box-shadow: var(--shadow-soft);
+    box-shadow: var(--shadow-soft), 0 0 0 1px rgba(196, 136, 73, 0.15);
 }
 
 .stat-card h3 {
@@ -728,8 +744,11 @@ tbody tr:last-child td {
 
 .sidebar {
     width: 260px;
-    background-color: var(--card-bg);
+    background:
+        linear-gradient(180deg, rgba(196, 136, 73, 0.05), transparent 25%),
+        var(--card-bg);
     border-right: 1px solid var(--border-color);
+    box-shadow: inset -1px 0 0 rgba(196, 136, 73, 0.06);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -760,7 +779,7 @@ tbody tr:last-child td {
     font-size: 0.9rem;
     font-weight: 500;
     border-radius: var(--radius-sm);
-    transition: background-color var(--transition-fast), color var(--transition-fast);
+    transition: background-color var(--transition-fast), color var(--transition-fast), padding-left var(--transition-fast);
 }
 
 .nav-item svg {
@@ -772,6 +791,7 @@ tbody tr:last-child td {
 .nav-item:hover {
     background-color: var(--card-bg-hover);
     color: var(--text-main);
+    padding-left: 19px;
 }
 
 /* Item Ativo */
@@ -831,6 +851,11 @@ tbody tr:last-child td {
     background-color: var(--bg-color-elevated);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
+    transition: border-color var(--transition-base);
+}
+
+.sidebar-user:hover {
+    border-color: var(--border-color-strong);
 }
 
 .user-avatar {
@@ -968,6 +993,23 @@ tbody tr:last-child td {
 
     .dashboard-container {
         max-width: 1240px;
+    }
+}
+
+/* Monitores widescreen — sem isso o conteúdo ficava com muito espaço vazio
+   nas laterais em telas grandes; aqui só ampliamos o teto de largura, sem
+   mexer no tamanho da sidebar (280px já é suficiente nessa faixa) */
+@media (min-width: 1800px) {
+    .main-content {
+        padding: var(--space-xl) calc(var(--space-xl) * 1.4);
+    }
+
+    .dashboard-container {
+        max-width: 1400px;
+    }
+
+    .container {
+        max-width: 480px;
     }
 }
 
@@ -1200,6 +1242,7 @@ tbody tr:last-child td {
 
 .btn-outline:hover {
     background: var(--card-bg-hover);
+    border-color: rgba(196, 136, 73, 0.5);
     transform: translateY(-1px);
     box-shadow: none;
 }
@@ -1218,6 +1261,11 @@ tbody tr:last-child td {
     padding: var(--space-lg);
     display: flex;
     flex-direction: column;
+    transition: transform var(--transition-base);
+}
+
+.plan-card:hover {
+    transform: translateY(-3px);
 }
 
 .plan-card__title {
