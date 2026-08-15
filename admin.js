@@ -106,7 +106,16 @@ function renderizarTabelaSaques(saques, usuarios) {
                         >Marcar como pago</button>
                     </div>
                 `
-                : '—';
+                : `
+                    <div class="admin-actions">
+                        <button
+                            class="btn-reject btn-arquivar"
+                            data-colecao="saques"
+                            data-uid="${saque.uid}"
+                            data-id="${saque.id}"
+                        >Excluir</button>
+                    </div>
+                `;
 
             return `
                 <tr>
@@ -193,7 +202,16 @@ function renderizarTabelaDepositos(depositos, usuarios) {
                         >Recusar</button>
                     </div>
                 `
-                : '—';
+                : `
+                    <div class="admin-actions">
+                        <button
+                            class="btn-reject btn-arquivar"
+                            data-colecao="depositos"
+                            data-uid="${deposito.uid}"
+                            data-id="${deposito.id}"
+                        >Excluir</button>
+                    </div>
+                `;
 
             return `
                 <tr>
@@ -375,6 +393,37 @@ async function resolverPendenciaPlano(uid, depositoId, acao) {
 }
 
 /**
+ * Arquiva um depósito ou saque (some da tabela, mas continua salvo no
+ * Firebase). "colecao" é 'depositos' ou 'saques' — a mesma função
+ * serve pras três tabelas que usam esse botão, porque Pendências de
+ * Plano é só um filtro em cima da própria coleção de depósitos.
+ */
+async function arquivarRegistro(colecao, uid, id) {
+    try {
+        const idToken = await auth.currentUser.getIdToken();
+
+        const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/arquivar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+            body: JSON.stringify({ colecao, uid, id }),
+        });
+
+        const dadosResposta = await resposta.json();
+        if (!resposta.ok) {
+            throw new Error(dadosResposta.error || 'Erro ao excluir registro.');
+        }
+
+        mostrarToast('Registro excluído da lista.', 'warning');
+    } catch (error) {
+        console.error('Erro ao arquivar registro:', error);
+        mostrarToast('❌ Erro ao excluir: ' + error.message, 'error');
+    }
+}
+
+/**
  * Marca um saque como pago chamando o Worker, que atualiza tanto o
  * registro em saques/{uid} quanto a entrada correspondente no Extrato
  * do usuário — as duas usam o mesmo id, então ficam sempre em sincronia.
@@ -412,11 +461,20 @@ function iniciarDelegacaoAcoesSaques() {
 
     tbody.addEventListener('click', (e) => {
         const btnMarcarPago = e.target.closest('.btn-marcar-saque-pago');
+        const btnArquivar = e.target.closest('.btn-arquivar');
+
         if (btnMarcarPago) {
             const { uid, id } = btnMarcarPago.dataset;
             btnMarcarPago.disabled = true;
             btnMarcarPago.textContent = 'Marcando...';
             marcarSaquePago(uid, id);
+        }
+
+        if (btnArquivar) {
+            const { colecao, uid, id } = btnArquivar.dataset;
+            btnArquivar.disabled = true;
+            btnArquivar.textContent = 'Excluindo...';
+            arquivarRegistro(colecao, uid, id);
         }
     });
 
@@ -446,6 +504,14 @@ function iniciarDelegacaoAcoesDepositos() {
             btnRecusar.disabled = true;
             btnRecusar.textContent = 'Recusando...';
             recusarDeposito(uid, id);
+        }
+
+        const btnArquivar = e.target.closest('.btn-arquivar');
+        if (btnArquivar) {
+            const { colecao, uid, id } = btnArquivar.dataset;
+            btnArquivar.disabled = true;
+            btnArquivar.textContent = 'Excluindo...';
+            arquivarRegistro(colecao, uid, id);
         }
     });
 
@@ -510,10 +576,11 @@ const estado = {
 
 function rerenderizarTudo() {
     if (estado.saques !== null) {
-        renderizarTabelaSaques(achatarPorUsuario(estado.saques), estado.usuarios || {});
+        const saquesLista = achatarPorUsuario(estado.saques).filter(s => !s.arquivado);
+        renderizarTabelaSaques(saquesLista, estado.usuarios || {});
     }
     if (estado.depositos !== null) {
-        const depositosLista = achatarPorUsuario(estado.depositos);
+        const depositosLista = achatarPorUsuario(estado.depositos).filter(d => !d.arquivado);
         renderizarTabelaDepositos(depositosLista, estado.usuarios || {});
         renderizarTabelaPendenciasPlano(depositosLista, estado.usuarios || {});
     }
