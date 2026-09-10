@@ -821,10 +821,10 @@ tbody tr:last-child td {
     gap: 12px;
     margin-top: var(--space-sm);
     padding: 12px 16px;
-    background: var(--success-soft);
-    border: 1px solid rgba(34, 176, 107, 0.3);
+    background: rgba(55, 187, 254, 0.12);
+    border: 1px solid rgba(55, 187, 254, 0.3);
     border-radius: var(--radius-sm);
-    color: var(--success-hover);
+    color: #37BBFE;
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
@@ -838,8 +838,8 @@ tbody tr:last-child td {
 }
 
 .sidebar-support-btn:hover {
-    background: rgba(34, 176, 107, 0.18);
-    border-color: rgba(34, 176, 107, 0.5);
+    background: rgba(55, 187, 254, 0.2);
+    border-color: rgba(55, 187, 254, 0.55);
 }
 
 /* Card do usuário no rodapé da Sidebar */
