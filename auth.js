@@ -10,7 +10,8 @@ import {
     sendPasswordResetEmail,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+// Adicionado o 'update' para podermos salvar o token FCM no perfil do usuário depois
+import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 /* ==========================================================================
    Configuração do Firebase
@@ -27,29 +28,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-/* ==========================================================================
-   Firebase App Check (reCAPTCHA v3)
-   ==========================================================================
-   Protege as chamadas de Auth e Realtime Database contra bots/abuso.
-   A verificação acontece do lado do Firebase — não precisa de backend
-   próprio para validar o token.
-
-   1. Vá em Firebase Console > App Check > Apps > (seu app web)
-      > Registrar provedor > reCAPTCHA v3 > cole a "Site Key" abaixo.
-   2. Depois de registrar, vá em App Check > APIs e ative "Enforce"
-      para Authentication e Realtime Database (senão o App Check fica
-      só monitorando, sem bloquear nada).
-   3. Para testar em localhost, o Firebase gera um "debug token" no
-      console do navegador (F12) na primeira execução — copie e
-      cadastre em App Check > Apps > Gerenciar tokens de depuração.
-      NÃO deixe debug token ativo em produção.
-   ========================================================================== */
 const RECAPTCHA_SITE_KEY = "6Lfs-3gtAAAAACZId43LTsWWSDroAMI7uXED4KU9";
-
-// Descomente a linha abaixo apenas durante testes em localhost, para
-// gerar um debug token automaticamente no console (F12). Remova antes
-// de publicar em produção.
-// self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
 
 initializeAppCheck(app, {
     provider: new ReCaptchaV3Provider(RECAPTCHA_SITE_KEY),
@@ -61,6 +40,15 @@ export const db = getDatabase(app);
 
 const REDIRECT_APOS_LOGIN_MS = 1000;
 const REDIRECT_APOS_CADASTRO_MS = 1500;
+
+/* ==========================================================================
+   Integração Android Nativo (Helpers)
+   ========================================================================== */
+export function vibrar() {
+    if (window.AndroidBridge && typeof window.AndroidBridge.toqueSutil === 'function') {
+        window.AndroidBridge.toqueSutil();
+    }
+}
 
 /* ==========================================================================
    Toast
@@ -75,19 +63,15 @@ function getToastContainer() {
     return container;
 }
 
-/**
- * Exibe uma notificação temporária na tela.
- * @param {string} mensagem
- * @param {'success'|'error'|'warning'} tipo
- */
 export function mostrarToast(mensagem, tipo = 'success') {
+    vibrar(); // Vibra levemente sempre que um Toast aparece (feedback nativo)
     const container = getToastContainer();
 
     const toast = document.createElement('div');
     toast.className = `toast ${tipo}`;
 
     const texto = document.createElement('span');
-    texto.textContent = mensagem; // textContent evita injeção de HTML
+    texto.textContent = mensagem; 
     toast.appendChild(texto);
 
     container.appendChild(toast);
@@ -95,16 +79,13 @@ export function mostrarToast(mensagem, tipo = 'success') {
 }
 
 /* ==========================================================================
-   Helpers
+   Helpers (Omitidos os não modificados para brevidade, mantenha os seus)
    ========================================================================== */
-function getEl(id) {
-    return document.getElementById(id);
-}
+function getEl(id) { return document.getElementById(id); }
 
 function setBotaoCarregando(elemento, carregando, textoCarregando = 'Enviando...') {
     if (!elemento) return;
     const ehBotao = 'disabled' in elemento;
-
     if (carregando) {
         elemento.dataset.textoOriginal = elemento.dataset.textoOriginal || elemento.innerText;
         if (ehBotao) elemento.disabled = true;
@@ -119,89 +100,58 @@ function setBotaoCarregando(elemento, carregando, textoCarregando = 'Enviando...
     }
 }
 
-/**
- * Traduz os códigos de erro do Firebase Auth para mensagens amigáveis em pt-BR.
- * Evita expor mensagens técnicas do Firebase diretamente ao usuário.
- */
 function traduzirErroFirebase(error, contexto = 'login') {
     const codigo = error?.code || '';
-
     const mensagensCadastro = {
         'auth/email-already-in-use': 'Este e-mail já está cadastrado.',
         'auth/invalid-email': 'Informe um e-mail válido.',
         'auth/weak-password': 'A senha deve ter no mínimo 6 caracteres.',
         'auth/missing-password': 'Informe uma senha.',
     };
-
     const mensagensLogin = {
         'auth/invalid-email': 'E-mail ou senha inválidos.',
         'auth/user-disabled': 'Esta conta foi desativada.',
         'auth/user-not-found': 'E-mail ou senha inválidos.',
         'auth/wrong-password': 'E-mail ou senha inválidos.',
         'auth/invalid-credential': 'E-mail ou senha inválidos.',
-        'auth/too-many-requests': 'Muitas tentativas. Aguarde um momento e tente novamente.',
+        'auth/too-many-requests': 'Muitas tentativas. Aguarde um momento.',
     };
-
     const mensagensReset = {
         'auth/invalid-email': 'Informe um e-mail válido.',
         'auth/user-not-found': 'Não encontramos uma conta com este e-mail.',
-        'auth/too-many-requests': 'Muitas tentativas. Aguarde um momento e tente novamente.',
+        'auth/too-many-requests': 'Muitas tentativas. Aguarde um momento.',
     };
-
     const dicionarios = { cadastro: mensagensCadastro, login: mensagensLogin, reset: mensagensReset };
     const dicionario = dicionarios[contexto] || mensagensLogin;
     return dicionario[codigo] || 'Ocorreu um erro. Tente novamente em instantes.';
 }
 
 function validarEmailSenha(email, senha) {
-    if (!email || !senha) {
-        return 'Preencha e-mail e senha.';
-    }
-    if (senha.length < 6) {
-        return 'A senha deve ter no mínimo 6 caracteres.';
-    }
+    if (!email || !senha) return 'Preencha e-mail e senha.';
+    if (senha.length < 6) return 'A senha deve ter no mínimo 6 caracteres.';
     return null;
 }
 
-/* ==========================================================================
-   Mensagens de validação nativa personalizadas
-   ==========================================================================
-   Usa o próprio balão de validação do navegador (o mesmo estilo de
-   "Preencha este campo."), mas com o texto trocado para indicar
-   exatamente qual campo falta preencher.
-   ========================================================================== */
 function aplicarMensagensValidacao(form, camposMensagens) {
     if (!form) return;
-
     Object.entries(camposMensagens).forEach(([idCampo, mensagens]) => {
         const input = getEl(idCampo);
         if (!input) return;
-
         input.addEventListener('invalid', () => {
-            if (input.validity.valueMissing) {
-                input.setCustomValidity(mensagens.vazio || 'Preencha este campo.');
-            } else if (input.validity.typeMismatch) {
-                input.setCustomValidity(mensagens.invalido || 'Valor inválido.');
-            } else if (input.validity.tooShort) {
-                input.setCustomValidity(mensagens.curto || 'Valor muito curto.');
-            } else {
-                input.setCustomValidity('');
-            }
+            if (input.validity.valueMissing) input.setCustomValidity(mensagens.vazio || 'Preencha este campo.');
+            else if (input.validity.typeMismatch) input.setCustomValidity(mensagens.invalido || 'Valor inválido.');
+            else if (input.validity.tooShort) input.setCustomValidity(mensagens.curto || 'Valor muito curto.');
+            else input.setCustomValidity('');
         });
-
-        // Limpa a mensagem customizada assim que o usuário começa a corrigir o campo
         input.addEventListener('input', () => input.setCustomValidity(''));
     });
 }
 
-/* ==========================================================================
-   Alternar visibilidade da senha (login.html e register.html)
-   ========================================================================== */
 document.querySelectorAll('.toggle-senha').forEach((botao) => {
     botao.addEventListener('click', () => {
+        vibrar(); // Feedback tátil ao mostrar/ocultar senha
         const campo = getEl(botao.dataset.alvo);
         if (!campo) return;
-
         const oculto = campo.type === 'password';
         campo.type = oculto ? 'text' : 'password';
         botao.setAttribute('aria-label', oculto ? 'Ocultar senha' : 'Mostrar senha');
@@ -209,70 +159,33 @@ document.querySelectorAll('.toggle-senha').forEach((botao) => {
     });
 });
 
-/* ==========================================================================
-   Indicação (register.html)
-   ==========================================================================
-   Cada usuário ganha um código curto ALEATÓRIO (6 caracteres
-   alfanuméricos, ex: "a1b2c3" — sem nenhuma relação com nome ou
-   sobrenome), salvo em codigosIndicacao/{codigo} -> uid. O link de
-   indicação vira "register.html?ref=a1b2c3" e, ao cadastrar, resolvemos
-   esse código de volta para o UID real de quem indicou.
-
-   Observação: contas criadas ANTES dessa mudança já têm um código
-   salvo em outro formato (numérico ou baseado no nome). Esses códigos
-   antigos continuam funcionando normalmente pois a resolução abaixo
-   só faz um lookup em codigosIndicacao/{codigo} — não importa qual
-   formato o código tem.
-   ========================================================================== */
-
-/**
- * Gera um código curto aleatório alfanumérico (padrão: 6 caracteres,
- * ex: "a1b2c3") para uso como código de indicação.
- */
 function gerarCodigoAleatorioCurto(tamanho = 6) {
     const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let codigo = '';
-    for (let i = 0; i < tamanho; i++) {
-        codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
-    }
+    for (let i = 0; i < tamanho; i++) codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
     return codigo;
 }
 
-/**
- * Gera um código de indicação único e aleatório, testando até achar
- * um que ainda não exista em codigosIndicacao/.
- */
 async function gerarCodigoIndicacaoUnico() {
     for (let i = 0; i < 25; i++) {
         const tentativa = gerarCodigoAleatorioCurto(6);
         const snap = await get(ref(db, 'codigosIndicacao/' + tentativa));
         if (!snap.exists()) return tentativa;
     }
-
-    // Fallback extremamente improvável: se 25 tentativas colidirem,
-    // usa um código maior (aleatório + timestamp) para garantir unicidade.
     return `${gerarCodigoAleatorioCurto(4)}${Date.now().toString(36).slice(-4)}`;
 }
 
-/**
- * Captura o código de indicação (?ref=codigo) da URL do link que a
- * pessoa recebeu de quem a indicou e guarda no campo oculto do
- * formulário de cadastro.
- */
 function capturarCodigoIndicacao() {
     const params = new URLSearchParams(window.location.search);
     const codigoRef = params.get('ref');
     const campoRefIndicador = getEl('refIndicador');
     const avisoIndicacao = getEl('avisoIndicacao');
-
     if (codigoRef && campoRefIndicador) {
         campoRefIndicador.value = codigoRef.trim().toLowerCase();
         if (avisoIndicacao) avisoIndicacao.style.display = 'block';
     }
-
     return codigoRef ? codigoRef.trim().toLowerCase() : null;
 }
-
 capturarCodigoIndicacao();
 
 /* ==========================================================================
@@ -288,6 +201,7 @@ if (registerForm) {
 
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        vibrar();
 
         const nome = getEl('nome')?.value.trim() || 'Usuário';
         const email = getEl('emailReg').value.trim();
@@ -303,26 +217,17 @@ if (registerForm) {
 
         setBotaoCarregando(botao, true, 'Criando conta...');
         try {
-            // 1. Cria a conta no Firebase Auth
             const userCredential = await createUserWithEmailAndPassword(auth, email, senha);
             const user = userCredential.user;
 
-            // 2. Resolve o código de indicação digitado (ex.: "a1b2c3")
-            //    para o UID de quem indicou, consultando codigosIndicacao/.
-            //    Se o código não existir (link inválido/expirado), o
-            //    cadastro segue normalmente sem indicador.
             let uidIndicador = null;
             if (codigoIndicadorDigitado) {
                 const indicadorSnap = await get(ref(db, 'codigosIndicacao/' + codigoIndicadorDigitado));
                 uidIndicador = indicadorSnap.exists() ? indicadorSnap.val() : null;
             }
 
-            // 3. Gera o código de indicação único e aleatório deste novo
-            //    usuário, para que ele também possa indicar outras
-            //    pessoas depois.
             const meuCodigoIndicacao = await gerarCodigoIndicacaoUnico();
 
-            // 4. Grava o perfil do usuário e o mapeamento código -> uid
             await set(ref(db, 'usuarios/' + user.uid), {
                 nome: nome,
                 email: email,
@@ -338,13 +243,6 @@ if (registerForm) {
 
             await set(ref(db, 'codigosIndicacao/' + meuCodigoIndicacao), user.uid);
 
-            // 5. Se esta conta foi indicada por alguém, grava também uma
-            //    entrada em equipe/{uidIndicador}/{meuUid} com os dados
-            //    básicos exibidos na tabela "Membros da Rede". Essa lista
-            //    invertida existe porque o indicador não tem permissão
-            //    para ler a coleção usuarios/ inteira (só o próprio nó
-            //    dele) — sem ela, a query orderByChild('indicadoPor')
-            //    seria barrada pelas regras do Realtime Database.
             if (uidIndicador) {
                 await set(ref(db, `equipe/${uidIndicador}/${user.uid}`), {
                     nome: nome,
@@ -354,6 +252,12 @@ if (registerForm) {
             }
 
             mostrarToast('🎉 Conta criada com sucesso!', 'success');
+            
+            // Solicita ao Android o token de Notificação Push (FCM)
+            if (window.AndroidBridge && window.AndroidBridge.solicitarTokenFCM) {
+                window.AndroidBridge.solicitarTokenFCM();
+            }
+
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, REDIRECT_APOS_CADASTRO_MS);
@@ -377,6 +281,7 @@ if (loginForm) {
 
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        vibrar();
 
         const email = getEl('email').value.trim();
         const senha = getEl('senha').value;
@@ -391,6 +296,12 @@ if (loginForm) {
         try {
             await signInWithEmailAndPassword(auth, email, senha);
             mostrarToast('✅ Login efetuado com sucesso!', 'success');
+            
+            // Solicita ao Android o token de Notificação Push (FCM) após o login
+            if (window.AndroidBridge && window.AndroidBridge.solicitarTokenFCM) {
+                window.AndroidBridge.solicitarTokenFCM();
+            }
+
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, REDIRECT_APOS_LOGIN_MS);
@@ -409,6 +320,7 @@ const linkEsqueciSenha = getEl('esqueciSenha');
 if (linkEsqueciSenha) {
     linkEsqueciSenha.addEventListener('click', async (e) => {
         e.preventDefault();
+        vibrar();
 
         const campoEmail = getEl('email');
         const email = (campoEmail?.value || '').trim();
@@ -435,14 +347,62 @@ if (linkEsqueciSenha) {
 /* ==========================================================================
    Proteção de páginas restritas
    ========================================================================== */
-// Qualquer página com a classe "protected-page" no <body> exige autenticação,
-// em vez de depender do nome/caminho do arquivo (mais confiável e reutilizável).
 if (document.body.classList.contains('protected-page')) {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             document.body.classList.remove('protected-page');
+            // Se o usuário já estava logado e abriu o app, garante que o token FCM está atualizado
+            if (window.AndroidBridge && window.AndroidBridge.solicitarTokenFCM) {
+                window.AndroidBridge.solicitarTokenFCM();
+            }
         } else {
             window.location.href = 'login.html';
         }
     });
 }
+
+/* ==========================================================================
+   LISTENERS GLOBAIS DA PONTE ANDROID (WEBVIEW)
+   ========================================================================== 
+   O Android (MainActivity.java) chama estas funções injetando JavaScript
+   diretamente no navegador (ex: window.onTokenFCM('token_aqui')).
+   ========================================================================== */
+
+// 1. Recebe o Token Push do Firebase Cloud Messaging do Android e salva no Realtime DB
+window.onTokenFCM = async function(tokenFCM) {
+    console.log("🔑 Token FCM recebido do Android:", tokenFCM);
+    const user = auth.currentUser;
+    if (user && tokenFCM) {
+        try {
+            await update(ref(db, 'usuarios/' + user.uid), { 
+                fcmToken: tokenFCM,
+                ultimoAcessoApp: new Date().toISOString()
+            });
+            console.log("✅ Token FCM salvo no perfil do usuário.");
+        } catch (error) {
+            console.error("❌ Erro ao salvar Token FCM:", error);
+        }
+    }
+};
+
+// 2. Recebe o resultado da Biometria
+window.onBiometriaResult = function(sucesso, mensagemErro) {
+    if (sucesso) {
+        mostrarToast('✅ Identidade confirmada!', 'success');
+        // Você pode usar isso para exibir saldo oculto, confirmar um saque no script.js, etc.
+    } else {
+        mostrarToast(`❌ Autenticação cancelada/falhou: ${mensagemErro}`, 'error');
+    }
+};
+
+// 3. Recebe a notificação de mudança de Tema do sistema em Tempo Real
+window.atualizarTema = function(isDark) {
+    console.log("🌗 Mudança de tema detectada via Android:", isDark ? "Escuro" : "Claro");
+    if (isDark) {
+        document.body.classList.add('dark-theme');
+        document.body.classList.remove('light-theme');
+    } else {
+        document.body.classList.add('light-theme');
+        document.body.classList.remove('dark-theme');
+    }
+};
