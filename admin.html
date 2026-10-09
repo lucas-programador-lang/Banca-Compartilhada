@@ -54,6 +54,46 @@
                 </div>
             </div>
 
+            <section class="table-section" id="secaoRendimentoManual">
+                <div class="table-section__head">
+                    <h3>Crédito Manual de Rendimento</h3>
+                </div>
+                <p class="table-hint">Soma o valor no saldo sacável e no total de rendimentos do usuário e lança no Extrato dele como "Rendimento creditado pela administração". O motivo fica só no registro interno abaixo. Para pagar rendimento atrasado dos planos, use "Rodar cálculo de rendimentos agora".</p>
+                <div class="table-search">
+                    <input type="text" id="rmBusca" placeholder="Buscar usuário por nome ou e-mail...">
+                </div>
+                <div class="table-search">
+                    <select id="rmUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                        <option value="">Carregando usuários...</option>
+                    </select>
+                </div>
+                <div class="table-search">
+                    <input type="number" id="rmValor" min="0.01" step="0.01" inputmode="decimal" placeholder="Valor a creditar (R$)">
+                </div>
+                <div class="table-search">
+                    <input type="text" id="rmMotivo" maxlength="120" placeholder="Motivo (ex.: ajuste do cron de segunda)">
+                </div>
+                <button class="btn" id="btnCreditarManual" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Creditar rendimento</button>
+
+                <p class="table-hint">Últimos créditos manuais (quem creditou, quanto e por quê):</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Horário</th>
+                                <th>Usuário</th>
+                                <th>Valor</th>
+                                <th>Motivo</th>
+                                <th>Creditado por</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCreditosManuais">
+                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <section class="table-section">
                 <div class="table-section__head">
                     <h3>Usuários e Saldos</h3>
