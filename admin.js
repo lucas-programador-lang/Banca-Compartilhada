@@ -571,10 +571,183 @@ const estado = {
     financeiro: null,
     saques: null,
     depositos: null,
+    auditoria: null,
     filtroUsuarios: '',
 };
 
+/**
+ * Crédito manual de rendimento: lista de usuários (filtrável por nome ou
+ * e-mail) no <select>, histórico dos últimos créditos e envio ao Worker.
+ * As opções são montadas com textContent (nunca innerHTML), então um nome
+ * malicioso não executa nada.
+ */
+const LIMITE_OPCOES_USUARIOS_MANUAL = 100;
+let chaveOperacaoManual = null; // reaproveitada se o envio falhar, para um reenvio não creditar duas vezes
+
+function gerarChaveOperacao() {
+    if (window.crypto?.randomUUID) return window.crypto.randomUUID();
+    return 'op' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+}
+
+function atualizarOpcoesRendimentoManual() {
+    const select = document.getElementById('rmUsuario');
+    if (!select) return;
+
+    const termo = (document.getElementById('rmBusca')?.value || '').trim().toLowerCase();
+    const selecionadoAntes = select.value;
+
+    let usuarios = Object.entries(estado.usuarios || {}).map(([uid, dados]) => ({ uid, nome: dados?.nome || '', email: dados?.email || '' }));
+    if (termo) {
+        usuarios = usuarios.filter(u => u.nome.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo));
+    }
+    usuarios.sort((a, b) => (a.nome || a.email).localeCompare(b.nome || b.email, 'pt-BR'));
+
+    select.textContent = '';
+    const opcaoVazia = document.createElement('option');
+    opcaoVazia.value = '';
+    opcaoVazia.textContent = usuarios.length
+        ? 'Selecione o usuário...'
+        : (termo ? 'Nenhum usuário encontrado' : 'Nenhum usuário cadastrado');
+    select.appendChild(opcaoVazia);
+
+    usuarios.slice(0, LIMITE_OPCOES_USUARIOS_MANUAL).forEach((u) => {
+        const opcao = document.createElement('option');
+        opcao.value = u.uid;
+        opcao.textContent = `${u.nome || 'Sem nome'} — ${u.email || u.uid}`;
+        select.appendChild(opcao);
+    });
+
+    if (usuarios.length > LIMITE_OPCOES_USUARIOS_MANUAL) {
+        const aviso = document.createElement('option');
+        aviso.value = '';
+        aviso.disabled = true;
+        aviso.textContent = `… mais ${usuarios.length - LIMITE_OPCOES_USUARIOS_MANUAL} usuários — refine a busca`;
+        select.appendChild(aviso);
+    }
+
+    // Mantém a seleção quando a lista é redesenhada por uma atualização em tempo real.
+    if (selecionadoAntes && usuarios.some(u => u.uid === selecionadoAntes)) {
+        select.value = selecionadoAntes;
+    }
+}
+
+function renderizarTabelaCreditosManuais(auditoriaObj, usuarios) {
+    const tbody = document.getElementById('tabelaCreditosManuais');
+    if (!tbody) return;
+
+    const creditos = Object.entries(auditoriaObj || {})
+        .map(([id, dados]) => ({ id, ...dados }))
+        .filter(c => c.tipo === 'rendimento_manual' && c.status === 'concluido')
+        .sort((a, b) => new Date(b.data || 0).getTime() - new Date(a.data || 0).getTime())
+        .slice(0, 20);
+
+    if (!creditos.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum crédito manual registrado ainda.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = creditos.map(c => `
+        <tr>
+            <td>${formatarDataHora(c.data)}</td>
+            <td>${escapeHTML(nomeDoUsuario(usuarios, c.uid))}</td>
+            <td>${formatadorMoeda.format(parseFloat(c.valor || 0))}</td>
+            <td>${escapeHTML(c.motivo) || '—'}</td>
+            <td>${escapeHTML(nomeDoUsuario(usuarios, c.adminUid))}</td>
+        </tr>
+    `).join('');
+}
+
+function iniciarFormularioRendimentoManual() {
+    const btn = document.getElementById('btnCreditarManual');
+    if (!btn || btn.dataset.listenerAtivo) return;
+
+    const campoBusca = document.getElementById('rmBusca');
+    const campoUsuario = document.getElementById('rmUsuario');
+    const campoValor = document.getElementById('rmValor');
+    const campoMotivo = document.getElementById('rmMotivo');
+
+    campoBusca?.addEventListener('input', atualizarOpcoesRendimentoManual);
+
+    // Qualquer mudança no formulário é uma operação nova: gera outra chave.
+    [campoUsuario, campoValor, campoMotivo].forEach((campo) => {
+        campo?.addEventListener('input', () => { chaveOperacaoManual = null; });
+        campo?.addEventListener('change', () => { chaveOperacaoManual = null; });
+    });
+
+    btn.addEventListener('click', async () => {
+        const uid = campoUsuario?.value || '';
+        const valor = Math.round((parseFloat(campoValor?.value) || 0) * 100) / 100;
+        const motivo = (campoMotivo?.value || '').trim();
+
+        if (!uid) {
+            mostrarToast('⚠️ Selecione o usuário.', 'warning');
+            return;
+        }
+        if (!(valor > 0)) {
+            mostrarToast('⚠️ Informe um valor maior que zero.', 'warning');
+            return;
+        }
+        if (motivo.length < 3) {
+            mostrarToast('⚠️ Informe o motivo do crédito.', 'warning');
+            return;
+        }
+
+        const nomeAlvo = nomeDoUsuario(estado.usuarios || {}, uid);
+        const confirmado = window.confirm(`Creditar ${formatadorMoeda.format(valor)} de rendimento para "${nomeAlvo}"?\n\nO valor entra no saldo sacável na hora.`);
+        if (!confirmado) return;
+
+        if (!chaveOperacaoManual) chaveOperacaoManual = gerarChaveOperacao();
+
+        btn.disabled = true;
+        const textoOriginal = btn.textContent;
+        btn.textContent = 'Creditando...';
+
+        try {
+            const idToken = await auth.currentUser.getIdToken();
+
+            const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/creditar-rendimento-manual`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ uid, valor, motivo, chave: chaveOperacaoManual }),
+            });
+
+            const dadosResposta = await resposta.json();
+            if (!resposta.ok) {
+                throw new Error(dadosResposta.error || 'Erro ao creditar rendimento.');
+            }
+
+            if (dadosResposta.jaProcessado) {
+                mostrarToast('ℹ️ Este crédito já havia sido processado — nada foi somado de novo.', 'info');
+            } else {
+                mostrarToast(`✅ ${formatadorMoeda.format(valor)} creditado para ${nomeAlvo}.`, 'success');
+            }
+
+            // Operação concluída: limpa o formulário e libera uma chave nova.
+            chaveOperacaoManual = null;
+            if (campoValor) campoValor.value = '';
+            if (campoMotivo) campoMotivo.value = '';
+        } catch (error) {
+            // A chave é mantida: se o crédito chegou a ser gravado, um novo
+            // clique com os mesmos dados não soma duas vezes.
+            console.error('Erro ao creditar rendimento manual:', error);
+            mostrarToast('❌ ' + error.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = textoOriginal;
+        }
+    });
+
+    btn.dataset.listenerAtivo = 'true';
+}
+
 function rerenderizarTudo() {
+    atualizarOpcoesRendimentoManual();
+    if (estado.auditoria !== null) {
+        renderizarTabelaCreditosManuais(estado.auditoria, estado.usuarios || {});
+    }
     if (estado.saques !== null) {
         const saquesLista = achatarPorUsuario(estado.saques).filter(s => !s.arquivado);
         renderizarTabelaSaques(saquesLista, estado.usuarios || {});
