@@ -720,7 +720,7 @@ function iniciarFormularioRendimentoManual() {
             }
 
             if (dadosResposta.jaProcessado) {
-                mostrarToast('ℹ️ Este crédito já havia sido processado — nada foi somado de novo.', 'info');
+                mostrarToast('ℹ️ Este crédito já havia sido processado — nada foi somado de novo.', 'warning');
             } else {
                 mostrarToast(`✅ ${formatadorMoeda.format(valor)} creditado para ${nomeAlvo}.`, 'success');
             }
@@ -839,6 +839,17 @@ function iniciarListenersAdmin() {
     iniciarDelegacaoPendenciasPlano();
     iniciarBuscaUsuarios();
     iniciarBotaoRodarRendimentos();
+    iniciarFormularioRendimentoManual();
+
+    const auditoriaRef = ref(db, 'auditoriaCreditos');
+    onValue(auditoriaRef, (snapshot) => {
+        estado.auditoria = snapshot.val() || {};
+        rerenderizarTudo();
+    }, (error) => {
+        // Sem as Regras novas (auditoriaCreditos) a leitura é negada — o
+        // resto do painel continua funcionando normalmente.
+        console.error('Erro ao carregar o histórico de créditos manuais (publique as Rules novas):', error);
+    });
 
     const usuariosRef = ref(db, 'usuarios');
     onValue(usuariosRef, (snapshot) => {
