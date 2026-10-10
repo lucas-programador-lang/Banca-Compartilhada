@@ -90,62 +90,123 @@ function atualizarPainel(dados) {
     }
 }
 
+// Valida o CPF (11 dígitos e dígitos verificadores) antes de salvar no Perfil.
+function cpfValidoNoSite(cpf) {
+    if (!/^\d{11}$/.test(cpf) || /^(\d)\1{10}$/.test(cpf)) return false;
+    const digito = (quantidade) => {
+        let soma = 0;
+        for (let i = 0; i < quantidade; i++) soma += Number(cpf[i]) * (quantidade + 1 - i);
+        const resto = (soma * 10) % 11;
+        return resto === 10 ? 0 : resto;
+    };
+    return digito(9) === Number(cpf[9]) && digito(10) === Number(cpf[10]);
+}
+
 function inicializarPerfilUsuario(userId) {
     const perfilTipoPix = getEl('perfilTipoPix');
     const perfilChavePix = getEl('perfilChavePix');
     const perfilNome = getEl('perfilNome');
+    const perfilCpf = getEl('perfilCpf');
+    const perfilCpfGrupo = getEl('perfilCpfGrupo');
     const btnSalvarPerfil = getEl('btnSalvarPerfil');
 
     if (!btnSalvarPerfil) return;
 
     const userRef = ref(db, 'usuarios/' + userId);
+    let dadosAtuais = {};
+
+    const tipoEhCpf = (tipo) => String(tipo || '').trim().toLowerCase() === 'cpf';
+
+    // Com chave CPF, a própria chave é o CPF do titular: o campo só aparece para os outros tipos.
+    const atualizarCampoCpf = () => {
+        if (!perfilCpfGrupo) return;
+        const tipoAtual = dadosAtuais.chavePix
+            ? dadosAtuais.tipoPix
+            : (perfilTipoPix ? perfilTipoPix.value : dadosAtuais.tipoPix);
+        perfilCpfGrupo.style.display = tipoEhCpf(tipoAtual) ? 'none' : 'block';
+    };
+
+    if (perfilTipoPix && !perfilTipoPix.dataset.listenerCpf) {
+        perfilTipoPix.addEventListener('change', atualizarCampoCpf);
+        perfilTipoPix.dataset.listenerCpf = 'true';
+    }
 
     onValue(userRef, (snapshot) => {
         const dados = snapshot.val();
-        if (dados) {
-            if (perfilNome && dados.nome && !perfilNome.value) perfilNome.value = dados.nome;
-            if (perfilTipoPix && dados.tipoPix) perfilTipoPix.value = dados.tipoPix;
+        if (!dados) return;
+        dadosAtuais = dados;
 
-            if (dados.chavePix) {
-                if (perfilChavePix) {
-                    perfilChavePix.value = dados.chavePix;
-                    perfilChavePix.disabled = true;
-                    perfilChavePix.classList.add('is-locked');
-                }
-                if (perfilTipoPix) {
-                    perfilTipoPix.disabled = true;
-                    perfilTipoPix.classList.add('is-locked');
-                }
-                if (btnSalvarPerfil) {
-                    btnSalvarPerfil.style.display = 'none';
-                }
+        if (perfilNome && dados.nome && !perfilNome.value) perfilNome.value = dados.nome;
+        if (perfilTipoPix && dados.tipoPix) perfilTipoPix.value = dados.tipoPix;
+
+        const chaveTravada = !!dados.chavePix;
+        if (chaveTravada) {
+            if (perfilChavePix) {
+                perfilChavePix.value = dados.chavePix;
+                perfilChavePix.disabled = true;
+                perfilChavePix.classList.add('is-locked');
+            }
+            if (perfilTipoPix) {
+                perfilTipoPix.disabled = true;
+                perfilTipoPix.classList.add('is-locked');
             }
         }
+
+        // CPF do titular: gravado uma vez e travado, como a chave.
+        const cpfTravado = !!dados.cpf;
+        if (perfilCpf && cpfTravado) {
+            perfilCpf.value = dados.cpf;
+            perfilCpf.disabled = true;
+            perfilCpf.classList.add('is-locked');
+        }
+        atualizarCampoCpf();
+
+        // O botão some quando não falta nada a cadastrar.
+        const precisaCpf = !tipoEhCpf(dados.tipoPix);
+        const faltaAlgo = !chaveTravada || (precisaCpf && !cpfTravado);
+        btnSalvarPerfil.style.display = faltaAlgo ? '' : 'none';
     });
 
     if (!btnSalvarPerfil.dataset.listenerAtivo) {
         btnSalvarPerfil.addEventListener('click', async () => {
+            const chaveJaSalva = !!dadosAtuais.chavePix;
             const novoNome = perfilNome ? perfilNome.value.trim() : '';
             const novoTipoPix = perfilTipoPix ? perfilTipoPix.value : '';
             const novaChavePix = perfilChavePix ? perfilChavePix.value.trim() : '';
 
-            if (!novaChavePix) {
-                mostrarToast('⚠️ Por favor, informe a sua chave PIX.', 'warning');
+            const tipoFinal = chaveJaSalva ? dadosAtuais.tipoPix : novoTipoPix;
+            const precisaGravarCpf = !tipoEhCpf(tipoFinal) && !dadosAtuais.cpf;
+            const cpfDigitos = perfilCpf ? perfilCpf.value.replace(/\D/g, '') : '';
+
+            if (!chaveJaSalva && !novaChavePix) {
+                mostrarToast('Por favor, informe a sua chave PIX.', 'warning');
+                return;
+            }
+            if (precisaGravarCpf && !cpfValidoNoSite(cpfDigitos)) {
+                mostrarToast('Informe um CPF válido do titular da chave PIX.', 'warning');
                 return;
             }
 
             setBotaoCarregando(btnSalvarPerfil, true, 'Salvando...');
             try {
                 const updates = {};
-                if (novoNome) updates['nome'] = novoNome;
-                updates['tipoPix'] = novoTipoPix;
-                updates['chavePix'] = novaChavePix;
+                if (!chaveJaSalva) {
+                    if (novoNome) updates['nome'] = novoNome;
+                    updates['tipoPix'] = novoTipoPix;
+                    updates['chavePix'] = novaChavePix;
+                }
+                if (precisaGravarCpf) updates['cpf'] = cpfDigitos;
 
                 await update(userRef, updates);
-                mostrarToast('✅ Chave PIX cadastrada com sucesso! Ela não poderá ser alterada.', 'success');
+                mostrarToast(
+                    chaveJaSalva
+                        ? 'CPF do titular cadastrado com sucesso!'
+                        : 'Chave PIX cadastrada com sucesso! Ela não poderá ser alterada.',
+                    'success'
+                );
             } catch (error) {
                 console.error('Erro ao salvar perfil:', error);
-                mostrarToast('❌ Erro ao salvar perfil: ' + error.message, 'error');
+                mostrarToast('Erro ao salvar perfil: ' + error.message, 'error');
             } finally {
                 setBotaoCarregando(btnSalvarPerfil, false);
             }
@@ -296,6 +357,8 @@ function inicializarExtratoUsuario(userId) {
             let statusHtml = '—';
             if (registro.status === 'pendente') {
                 statusHtml = '<span class="status-badge status-pendente">Pendente</span>';
+            } else if (registro.status === 'processando') {
+                statusHtml = '<span class="status-badge status-pendente">Processando</span>';
             } else if (registro.status === 'pago') {
                 statusHtml = '<span class="status-badge status-aprovado">Pago</span>';
             }
@@ -855,7 +918,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(dadosResposta.error || 'Erro ao solicitar o saque.');
             }
 
-            mostrarToast('✅ Saque solicitado com sucesso!', 'success');
+            const mensagemSaque = dadosResposta.automatico === 'pago'
+                ? 'Saque pago! O Pix já foi enviado.'
+                : dadosResposta.automatico === 'processando'
+                    ? 'Saque enviado! O Pix está sendo processado.'
+                    : 'Saque solicitado com sucesso!';
+            mostrarToast(mensagemSaque, 'success');
             fecharModalSaque();
         } catch (error) {
             console.error('Erro ao solicitar saque:', error);
