@@ -344,6 +344,46 @@ function atualizarLinkIndicacao(codigoIndicacao) {
     }
 }
 
+// Bloqueio do app por digital / rosto / senha do celular. Só existe dentro do app
+// Android (ponte "Android"); no navegador o cartão do Perfil continua escondido.
+function inicializarBloqueioBiometrico() {
+    const card = getEl('cardBloqueioBiometrico');
+    const chk = getEl('chkBloqueioBiometrico');
+    if (!card || !chk || chk.dataset.listenerAtivo) return;
+
+    const ponte = window.Android;
+    if (!ponte
+        || typeof ponte.biometriaDisponivel !== 'function'
+        || typeof ponte.bloqueioBiometricoAtivo !== 'function'
+        || typeof ponte.definirBloqueioBiometrico !== 'function') {
+        return;
+    }
+    if (!ponte.biometriaDisponivel()) return; // celular sem digital, rosto nem senha de tela
+
+    card.style.display = 'block';
+    let estadoAtual = !!ponte.bloqueioBiometricoAtivo();
+    chk.checked = estadoAtual;
+
+    chk.addEventListener('change', () => {
+        const queroAtivar = chk.checked;
+        // Volta ao estado anterior até o app confirmar com a digital.
+        chk.checked = estadoAtual;
+        ponte.definirBloqueioBiometrico(queroAtivar);
+    });
+
+    // O app chama esta função depois da confirmação (ou do cancelamento).
+    window.onBloqueioBiometricoAlterado = (ativo) => {
+        const novoEstado = !!ativo;
+        chk.checked = novoEstado;
+        if (novoEstado !== estadoAtual) {
+            mostrarToast(novoEstado ? '🔒 Bloqueio do app ativado.' : '🔓 Bloqueio do app desativado.', 'success');
+        }
+        estadoAtual = novoEstado;
+    };
+
+    chk.dataset.listenerAtivo = 'true';
+}
+
 function inicializarEquipeUsuario(userId) {
     const inputLink = getEl('linkIndicacao');
 
@@ -363,6 +403,48 @@ function inicializarEquipeUsuario(userId) {
             }
         });
         btnCopiar.dataset.listenerAtivo = 'true';
+    }
+
+    // Compartilhar convite: dentro do app abre a folha de compartilhamento do Android
+    // (WhatsApp, Telegram...); no navegador usa o compartilhar do sistema, e se nada
+    // disso existir, copia o texto do convite.
+    const btnCompartilhar = getEl('btnCompartilharConvite');
+    if (btnCompartilhar && !btnCompartilhar.dataset.listenerAtivo) {
+        btnCompartilhar.addEventListener('click', async () => {
+            const link = inputLink?.value || '';
+            if (!link) {
+                mostrarToast('⚠️ Seu link ainda está sendo gerado. Tente de novo em instantes.', 'warning');
+                return;
+            }
+
+            const titulo = 'Banca Compartilhada';
+            const texto = `Venha para a Banca Compartilhada! Cadastre-se pelo meu link de convite: ${link}`;
+
+            if (window.Android && typeof window.Android.compartilharTexto === 'function') {
+                window.Android.compartilharTexto(titulo, texto);
+                return;
+            }
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: titulo, text: texto });
+                } catch (error) {
+                    if (error && error.name !== 'AbortError') {
+                        console.error('Erro ao compartilhar convite:', error);
+                    }
+                }
+                return;
+            }
+
+            try {
+                await navigator.clipboard.writeText(texto);
+                mostrarToast('🔗 Convite copiado! Cole no WhatsApp ou onde preferir.', 'success');
+            } catch (error) {
+                console.error('Erro ao copiar convite:', error);
+                mostrarToast('⚠️ Não foi possível compartilhar. Use o botão Copiar Link.', 'warning');
+            }
+        });
+        btnCompartilhar.dataset.listenerAtivo = 'true';
     }
 
     const tbody = getEl('tabelaMembrosEquipe');
@@ -845,6 +927,7 @@ document.addEventListener('DOMContentLoaded', () => {
         inicializarCarteiraUsuario(userId);
         inicializarExtratoUsuario(userId);
         inicializarEquipeUsuario(userId);
+        inicializarBloqueioBiometrico();
     });
 });
 
