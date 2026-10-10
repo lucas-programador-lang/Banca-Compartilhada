@@ -72,10 +72,34 @@
                 <button type="submit" class="btn">Cadastrar</button>
             </form>
             <p class="link-text">Já possui conta? <a href="login.html">Faça login</a></p>
+
+            <div id="baixarAppBox" style="margin-top: var(--space-md); text-align: center;">
+                <a
+                    href="https://github.com/lucas-programador-lang/Banca-Compartilhada/releases/latest/download/banca-compartilhada.apk"
+                    class="btn btn-outline"
+                    id="btnBaixarApp"
+                    download="banca-compartilhada.apk"
+                    rel="noopener"
+                    style="display: block; box-sizing: border-box; text-align: center; text-decoration: none;"
+                >
+                    📲 Baixar o aplicativo (Android)
+                </a>
+                <p class="link-text secondary" style="margin-top: 8px; font-size: 0.8rem;">Ao instalar, o Android pode pedir para permitir a instalação de apps desta origem.</p>
+            </div>
         </div>
     </main>
+    <!-- Esconde o botão de download dentro do próprio app e no iPhone (o APK só funciona no Android) -->
+    <script>
+        (function () {
+            var box = document.getElementById('baixarAppBox');
+            if (!box) return;
+            var dentroDoApp = typeof Android !== 'undefined';
+            var ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (dentroDoApp || ios) box.style.display = 'none';
+        })();
+    </script>
+
     <!-- Script modular do Firebase Auth -->
     <script type="module" src="auth.js"></script>
-    <script src="update-modal.js"></script>
 </body>
 </html>
