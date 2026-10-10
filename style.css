@@ -2023,3 +2023,47 @@ tbody tr:last-child td {
     background: rgba(196, 136, 73, 0.24);
     border-color: var(--primary);
 }
+
+/* ==========================================================================
+   Ícones desenhados no lugar dos emojis (mensagens, aviso de domingo e alertas)
+   ========================================================================== */
+
+.toast__icon {
+    display: inline-flex;
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.toast__icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.toast__text {
+    flex: 1;
+    min-width: 0;
+    line-height: 1.35;
+}
+
+.toast.success .toast__icon { color: var(--success); }
+.toast.error .toast__icon { color: var(--danger); }
+.toast.warning .toast__icon { color: var(--warning); }
+
+/* Triângulo de aviso (usa a cor do texto do próprio aviso) */
+.modal-lead--warning::before,
+.modal-alert::before {
+    content: "";
+    display: inline-block;
+    width: 1.05em;
+    height: 1.05em;
+    margin-right: 8px;
+    vertical-align: -0.17em;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat;
+}
