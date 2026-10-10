@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mostrarToast('✅ Pagamento confirmado! Seu plano já está ativo na Carteira.', 'success');
             } else if (dados?.status === 'recusado') {
                 pararEscutaConfirmacaoPagamento();
-                if (statusPagamentoPix) statusPagamentoPix.textContent = '❌ Pagamento não confirmado.';
+                if (statusPagamentoPix) statusPagamentoPix.textContent = 'Pagamento não confirmado.';
                 mostrarToast('❌ O pagamento não foi confirmado. Tente novamente.', 'error');
             }
         });
@@ -615,7 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (valorAtual < 30) {
             if (modalToast) {
                 modalToast.classList.add('ativo');
-                modalToast.textContent = "⚠️ O valor mínimo de depósito/plano é R$ 30,00.";
+                modalToast.textContent = "O valor mínimo de depósito/plano é R$ 30,00.";
                 setTimeout(() => { if (modalToast) modalToast.classList.remove('ativo'); }, 4000);
             }
             return;
