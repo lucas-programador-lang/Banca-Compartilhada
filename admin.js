@@ -27,6 +27,9 @@ const STATUS_LABELS = {
     recusado: 'Recusado',
     concluido: 'Concluído',
     pago: 'Pago',
+    enviando: 'Enviando...',
+    processando: 'Processando (automático)',
+    verificar: 'Verificar na Vizzion',
 };
 
 const STATUS_CORES = {
@@ -35,6 +38,9 @@ const STATUS_CORES = {
     concluido: 'var(--success)',
     recusado: 'var(--danger)',
     pago: 'var(--success)',
+    enviando: 'var(--warning)',
+    processando: 'var(--warning)',
+    verificar: 'var(--danger)',
 };
 
 function badgeStatus(status) {
@@ -96,7 +102,9 @@ function renderizarTabelaSaques(saques, usuarios) {
     } else {
         tbody.innerHTML = saques.map(saque => {
             const status = (saque.status || 'pendente').toLowerCase();
-            const acoes = status === 'pendente'
+            const acoes = status === 'enviando'
+                ? '<span style="color: var(--text-muted);">Enviando...</span>'
+                : ['pendente', 'processando', 'verificar'].includes(status)
                 ? `
                     <div class="admin-actions">
                         <button
@@ -130,7 +138,7 @@ function renderizarTabelaSaques(saques, usuarios) {
         }).join('');
     }
 
-    const pendentes = saques.filter(s => (s.status || 'pendente').toLowerCase() === 'pendente').length;
+    const pendentes = saques.filter(s => ['pendente', 'processando', 'verificar'].includes((s.status || 'pendente').toLowerCase())).length;
     const elTotal = document.getElementById('totalSaquesPendentes');
     if (elTotal) elTotal.textContent = pendentes;
 }
