@@ -1,0 +1,15 @@
+{
+  "name": "Banca Compartilhada",
+  "short_name": "Banca",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080503",
+  "theme_color": "#080503",
+  "icons": [
+    {
+      "src": "/icone-pwa.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
