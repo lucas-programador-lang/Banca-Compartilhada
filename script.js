@@ -376,7 +376,7 @@ function inicializarBloqueioBiometrico() {
         const novoEstado = !!ativo;
         chk.checked = novoEstado;
         if (novoEstado !== estadoAtual) {
-            mostrarToast(novoEstado ? '🔒 Bloqueio do app ativado.' : '🔓 Bloqueio do app desativado.', 'success');
+            mostrarToast(novoEstado ? 'Bloqueio do app ativado.' : 'Bloqueio do app desativado.', 'success');
         }
         estadoAtual = novoEstado;
     };
@@ -413,7 +413,7 @@ function inicializarEquipeUsuario(userId) {
         btnCompartilhar.addEventListener('click', async () => {
             const link = inputLink?.value || '';
             if (!link) {
-                mostrarToast('⚠️ Seu link ainda está sendo gerado. Tente de novo em instantes.', 'warning');
+                mostrarToast('Seu link ainda está sendo gerado. Tente de novo em instantes.', 'warning');
                 return;
             }
 
@@ -438,10 +438,10 @@ function inicializarEquipeUsuario(userId) {
 
             try {
                 await navigator.clipboard.writeText(texto);
-                mostrarToast('🔗 Convite copiado! Cole no WhatsApp ou onde preferir.', 'success');
+                mostrarToast('Convite copiado! Cole no WhatsApp ou onde preferir.', 'success');
             } catch (error) {
                 console.error('Erro ao copiar convite:', error);
-                mostrarToast('⚠️ Não foi possível compartilhar. Use o botão Copiar Link.', 'warning');
+                mostrarToast('Não foi possível compartilhar. Use o botão Copiar Link.', 'warning');
             }
         });
         btnCompartilhar.dataset.listenerAtivo = 'true';
