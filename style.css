@@ -1877,3 +1877,149 @@ tbody tr:last-child td {
         max-width: 100%;
     }
 }
+
+/* ==========================================================================
+   Download do aplicativo (APK)
+   - .app-download-fab: bolha flutuante com a logo (telas de login e cadastro)
+   - .sidebar-download-btn: botão fixo dentro da sidebar (index.html)
+   ========================================================================== */
+
+.app-download-fab {
+    position: fixed;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    z-index: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.app-download-fab__label {
+    padding: 8px 14px;
+    background-color: var(--bg-color-elevated);
+    border: 1px solid var(--border-color-strong);
+    border-radius: 999px;
+    color: var(--primary-hover);
+    font-size: 0.82rem;
+    font-weight: 600;
+    white-space: nowrap;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.app-download-fab__bubble {
+    position: relative;
+    flex-shrink: 0;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #0b0907;
+    border: 2px solid var(--primary);
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55), 0 0 0 4px var(--primary-soft);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+/* A logo já é redonda e tem margem transparente: o scale() preenche a bolha. */
+.app-download-fab__logo {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    transform: scale(1.22);
+}
+
+.app-download-fab__bubble::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    opacity: 0;
+    animation: appDownloadPulse 2.4s ease-out infinite;
+    pointer-events: none;
+}
+
+.app-download-fab__badge {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-deep), var(--primary));
+    border: 2px solid #0b0907;
+    color: #17100a;
+}
+
+.app-download-fab__badge svg {
+    width: 14px;
+    height: 14px;
+}
+
+.app-download-fab:hover .app-download-fab__bubble {
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6), 0 0 0 5px var(--primary-soft);
+}
+
+.app-download-fab:hover .app-download-fab__label {
+    border-color: var(--primary);
+}
+
+.app-download-fab:focus-visible {
+    outline: 3px solid var(--primary-hover);
+    outline-offset: 4px;
+    border-radius: 999px;
+}
+
+@keyframes appDownloadPulse {
+    0% { opacity: 0.7; transform: scale(0.94); }
+    100% { opacity: 0; transform: scale(1.25); }
+}
+
+@media (max-width: 380px) {
+    .app-download-fab__label {
+        display: none; /* telas muito estreitas: só a bolha */
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-download-fab__bubble::before {
+        animation: none;
+    }
+}
+
+/* Botão de download dentro da sidebar (mesmo formato do botão de suporte) */
+.sidebar-download-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: var(--space-sm);
+    padding: 12px 16px;
+    background: var(--primary-soft);
+    border: 1px solid var(--border-color-strong);
+    border-radius: var(--radius-sm);
+    color: var(--primary-hover);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.sidebar-download-btn__logo {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    transform: scale(1.22);
+}
+
+.sidebar-download-btn:hover {
+    background: rgba(196, 136, 73, 0.24);
+    border-color: var(--primary);
+}
