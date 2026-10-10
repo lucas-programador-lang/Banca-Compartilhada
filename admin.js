@@ -680,15 +680,15 @@ function iniciarFormularioRendimentoManual() {
         const motivo = (campoMotivo?.value || '').trim();
 
         if (!uid) {
-            mostrarToast('⚠️ Selecione o usuário.', 'warning');
+            mostrarToast('Selecione o usuário.', 'warning');
             return;
         }
         if (!(valor > 0)) {
-            mostrarToast('⚠️ Informe um valor maior que zero.', 'warning');
+            mostrarToast('Informe um valor maior que zero.', 'warning');
             return;
         }
         if (motivo.length < 3) {
-            mostrarToast('⚠️ Informe o motivo do crédito.', 'warning');
+            mostrarToast('Informe o motivo do crédito.', 'warning');
             return;
         }
 
@@ -720,9 +720,9 @@ function iniciarFormularioRendimentoManual() {
             }
 
             if (dadosResposta.jaProcessado) {
-                mostrarToast('ℹ️ Este crédito já havia sido processado — nada foi somado de novo.', 'warning');
+                mostrarToast('Este crédito já havia sido processado. Nada foi somado de novo.', 'warning');
             } else {
-                mostrarToast(`✅ ${formatadorMoeda.format(valor)} creditado para ${nomeAlvo}.`, 'success');
+                mostrarToast(`${formatadorMoeda.format(valor)} creditado para ${nomeAlvo}.`, 'success');
             }
 
             // Operação concluída: limpa o formulário e libera uma chave nova.
@@ -733,7 +733,7 @@ function iniciarFormularioRendimentoManual() {
             // A chave é mantida: se o crédito chegou a ser gravado, um novo
             // clique com os mesmos dados não soma duas vezes.
             console.error('Erro ao creditar rendimento manual:', error);
-            mostrarToast('❌ ' + error.message, 'error');
+            mostrarToast(error.message, 'error');
         } finally {
             btn.disabled = false;
             btn.textContent = textoOriginal;
