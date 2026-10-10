@@ -402,6 +402,8 @@ window.onTokenFCM = async function(tokenFCM) {
                 fcmToken: tokenFCM,
                 ultimoAcessoApp: new Date().toISOString()
             });
+            // Cópia que o servidor lê para enviar as notificações (rendimento, saque, comissão...)
+            await set(ref(db, 'tokensPush/' + user.uid), tokenFCM);
             console.log("✅ Token FCM salvo no perfil do usuário.");
         } catch (error) {
             console.error("❌ Erro ao salvar Token FCM:", error);
