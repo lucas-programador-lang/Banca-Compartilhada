@@ -62,6 +62,17 @@
                 </svg>
                 <span>Suporte (Telegram)</span>
             </a>
+
+               <a
+                    href="https://github.com/lucas-programador-lang/Banca-Compartilhada/releases/latest/download/banca-compartilhada.apk"
+                    class="sidebar-download-btn"
+                    id="btnBaixarAppSidebar"
+                    download="banca-compartilhada.apk"
+                    rel="noopener"
+                >
+                    <img src="logo.png" alt="" class="sidebar-download-btn__logo">
+                    <span>Baixar o aplicativo</span>
+                </a>
             </div>
 
             <!-- Rodapé da Sidebar com dados do usuário -->
@@ -478,6 +489,17 @@
             </div>
         </div>
     </div>
+
+    <!-- Esconde o botão de download dentro do próprio app e no iPhone (o APK só funciona no Android) -->
+    <script>
+        (function () {
+            var btn = document.getElementById('btnBaixarAppSidebar');
+            if (!btn) return;
+            var dentroDoApp = typeof Android !== 'undefined';
+            var ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (dentroDoApp || ios) btn.style.display = 'none';
+        })();
+    </script>
 
     <!-- Scripts -->
     <script type="module" src="auth.js"></script>
