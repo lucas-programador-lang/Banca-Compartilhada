@@ -81,30 +81,59 @@
   // ==========================================================
   // FUNÇÃO PARA BAIXAR O APK DIRETO PELO APLICATIVO
   // ==========================================================
-  var RETRY_AFTER_MS = 20000; // depois disso, libera o botão pra tentar de novo
+  var RETRY_AFTER_MS = 20000; // sem novidades do app por esse tempo: libera o botão pra tentar de novo
   var retryTimer = null;
+  var btnOriginalHtml = null;
+
+  function liberarBotao(mensagem) {
+    var btn = document.getElementById("cpuUpdateBtn");
+    var hint = document.getElementById("cpuHint");
+    clearTimeout(retryTimer);
+    if (btn && btnOriginalHtml !== null) {
+      btn.innerHTML = btnOriginalHtml;
+      btn.style.opacity = "";
+      btn.style.pointerEvents = "";
+    }
+    if (hint && mensagem) hint.textContent = mensagem;
+  }
+
+  function armarTemporizador() {
+    clearTimeout(retryTimer);
+    retryTimer = setTimeout(function () {
+      liberarBotao("Não terminou? Toque em Atualizar Agora para tentar de novo ou fale com o suporte.");
+    }, RETRY_AFTER_MS);
+  }
+
+  // O app Android chama estas duas funções durante a atualização:
+  //  - cpuAtualizacaoProgresso(0 a 100): mostra a porcentagem do download no botão;
+  //  - cpuAtualizacaoFalhou("mensagem"): libera o botão e mostra o motivo.
+  window.cpuAtualizacaoProgresso = function (pct) {
+    var btn = document.getElementById("cpuUpdateBtn");
+    var hint = document.getElementById("cpuHint");
+    if (!btn) return;
+    if (btnOriginalHtml === null) btnOriginalHtml = btn.innerHTML;
+    var numero = Math.max(0, Math.min(100, Number(pct) || 0));
+    btn.innerHTML = "<span>" + (numero >= 100 ? "Abrindo o instalador..." : "Baixando atualização... " + numero + "%") + "</span>";
+    btn.style.opacity = "0.7";
+    btn.style.pointerEvents = "none";
+    if (hint) hint.textContent = numero >= 100 ? "Quando o Android pedir, toque em Instalar." : "Aguarde o download terminar.";
+    armarTemporizador();
+  };
+
+  window.cpuAtualizacaoFalhou = function (mensagem) {
+    liberarBotao(String(mensagem || ""));
+  };
 
   function openUpdateLink() {
     if (typeof Android !== "undefined" && typeof Android.baixarApkDireto === "function") {
-      Android.baixarApkDireto(APK_URL);
-
       var btn = document.getElementById("cpuUpdateBtn");
-      var hint = document.getElementById("cpuHint");
-      var originalBtn = btn.innerHTML;
-      btn.innerHTML = '<span>Baixando atualização... Aguarde a instalação.</span>';
+      if (btnOriginalHtml === null) btnOriginalHtml = btn.innerHTML;
+      btn.innerHTML = "<span>Preparando atualização...</span>";
       btn.style.opacity = "0.7";
       btn.style.pointerEvents = "none";
-
-      // Se o download não começar ou não terminar (sem permissão pra instalar,
-      // sem internet...), o botão não pode ficar travado pra sempre: depois de
-      // um tempo ele volta ao normal e a pessoa pode tentar de novo.
-      clearTimeout(retryTimer);
-      retryTimer = setTimeout(function () {
-        btn.innerHTML = originalBtn;
-        btn.style.opacity = "";
-        btn.style.pointerEvents = "";
-        if (hint) hint.textContent = "Não terminou? Toque em Atualizar Agora para tentar de novo ou fale com o suporte.";
-      }, RETRY_AFTER_MS);
+      armarTemporizador();
+      // O app confere a permissão de instalar apps desconhecidos ANTES de baixar.
+      Android.baixarApkDireto(APK_URL);
     } else {
       window.open(APK_URL, "_blank");
     }
