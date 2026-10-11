@@ -215,6 +215,22 @@ function inicializarPerfilUsuario(userId) {
     }
 }
 
+// Regra dos dias: só segunda a sexta (horário de Brasília) rendem; sábado e domingo não.
+// Cada "dia" do plano fecha 24h depois da ativação e só conta se esse fechamento cair de
+// segunda a sexta. É a MESMA conta do servidor (contarDiasRendimento no worker.js): a tela
+// só mostra o rendimento acumulado; quem credita no saldo é o servidor.
+function contarDiasRendimento(dataAtivacao, agora) {
+    const DIA_MS = 24 * 60 * 60 * 1000;
+    const BRASILIA_MS = 3 * 60 * 60 * 1000; // UTC-3 fixo (sem horário de verão)
+    const blocosCompletos = Math.floor((agora.getTime() - dataAtivacao.getTime()) / DIA_MS);
+    let dias = 0;
+    for (let k = 1; k <= Math.min(blocosCompletos, 5000); k++) {
+        const diaDaSemana = new Date(dataAtivacao.getTime() + k * DIA_MS - BRASILIA_MS).getUTCDay(); // 0=domingo ... 6=sábado
+        if (diaDaSemana >= 1 && diaDaSemana <= 5) dias++;
+    }
+    return dias;
+}
+
 function calcularEstadoPlano(plano) {
     const valor = parseFloat(plano.valor || 0);
     const percentualDiario = parseFloat(plano.percentualDiario || 0);
@@ -222,7 +238,7 @@ function calcularEstadoPlano(plano) {
 
     const dataAtivacao = new Date(plano.dataAtivacao || Date.now());
     const agora = new Date();
-    const diasCorridos = Math.max(0, Math.floor((agora - dataAtivacao) / (1000 * 60 * 60 * 24)));
+    const diasCorridos = isNaN(dataAtivacao.getTime()) ? 0 : contarDiasRendimento(dataAtivacao, agora);
 
     const rendimentoDiario = valor * percentualDiario;
     const tetoValor = valor * tetoPercentual;
