@@ -589,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAbrirDep.addEventListener('click', () => {
             const inputPlano = document.getElementById('valorPlano');
             const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
-            if (modalInput && inputPlano) modalInput.value = inputPlano.value || "30";
+            if (modalInput && inputPlano) modalInput.value = inputPlano.value || "10";
             abrirModalDeposito();
         });
     }
