@@ -16,7 +16,7 @@
   // O nome do arquivo no final do link PRECISA ser idêntico ao nome do APK
   // anexado na Release do GitHub (banca-compartilhada.apk).
   var APK_URL = "https://github.com/" + REPO + "/releases/latest/download/banca-compartilhada.apk";
-  var SUPPORT_URL = "https://wa.me/5569993607367?text=" + encodeURIComponent("Olá, estou com problemas para atualizar o aplicativo Banca Compartilhada.");
+  var SUPPORT_URL = "https://t.me/Derekkf12?text=" + encodeURIComponent("Olá, estou com problemas para atualizar o aplicativo Banca Compartilhada.");
   var LOGO_URL = "/logo.png";
 
   var CSS = [
