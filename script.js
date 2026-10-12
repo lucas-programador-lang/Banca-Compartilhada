@@ -4,7 +4,7 @@ import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth
 
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 32.50,
-    DIA_SAQUE_PERMITIDO: 0,
+    DIA_SAQUE_PERMITIDO: 1,// 1 = Segunda-feira (TESTE). Depois volte para 0 (Domingo)
     TAXA_SAQUE_PERCENTUAL: 0.14,
     VALORES_PLANOS_PERMITIDOS: [10, 15, 30, 50, 60, 100, 150, 200, 300, 450, 500, 1000],
     WORKER_BASE_URL: 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev',
