@@ -6,7 +6,7 @@ const CONFIG = {
     VALOR_SAQUE_MINIMO: 35,
     DIA_SAQUE_PERMITIDO: 0,
     TAXA_SAQUE_PERCENTUAL: 0.14,
-    VALORES_PLANOS_PERMITIDOS: [30, 50, 100, 300, 500, 1000],
+    VALORES_PLANOS_PERMITIDOS: [10, 15, 30, 50, 100, 300, 500, 1000],
     // URL real do Worker publicado no Cloudflare.
     WORKER_BASE_URL: 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev',
 };
