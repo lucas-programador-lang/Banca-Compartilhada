@@ -92,7 +92,7 @@ function atualizarPainel(dados) {
 
 // Valida o CPF (11 dígitos e dígitos verificadores) antes de salvar no Perfil.
 function cpfValidoNoSite(cpf) {
-    if (!/^\d{11}$/.test(cpf) || /^(\d)\1{10}$/.test(cpf)) return false;
+    if (!/^\d{11}$/.test(cpf) \vert{}\vert{} /^(\d)\1{10}$/.test(cpf)) return false;
     const digito = (quantidade) => {
         let soma = 0;
         for (let i = 0; i < quantidade; i++) soma += Number(cpf[i]) * (quantidade + 1 - i);
@@ -313,10 +313,8 @@ function inicializarCarteiraUsuario(userId) {
 
 /**
  * Desabilita o botão "APLICAR AGORA" de cada valor de plano que o
- * usuário já tem ativo agora (status !== 'finalizado') — limite de 1
- * plano por valor, por vez. Isso é só UX (evita a pessoa preencher
- * CPF/telefone pra um Pix que o Worker vai recusar); a validação que
- * importa de verdade acontece no servidor, em /api/pix/criar.
+ * usuário já tem ativo agora (status !== 'finalizado') — EXCEPTO 
+ * para os planos ILIMITADOS (15, 60, 150, 200, 450).
  */
 function atualizarDisponibilidadePlanos(planosObj) {
     const planos = planosObj ? Object.values(planosObj) : [];
@@ -324,8 +322,18 @@ function atualizarDisponibilidadePlanos(planosObj) {
         planos.filter(p => p.status !== 'finalizado').map(p => parseFloat(p.valor))
     );
 
+    const planosIlimitados = [15, 60, 150, 200, 450];
+
     document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
         const valor = parseFloat(btn.getAttribute('data-valor'));
+        
+        // Se o plano estiver na lista de ilimitados, NUNCA bloqueia.
+        if (planosIlimitados.includes(valor)) {
+            btn.disabled = false;
+            btn.textContent = 'APLICAR AGORA';
+            return;
+        }
+
         if (valoresAtivos.has(valor)) {
             btn.disabled = true;
             btn.textContent = 'PLANO JÁ ATIVO';
