@@ -691,10 +691,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputCpf = document.getElementById('modalDepositoCpf');
         const inputTelefone = document.getElementById('modalDepositoTelefone');
 
-        if (valorAtual < 30) {
+        if (valorAtual < 10) {
             if (modalToast) {
                 modalToast.classList.add('ativo');
-                modalToast.textContent = "O valor mínimo de depósito/plano é R$ 30,00.";
+                modalToast.textContent = "O valor mínimo de depósito/plano é R$ 10,00.";
                 setTimeout(() => { if (modalToast) modalToast.classList.remove('ativo'); }, 4000);
             }
             return;
