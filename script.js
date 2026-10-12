@@ -7,7 +7,6 @@ const CONFIG = {
     DIA_SAQUE_PERMITIDO: 0,
     TAXA_SAQUE_PERCENTUAL: 0.14,
     VALORES_PLANOS_PERMITIDOS: [10, 15, 30, 50, 60, 100, 150, 200, 300, 450, 500, 1000],
-    // URL real do Worker publicado no Cloudflare.
     WORKER_BASE_URL: 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev',
 };
 
@@ -22,20 +21,6 @@ const formatadorData = new Intl.DateTimeFormat('pt-BR', {
     year: 'numeric',
 });
 
-/**
- * Retorna o dia da semana (0 = domingo, ..., 6 = sábado) sempre no fuso
- * de Brasília (UTC-3, fixo — Brasil não tem mais horário de verão desde
- * 2019), em vez de usar new Date().getDay(), que depende do fuso horário
- * configurado no dispositivo do usuário. Sem isso, alguém em outro fuso
- * podia ver "domingo liberado" quando na verdade já era sábado ou
- * segunda em Brasília.
- *
- * ⚠️ Isso só corrige a EXIBIÇÃO/validação no navegador. A escrita do
- * saque ainda acontece direto pelo Firebase SDK no cliente — alguém
- * que quiser burlar a regra de "só domingo" pode fazer isso via
- * DevTools, porque não há checagem no servidor. Ver observação no
- * Worker sobre mover essa rota pra lá se precisar de segurança real.
- */
 function obterDiaSemanaBrasilia() {
     const brasiliaMs = Date.now() - 3 * 60 * 60 * 1000;
     return new Date(brasiliaMs).getUTCDay();
@@ -45,14 +30,6 @@ function getEl(id) {
     return document.getElementById(id);
 }
 
-/**
- * Escapa caracteres especiais de HTML antes de inserir qualquer dado
- * vindo do Firebase (nome, e-mail, descrição, chave PIX, etc.) dentro
- * de innerHTML. Sem isso, alguém poderia se cadastrar com um "nome"
- * contendo tags/script e esse código executaria no navegador de quem
- * visualizasse aquele dado (ex.: no painel Equipe de outro usuário, ou
- * no painel admin) — um XSS armazenado clássico.
- */
 function escapeHTML(texto) {
     return String(texto ?? '').replace(/[&<>"']/g, (c) => ({
         '&': '&amp;',
@@ -90,7 +67,6 @@ function atualizarPainel(dados) {
     }
 }
 
-// Valida o CPF (11 dígitos e dígitos verificadores) antes de salvar no Perfil.
 function cpfValidoNoSite(cpf) {
     if (!/^\d{11}$/.test(cpf) \vert{}\vert{} /^(\d)\1{10}$/.test(cpf)) return false;
     const digito = (quantidade) => {
@@ -117,7 +93,6 @@ function inicializarPerfilUsuario(userId) {
 
     const tipoEhCpf = (tipo) => String(tipo || '').trim().toLowerCase() === 'cpf';
 
-    // Com chave CPF, a própria chave é o CPF do titular: o campo só aparece para os outros tipos.
     const atualizarCampoCpf = () => {
         if (!perfilCpfGrupo) return;
         const tipoAtual = dadosAtuais.chavePix
@@ -152,7 +127,6 @@ function inicializarPerfilUsuario(userId) {
             }
         }
 
-        // CPF do titular: gravado uma vez e travado, como a chave.
         const cpfTravado = !!dados.cpf;
         if (perfilCpf && cpfTravado) {
             perfilCpf.value = dados.cpf;
@@ -161,7 +135,6 @@ function inicializarPerfilUsuario(userId) {
         }
         atualizarCampoCpf();
 
-        // O botão some quando não falta nada a cadastrar.
         const precisaCpf = !tipoEhCpf(dados.tipoPix);
         const faltaAlgo = !chaveTravada || (precisaCpf && !cpfTravado);
         btnSalvarPerfil.style.display = faltaAlgo ? '' : 'none';
@@ -215,17 +188,13 @@ function inicializarPerfilUsuario(userId) {
     }
 }
 
-// Regra dos dias: só segunda a sexta (horário de Brasília) rendem; sábado e domingo não.
-// Cada "dia" do plano fecha 24h depois da ativação e só conta se esse fechamento cair de
-// segunda a sexta. É a MESMA conta do servidor (contarDiasRendimento no worker.js): a tela
-// só mostra o rendimento acumulado; quem credita no saldo é o servidor.
 function contarDiasRendimento(dataAtivacao, agora) {
     const DIA_MS = 24 * 60 * 60 * 1000;
-    const BRASILIA_MS = 3 * 60 * 60 * 1000; // UTC-3 fixo (sem horário de verão)
+    const BRASILIA_MS = 3 * 60 * 60 * 1000;
     const blocosCompletos = Math.floor((agora.getTime() - dataAtivacao.getTime()) / DIA_MS);
     let dias = 0;
     for (let k = 1; k <= Math.min(blocosCompletos, 5000); k++) {
-        const diaDaSemana = new Date(dataAtivacao.getTime() + k * DIA_MS - BRASILIA_MS).getUTCDay(); // 0=domingo ... 6=sábado
+        const diaDaSemana = new Date(dataAtivacao.getTime() + k * DIA_MS - BRASILIA_MS).getUTCDay();
         if (diaDaSemana >= 1 && diaDaSemana <= 5) dias++;
     }
     return dias;
@@ -311,11 +280,6 @@ function inicializarCarteiraUsuario(userId) {
     });
 }
 
-/**
- * Desabilita o botão "APLICAR AGORA" de cada valor de plano que o
- * usuário já tem ativo agora (status !== 'finalizado') — EXCEPTO 
- * para os planos ILIMITADOS (15, 60, 150, 200, 450).
- */
 function atualizarDisponibilidadePlanos(planosObj) {
     const planos = planosObj ? Object.values(planosObj) : [];
     const valoresAtivos = new Set(
@@ -327,7 +291,6 @@ function atualizarDisponibilidadePlanos(planosObj) {
     document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
         const valor = parseFloat(btn.getAttribute('data-valor'));
         
-        // Se o plano estiver na lista de ilimitados, NUNCA bloqueia.
         if (planosIlimitados.includes(valor)) {
             btn.disabled = false;
             btn.textContent = 'APLICAR AGORA';
@@ -375,9 +338,6 @@ function inicializarExtratoUsuario(userId) {
             const valor = parseFloat(registro.valor || 0);
             const classeValor = valor < 0 ? 'plan-row__value plan-row__value--negative' : 'plan-row__value plan-row__value--positive';
 
-            // Só saques têm status (pendente/pago) — comissão e rendimento
-            // já são créditos concluídos no momento em que aparecem aqui,
-            // não precisam de badge nenhum.
             let statusHtml = '—';
             if (registro.status === 'pendente') {
                 statusHtml = '<span class="status-badge status-pendente">Pendente</span>';
@@ -400,13 +360,6 @@ function inicializarExtratoUsuario(userId) {
     });
 }
 
-// Gera um código curto aleatório (fallback), usado apenas se por
-// algum motivo o usuário ainda não tiver nenhum codigoIndicacao salvo
-// (ex.: contas muito antigas criadas antes desse campo existir).
-// Usuários criados normalmente já recebem esse código no cadastro
-// (ver auth.js). Contas antigas com código no formato anterior
-// (numérico ou baseado no nome) MANTÊM o código que já têm — este
-// gerador só entra em ação quando não existe nenhum código salvo.
 function gerarCodigoAleatorioCurto(tamanho = 6) {
     const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let codigo = '';
@@ -421,9 +374,6 @@ function gerarLinkIndicacao(codigoIndicacao) {
     return `${baseUrl}/register.html?ref=${codigoIndicacao}`;
 }
 
-// Só atualiza o valor do input — chamada toda vez que os dados do
-// usuário mudam. Separada de inicializarEquipeUsuario, que registra
-// listeners (copiar / tabela de membros) e só deve rodar uma vez.
 function atualizarLinkIndicacao(codigoIndicacao) {
     const inputLink = getEl('linkIndicacao');
     if (inputLink && codigoIndicacao) {
@@ -431,8 +381,6 @@ function atualizarLinkIndicacao(codigoIndicacao) {
     }
 }
 
-// Bloqueio do app por digital / rosto / senha do celular. Só existe dentro do app
-// Android (ponte "Android"); no navegador o cartão do Perfil continua escondido.
 function inicializarBloqueioBiometrico() {
     const card = getEl('cardBloqueioBiometrico');
     const chk = getEl('chkBloqueioBiometrico');
@@ -445,7 +393,7 @@ function inicializarBloqueioBiometrico() {
         || typeof ponte.definirBloqueioBiometrico !== 'function') {
         return;
     }
-    if (!ponte.biometriaDisponivel()) return; // celular sem digital, rosto nem senha de tela
+    if (!ponte.biometriaDisponivel()) return;
 
     card.style.display = 'block';
     let estadoAtual = !!ponte.bloqueioBiometricoAtivo();
@@ -453,12 +401,10 @@ function inicializarBloqueioBiometrico() {
 
     chk.addEventListener('change', () => {
         const queroAtivar = chk.checked;
-        // Volta ao estado anterior até o app confirmar com a digital.
         chk.checked = estadoAtual;
         ponte.definirBloqueioBiometrico(queroAtivar);
     });
 
-    // O app chama esta função depois da confirmação (ou do cancelamento).
     window.onBloqueioBiometricoAlterado = (ativo) => {
         const novoEstado = !!ativo;
         chk.checked = novoEstado;
@@ -492,9 +438,6 @@ function inicializarEquipeUsuario(userId) {
         btnCopiar.dataset.listenerAtivo = 'true';
     }
 
-    // Compartilhar convite: dentro do app abre a folha de compartilhamento do Android
-    // (WhatsApp, Telegram...); no navegador usa o compartilhar do sistema, e se nada
-    // disso existir, copia o texto do convite.
     const btnCompartilhar = getEl('btnCompartilharConvite');
     if (btnCompartilhar && !btnCompartilhar.dataset.listenerAtivo) {
         btnCompartilhar.addEventListener('click', async () => {
@@ -537,11 +480,6 @@ function inicializarEquipeUsuario(userId) {
     const tbody = getEl('tabelaMembrosEquipe');
     if (!tbody) return;
 
-    // Lê diretamente equipe/{userId}, que já contém uma entrada por
-    // indicado (gravada no momento do cadastro em auth.js). Evita a
-    // query orderByChild('indicadoPor') em usuarios/, que é barrada
-    // pelas regras do Realtime Database para usuários não-admin
-    // (a leitura da raiz de usuarios/ exige isAdmin).
     const equipeRef = ref(db, 'equipe/' + userId);
 
     onValue(equipeRef, (snapshot) => {
@@ -568,14 +506,14 @@ function inicializarEquipeUsuario(userId) {
             </tr>
         `).join('');
     }, (error) => {
-        console.error('Erro ao carregar indicados (verifique as Regras/index do Firebase):', error);
+        console.error('Erro ao carregar indicados:', error);
     });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     let saldoAtualUsuario = 0;
     let userIdAtual = null;
-    let userAtual = null; // referência ao User do Firebase Auth — necessária pra pegar o ID Token na hora do saque
+    let userAtual = null;
     let nomeUsuarioAtual = '';
     let emailUsuarioAtual = '';
 
@@ -609,10 +547,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnConfirmarModalDep = document.getElementById('btnConfirmarModalDep') || document.getElementById('btnConfirmarModalDepositar');
     const btnCopiarPix = document.getElementById('btnCopiarPix');
 
-    // O botão de copiar só faz sentido depois que o código Pix real
-    // foi gerado (antes disso, txtChaveCopiaCola mostra um texto de
-    // exemplo estático). Fica escondido até areaQrCodePix ganhar a
-    // classe "ativo".
     if (btnCopiarPix) btnCopiarPix.style.display = 'none';
 
     btnCopiarPix?.addEventListener('click', async () => {
@@ -629,8 +563,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle da função que cancela o listener de confirmação de pagamento
-    // (onValue retorna sua própria função de "unsubscribe" no SDK v9+).
     let pararEscutaPagamento = null;
 
     function pararEscutaConfirmacaoPagamento() {
@@ -640,12 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Fica de olho em depositos/{uid}/{depositoId} enquanto o modal está
-     * aberto. Quando o webhook da Vizzion Pay (via Worker) marcar o
-     * depósito como "aprovado", fecha o modal e avisa o usuário — sem
-     * precisar de nenhuma ação manual dele ou de um admin.
-     */
     function escutarConfirmacaoPagamento(uid, depositoId) {
         pararEscutaConfirmacaoPagamento();
         const depositoRef = ref(db, `depositos/${uid}/${depositoId}`);
@@ -708,9 +634,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // A área do QR Code só fica visível depois que o Pix é gerado —
-        // se ainda não tem a classe "ativo", é a primeira vez que o
-        // botão é clicado.
         if (areaQrCodePix && !areaQrCodePix.classList.contains('ativo')) {
             if (!userIdAtual) {
                 mostrarToast('❌ Você precisa estar logado para solicitar um depósito.', 'error');
@@ -727,9 +650,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setBotaoCarregando(btnConfirmarModalDep, true, 'Gerando Pix...');
             try {
-                // 1. Cria o registro do depósito (status "pendente") — o
-                //    Worker/webhook vai atualizar esse mesmo registro
-                //    quando o pagamento for confirmado.
                 const depositosRef = ref(db, 'depositos/' + userIdAtual);
                 const novoDepositoRef = push(depositosRef);
                 const depositoId = novoDepositoRef.key;
@@ -740,8 +660,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     dataSolicitacao: new Date().toISOString(),
                 });
 
-                // 2. Pede pro Worker gerar a cobrança Pix de verdade na
-                //    Vizzion Pay (as chaves da API ficam só no Worker).
                 const respostaPix = await fetch(`${CONFIG.WORKER_BASE_URL}/api/pix/criar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -763,8 +681,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 await update(novoDepositoRef, { transactionId: dadosPix.transactionId });
 
-                // 3. Mostra o QR Code / copia-e-cola reais devolvidos pela
-                //    Vizzion Pay.
                 const qrImg = document.getElementById('imgQrCode');
                 const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
 
@@ -778,10 +694,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (areaQrCodePix) areaQrCodePix.classList.add('ativo');
                 if (statusPagamentoPix) statusPagamentoPix.style.display = 'block';
                 if (btnCopiarPix && dadosPix.pixCode) btnCopiarPix.style.display = 'block';
-                btnConfirmarModalDep.style.display = 'none'; // a confirmação agora é automática via webhook
+                btnConfirmarModalDep.style.display = 'none';
 
-                // 4. Fica escutando em tempo real até o webhook confirmar
-                //    o pagamento (ou recusar).
                 escutarConfirmacaoPagamento(userIdAtual, depositoId);
             } catch (error) {
                 console.error('Erro ao gerar Pix:', error);
@@ -808,9 +722,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elNome) elNome.value = nomePerfil;
         if (elTipo) elTipo.value = tipoPixPerfil;
         if (elChave) {
-            // elChave é um <strong> de exibição, não um <input> — usar
-            // textContent (não .value) e avisar quando não há chave
-            // cadastrada ainda no Perfil.
             elChave.textContent = chavePixPerfil || 'Nenhuma chave cadastrada — vá em Perfil e cadastre uma.';
             elChave.classList.toggle('is-missing', !chavePixPerfil);
         }
@@ -910,10 +821,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const valorSaque = parseFloat(inputValSaque?.value || 0);
 
-        // As checagens aqui são só feedback rápido pro usuário (evita uma
-        // ida e volta ao servidor por engano). Quem decide de verdade —
-        // dia da semana em horário de Brasília, saldo real, chave PIX — é
-        // o Worker, que não confia em nada vindo do navegador.
         if (isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
             mostrarToast(`⚠️ O valor mínimo para saque é ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`, 'warning');
             return;
@@ -977,13 +884,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (elNome) elNome.innerText = nomeUsuario;
                 if (elInicial) elInicial.innerText = nomeUsuario.charAt(0).toUpperCase();
 
-                // O código de indicação já deve ter sido salvo no cadastro
-                // (ver auth.js — gerarCodigoIndicacaoUnico). Se, por algum
-                // motivo, uma conta antiga não tiver NENHUM código salvo,
-                // geramos um curto aleatório aqui como fallback único e
-                // gravamos para sempre. Contas que já têm um código
-                // (qualquer formato, incluindo os antigos) NÃO são
-                // alteradas — o valor salvo é sempre respeitado.
                 let codigo = dados.codigoIndicacao;
                 if (!codigo) {
                     codigo = gerarCodigoAleatorioCurto(6);
@@ -996,21 +896,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Saldo, comissão e rendimento moram em financeiro/{uid}, separado
-        // de usuarios/{uid} — as Regras do Firebase só deixam o Worker
-        // (com credenciais de admin) escrever aqui. O usuário só lê. Isso
-        // fecha a brecha de alguém editar o próprio saldo direto pelo
-        // Firebase SDK/DevTools, que existia enquanto saldo ficava dentro
-        // de usuarios/{uid} (nó que o dono da conta sempre pode escrever,
-        // por causa do Perfil).
         const financeiroRef = ref(db, 'financeiro/' + userId);
         onValue(financeiroRef, (snapshot) => {
             const dadosFinanceiros = snapshot.val() || {};
-            // saldoAtualUsuario é usado só pra checagem rápida de UX no
-            // modal de saque (feedback antes de chamar o Worker) — soma
-            // os dois potes porque o usuário não sabe, e não precisa
-            // saber, de onde veio cada parte; quem decide de verdade se
-            // a comissão está liberada é o Worker.
             saldoAtualUsuario = parseFloat(dadosFinanceiros.saldoRendimento || 0) + parseFloat(dadosFinanceiros.saldoComissao || 0);
             atualizarPainel(dadosFinanceiros);
         });
