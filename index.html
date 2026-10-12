@@ -139,7 +139,53 @@
                 <!-- Grid de Planos -->
                 <div class="grid-planos">
 
-                    <!-- Plano 1: R$ 30 (3% ao dia | Teto 70%) -->
+                    <!-- Plano 1: R$ 10 (Ciclo Express 48h) -->
+                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                        <h3 class="plan-card__title">Plano Ciclo Express</h3>
+                        <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo Rápido (48 horas)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 10,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Rendimento:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 7,00 por dia útil</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Retorno Final (Lucro + Capital):</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 14,00 (140%)</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="10">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano 2: R$ 15 (Ciclo Express 48h) -->
+                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                        <h3 class="plan-card__title">Plano Ciclo Express 2</h3>
+                        <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo Rápido (48 horas)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 15,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Rendimento:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 9,75 por dia útil</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Retorno Final (Lucro + Capital):</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 19,50 (130%)</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="15">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano 3: R$ 30 (3% ao dia | Teto 70%) -->
                     <div class="card plan-card">
                         <h3 class="plan-card__title">Banca Starter</h3>
                         <span class="plan-badge">R$ 0,90 / dia útil (3% por dia útil)</span>
@@ -158,7 +204,7 @@
                         <button class="btn btn-escolher-plano" data-valor="30">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano 2: R$ 50 (3% ao dia | Teto 70%) -->
+                    <!-- Plano 4: R$ 50 (3% ao dia | Teto 70%) -->
                     <div class="card plan-card">
                         <h3 class="plan-card__title">Banca Bronze</h3>
                         <span class="plan-badge">R$ 1,50 / dia útil (3% por dia útil)</span>
@@ -177,7 +223,7 @@
                         <button class="btn btn-escolher-plano" data-valor="50">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano 3: R$ 100 (2% ao dia | Teto 60%) -->
+                    <!-- Plano 5: R$ 100 (2% ao dia | Teto 60%) -->
                     <div class="card plan-card">
                         <h3 class="plan-card__title">Banca Prata</h3>
                         <span class="plan-badge">R$ 2,00 / dia útil (2% por dia útil)</span>
@@ -196,7 +242,7 @@
                         <button class="btn btn-escolher-plano" data-valor="100">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano 4: R$ 300 (2% ao dia | Teto 60%) -->
+                    <!-- Plano 6: R$ 300 (2% ao dia | Teto 60%) -->
                     <div class="card plan-card">
                         <h3 class="plan-card__title">Banca Ouro</h3>
                         <span class="plan-badge">R$ 6,00 / dia útil (2% por dia útil)</span>
@@ -215,7 +261,7 @@
                         <button class="btn btn-escolher-plano" data-valor="300">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano 5: R$ 500 (2% ao dia | Teto 60%) -->
+                    <!-- Plano 7: R$ 500 (2% ao dia | Teto 60%) -->
                     <div class="card plan-card">
                         <h3 class="plan-card__title">Banca Platinum</h3>
                         <span class="plan-badge">R$ 10,00 / dia útil (2% por dia útil)</span>
@@ -234,7 +280,7 @@
                         <button class="btn btn-escolher-plano" data-valor="500">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano 6: R$ 1.000 (2% ao dia | Teto 60%) -->
+                    <!-- Plano 8: R$ 1.000 (2% ao dia | Teto 60%) -->
                     <div class="card plan-card">
                         <h3 class="plan-card__title">Banca Master</h3>
                         <span class="plan-badge">R$ 20,00 / dia útil (2% por dia útil)</span>
@@ -255,7 +301,7 @@
 
                 </div>
 
-                <input type="hidden" id="valorPlano" value="30">
+                <input type="hidden" id="valorPlano" value="10">
                 <button id="btnDepositar" style="display: none;"></button>
             </section>
 
@@ -418,7 +464,7 @@
         <div class="card modal-card">
 
             <div id="modalToast" class="modal-alert">
-                O valor mínimo para depósito é R$ 30,00!
+                O valor mínimo para depósito é R$ 10,00!
             </div>
 
             <button id="fecharModalDeposito" class="modal-close" aria-label="Fechar">&times;</button>
@@ -429,6 +475,8 @@
             <div class="input-group">
                 <label>Valor do Plano / Depósito (R$)</label>
                 <select id="modalValorPlano">
+                    <option value="10">R$ 10,00 — Ciclo Express</option>
+                    <option value="15">R$ 15,00 — Ciclo Express 2</option>
                     <option value="30">R$ 30,00 — Banca Starter</option>
                     <option value="50">R$ 50,00 — Banca Bronze</option>
                     <option value="100">R$ 100,00 — Banca Prata</option>
