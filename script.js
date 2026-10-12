@@ -31,13 +31,16 @@ function getEl(id) {
 }
 
 function escapeHTML(texto) {
-    return String(texto ?? '').replace(/[&<>"']/g, (c) => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;',
-    }[c]));
+    const textoLimpo = (texto !== null && texto !== undefined) ? String(texto) : '';
+    return textoLimpo.replace(/[&<>"']/g, function(c) {
+        return {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        }[c];
+    });
 }
 
 function setBotaoCarregando(botao, carregando, textoCarregando = 'Enviando...') {
@@ -68,8 +71,12 @@ function atualizarPainel(dados) {
 }
 
 function cpfValidoNoSite(cpf) {
-    if (!/^\d{11}$/.test(cpf) \vert{}\vert{} /^(\d)\1{10}$/.test(cpf)) return false;
-    const digito = (quantidade) => {
+    if (!cpf || cpf.length !== 11) return false;
+    if (cpf === '00000000000' || cpf === '11111111111' || cpf === '22222222222' || 
+        cpf === '33333333333' || cpf === '44444444444' || cpf === '55555555555' || 
+        cpf === '66666666666' || cpf === '77777777777' || cpf === '88888888888' || cpf === '99999999999') return false;
+        
+    const digito = function(quantidade) {
         let soma = 0;
         for (let i = 0; i < quantidade; i++) soma += Number(cpf[i]) * (quantidade + 1 - i);
         const resto = (soma * 10) % 11;
@@ -91,9 +98,11 @@ function inicializarPerfilUsuario(userId) {
     const userRef = ref(db, 'usuarios/' + userId);
     let dadosAtuais = {};
 
-    const tipoEhCpf = (tipo) => String(tipo || '').trim().toLowerCase() === 'cpf';
+    const tipoEhCpf = function(tipo) {
+        return String(tipo || '').trim().toLowerCase() === 'cpf';
+    };
 
-    const atualizarCampoCpf = () => {
+    const atualizarCampoCpf = function() {
         if (!perfilCpfGrupo) return;
         const tipoAtual = dadosAtuais.chavePix
             ? dadosAtuais.tipoPix
@@ -106,7 +115,7 @@ function inicializarPerfilUsuario(userId) {
         perfilTipoPix.dataset.listenerCpf = 'true';
     }
 
-    onValue(userRef, (snapshot) => {
+    onValue(userRef, function(snapshot) {
         const dados = snapshot.val();
         if (!dados) return;
         dadosAtuais = dados;
@@ -141,7 +150,7 @@ function inicializarPerfilUsuario(userId) {
     });
 
     if (!btnSalvarPerfil.dataset.listenerAtivo) {
-        btnSalvarPerfil.addEventListener('click', async () => {
+        btnSalvarPerfil.addEventListener('click', async function() {
             const chaveJaSalva = !!dadosAtuais.chavePix;
             const novoNome = perfilNome ? perfilNome.value.trim() : '';
             const novoTipoPix = perfilTipoPix ? perfilTipoPix.value : '';
@@ -229,7 +238,7 @@ function renderizarTabelaCarteira(planosObj) {
     if (!tbody) return;
 
     const planos = planosObj
-        ? Object.entries(planosObj).map(([id, dados]) => ({ id, ...dados }))
+        ? Object.entries(planosObj).map(function([id, dados]) { return { id, ...dados }; })
         : [];
 
     if (!planos.length) {
@@ -239,27 +248,27 @@ function renderizarTabelaCarteira(planosObj) {
         return;
     }
 
-    planos.sort((a, b) => new Date(b.dataAtivacao || 0) - new Date(a.dataAtivacao || 0));
+    planos.sort(function(a, b) { return new Date(b.dataAtivacao || 0) - new Date(a.dataAtivacao || 0); });
 
     let totalInvestido = 0;
     let totalRendimento = 0;
 
-    tbody.innerHTML = planos.map(plano => {
+    tbody.innerHTML = planos.map(function(plano) {
         const valor = parseFloat(plano.valor || 0);
-        const { dataAtivacao, rendimentoDiario, rendimentoAcumulado, finalizado } = calcularEstadoPlano(plano);
+        const estado = calcularEstadoPlano(plano);
 
         totalInvestido += valor;
-        totalRendimento += rendimentoAcumulado;
+        totalRendimento += estado.rendimentoAcumulado;
 
-        const statusTexto = finalizado ? 'Finalizado' : 'Ativo';
-        const statusClasse = finalizado ? 'plan-row__value' : 'plan-row__value plan-row__value--positive';
+        const statusTexto = estado.finalizado ? 'Finalizado' : 'Ativo';
+        const statusClasse = estado.finalizado ? 'plan-row__value' : 'plan-row__value plan-row__value--positive';
 
         return `
             <tr>
-                <td>${formatadorData.format(dataAtivacao)}</td>
+                <td>${formatadorData.format(estado.dataAtivacao)}</td>
                 <td>${formatadorMoeda.format(valor)}</td>
-                <td>${formatadorMoeda.format(rendimentoDiario)}</td>
-                <td>${formatadorMoeda.format(rendimentoAcumulado)}</td>
+                <td>${formatadorMoeda.format(estado.rendimentoDiario)}</td>
+                <td>${formatadorMoeda.format(estado.rendimentoAcumulado)}</td>
                 <td><span class="${statusClasse}" style="font-weight: 600;">${statusTexto}</span></td>
             </tr>
         `;
@@ -274,7 +283,7 @@ function inicializarCarteiraUsuario(userId) {
     if (!tbody) return;
 
     const planosRef = ref(db, 'planos/' + userId);
-    onValue(planosRef, (snapshot) => {
+    onValue(planosRef, function(snapshot) {
         renderizarTabelaCarteira(snapshot.val());
         atualizarDisponibilidadePlanos(snapshot.val());
     });
@@ -282,19 +291,22 @@ function inicializarCarteiraUsuario(userId) {
 
 function atualizarDisponibilidadePlanos(planosObj) {
     const planos = planosObj ? Object.values(planosObj) : [];
-    const valoresAtivos = new Set(
-        planos.filter(p => p.status !== 'finalizado').map(p => parseFloat(p.valor))
-    );
+    
+    // Filtramos os planos que não estão finalizados para saber quais já estão ativos
+    const ativos = planos.filter(function(p) { return p.status !== 'finalizado'; });
+    const valoresAtivos = new Set(ativos.map(function(p) { return parseFloat(p.valor); }));
 
     const planosIlimitados = [15, 60, 150, 200, 450];
 
-    document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
+    const botoes = document.querySelectorAll('.btn-escolher-plano');
+    for (let i = 0; i < botoes.length; i++) {
+        const btn = botoes[i];
         const valor = parseFloat(btn.getAttribute('data-valor'));
         
         if (planosIlimitados.includes(valor)) {
             btn.disabled = false;
             btn.textContent = 'APLICAR AGORA';
-            return;
+            continue;
         }
 
         if (valoresAtivos.has(valor)) {
@@ -304,7 +316,7 @@ function atualizarDisponibilidadePlanos(planosObj) {
             btn.disabled = false;
             btn.textContent = 'APLICAR AGORA';
         }
-    });
+    }
 }
 
 function inicializarExtratoUsuario(userId) {
@@ -317,10 +329,10 @@ function inicializarExtratoUsuario(userId) {
     });
 
     const extratoRef = ref(db, 'extrato/' + userId);
-    onValue(extratoRef, (snapshot) => {
+    onValue(extratoRef, function(snapshot) {
         const dados = snapshot.val();
         const registros = dados
-            ? Object.entries(dados).map(([id, info]) => ({ id, ...info }))
+            ? Object.entries(dados).map(function([id, info]) { return { id, ...info }; })
             : [];
 
         if (!registros.length) {
@@ -328,9 +340,9 @@ function inicializarExtratoUsuario(userId) {
             return;
         }
 
-        registros.sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
+        registros.sort(function(a, b) { return new Date(b.data || 0) - new Date(a.data || 0); });
 
-        tbody.innerHTML = registros.map(registro => {
+        tbody.innerHTML = registros.map(function(registro) {
             const data = new Date(registro.data || Date.now());
             let mesAno = formatadorMesAno.format(data);
             mesAno = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
@@ -360,7 +372,8 @@ function inicializarExtratoUsuario(userId) {
     });
 }
 
-function gerarCodigoAleatorioCurto(tamanho = 6) {
+function gerarCodigoAleatorioCurto(tamanho) {
+    if (!tamanho) tamanho = 6;
     const caracteres = 'abcdefghijklmnopqrstuvwxyz0123456789';
     let codigo = '';
     for (let i = 0; i < tamanho; i++) {
@@ -371,7 +384,7 @@ function gerarCodigoAleatorioCurto(tamanho = 6) {
 
 function gerarLinkIndicacao(codigoIndicacao) {
     const baseUrl = window.location.href.split('index.html')[0].replace(/\/$/, '');
-    return `${baseUrl}/register.html?ref=${codigoIndicacao}`;
+    return baseUrl + '/register.html?ref=' + codigoIndicacao;
 }
 
 function atualizarLinkIndicacao(codigoIndicacao) {
@@ -399,13 +412,13 @@ function inicializarBloqueioBiometrico() {
     let estadoAtual = !!ponte.bloqueioBiometricoAtivo();
     chk.checked = estadoAtual;
 
-    chk.addEventListener('change', () => {
+    chk.addEventListener('change', function() {
         const queroAtivar = chk.checked;
         chk.checked = estadoAtual;
         ponte.definirBloqueioBiometrico(queroAtivar);
     });
 
-    window.onBloqueioBiometricoAlterado = (ativo) => {
+    window.onBloqueioBiometricoAlterado = function(ativo) {
         const novoEstado = !!ativo;
         chk.checked = novoEstado;
         if (novoEstado !== estadoAtual) {
@@ -419,11 +432,11 @@ function inicializarBloqueioBiometrico() {
 
 function inicializarEquipeUsuario(userId) {
     const inputLink = getEl('linkIndicacao');
-
     const btnCopiar = getEl('btnCopiarLinkIndicacao');
+    
     if (btnCopiar && !btnCopiar.dataset.listenerAtivo) {
-        btnCopiar.addEventListener('click', async () => {
-            const link = inputLink?.value || '';
+        btnCopiar.addEventListener('click', async function() {
+            const link = inputLink ? inputLink.value : '';
             if (!link) return;
 
             try {
@@ -431,7 +444,7 @@ function inicializarEquipeUsuario(userId) {
                 mostrarToast('🔗 Link de indicação copiado!', 'success');
             } catch (error) {
                 console.error('Erro ao copiar link:', error);
-                inputLink?.select();
+                if (inputLink) inputLink.select();
                 mostrarToast('⚠️ Não foi possível copiar automaticamente. Selecione o link e copie manualmente.', 'warning');
             }
         });
@@ -440,15 +453,15 @@ function inicializarEquipeUsuario(userId) {
 
     const btnCompartilhar = getEl('btnCompartilharConvite');
     if (btnCompartilhar && !btnCompartilhar.dataset.listenerAtivo) {
-        btnCompartilhar.addEventListener('click', async () => {
-            const link = inputLink?.value || '';
+        btnCompartilhar.addEventListener('click', async function() {
+            const link = inputLink ? inputLink.value : '';
             if (!link) {
                 mostrarToast('Seu link ainda está sendo gerado. Tente de novo em instantes.', 'warning');
                 return;
             }
 
             const titulo = 'Banca Compartilhada';
-            const texto = `Venha para a Banca Compartilhada! Cadastre-se pelo meu link de convite: ${link}`;
+            const texto = 'Venha para a Banca Compartilhada! Cadastre-se pelo meu link de convite: ' + link;
 
             if (window.Android && typeof window.Android.compartilharTexto === 'function') {
                 window.Android.compartilharTexto(titulo, texto);
@@ -482,10 +495,10 @@ function inicializarEquipeUsuario(userId) {
 
     const equipeRef = ref(db, 'equipe/' + userId);
 
-    onValue(equipeRef, (snapshot) => {
+    onValue(equipeRef, function(snapshot) {
         const dados = snapshot.val();
         const membros = dados
-            ? Object.entries(dados).map(([uid, info]) => ({ uid, ...info }))
+            ? Object.entries(dados).map(function([uid, info]) { return { uid, ...info }; })
             : [];
 
         const elTotalIndicados = getEl('totalIndicados');
@@ -496,30 +509,37 @@ function inicializarEquipeUsuario(userId) {
             return;
         }
 
-        membros.sort((a, b) => new Date(b.dataCadastro || 0) - new Date(a.dataCadastro || 0));
+        membros.sort(function(a, b) { return new Date(b.dataCadastro || 0) - new Date(a.dataCadastro || 0); });
 
-        tbody.innerHTML = membros.map(membro => `
-            <tr>
-                <td>${membro.dataCadastro ? formatadorData.format(new Date(membro.dataCadastro)) : '—'}</td>
-                <td>${escapeHTML(membro.nome) || '—'}</td>
-                <td>${escapeHTML(membro.email) || '—'}</td>
-            </tr>
-        `).join('');
-    }, (error) => {
+        tbody.innerHTML = membros.map(function(membro) {
+            const dataCad = membro.dataCadastro ? formatadorData.format(new Date(membro.dataCadastro)) : '—';
+            const nomeStr = escapeHTML(membro.nome) || '—';
+            const emailStr = escapeHTML(membro.email) || '—';
+            
+            return `
+                <tr>
+                    <td>${dataCad}</td>
+                    <td>${nomeStr}</td>
+                    <td>${emailStr}</td>
+                </tr>
+            `;
+        }).join('');
+    }, function(error) {
         console.error('Erro ao carregar indicados:', error);
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     let saldoAtualUsuario = 0;
     let userIdAtual = null;
     let userAtual = null;
     let nomeUsuarioAtual = '';
     let emailUsuarioAtual = '';
 
-    document.querySelectorAll('.btn-escolher-plano').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const valor = btn.getAttribute('data-valor');
+    const botoesPlanos = document.querySelectorAll('.btn-escolher-plano');
+    for (let i = 0; i < botoesPlanos.length; i++) {
+        botoesPlanos[i].addEventListener('click', function() {
+            const valor = this.getAttribute('data-valor');
             const inputPlano = document.getElementById('valorPlano');
             if (inputPlano) inputPlano.value = valor;
 
@@ -528,11 +548,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             abrirModalDeposito();
         });
-    });
+    }
 
     const btnAbrirDep = document.getElementById('btnAbrirDeposito');
     if (btnAbrirDep) {
-        btnAbrirDep.addEventListener('click', () => {
+        btnAbrirDep.addEventListener('click', function() {
             const inputPlano = document.getElementById('valorPlano');
             const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
             if (modalInput && inputPlano) modalInput.value = inputPlano.value || "10";
@@ -549,19 +569,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnCopiarPix) btnCopiarPix.style.display = 'none';
 
-    btnCopiarPix?.addEventListener('click', async () => {
-        const pixEl = document.getElementById('txtChaveCopiaCola');
-        const codigo = pixEl?.textContent.trim() || '';
-        if (!codigo) return;
+    if (btnCopiarPix) {
+        btnCopiarPix.addEventListener('click', async function() {
+            const pixEl = document.getElementById('txtChaveCopiaCola');
+            const codigo = pixEl ? pixEl.textContent.trim() : '';
+            if (!codigo) return;
 
-        try {
-            await navigator.clipboard.writeText(codigo);
-            mostrarToast('✅ Código Pix copiado!', 'success');
-        } catch (error) {
-            console.error('Erro ao copiar código Pix:', error);
-            mostrarToast('⚠️ Não foi possível copiar automaticamente. Selecione o código manualmente.', 'warning');
-        }
-    });
+            try {
+                await navigator.clipboard.writeText(codigo);
+                mostrarToast('✅ Código Pix copiado!', 'success');
+            } catch (error) {
+                console.error('Erro ao copiar código Pix:', error);
+                mostrarToast('⚠️ Não foi possível copiar automaticamente. Selecione o código manualmente.', 'warning');
+            }
+        });
+    }
 
     let pararEscutaPagamento = null;
 
@@ -575,13 +597,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function escutarConfirmacaoPagamento(uid, depositoId) {
         pararEscutaConfirmacaoPagamento();
         const depositoRef = ref(db, `depositos/${uid}/${depositoId}`);
-        pararEscutaPagamento = onValue(depositoRef, (snapshot) => {
+        pararEscutaPagamento = onValue(depositoRef, function(snapshot) {
             const dados = snapshot.val();
-            if (dados?.status === 'aprovado') {
+            if (dados && dados.status === 'aprovado') {
                 pararEscutaConfirmacaoPagamento();
                 fecharModalDeposito();
                 mostrarToast('✅ Pagamento confirmado! Seu plano já está ativo na Carteira.', 'success');
-            } else if (dados?.status === 'recusado') {
+            } else if (dados && dados.status === 'recusado') {
                 pararEscutaConfirmacaoPagamento();
                 if (statusPagamentoPix) statusPagamentoPix.textContent = 'Pagamento não confirmado.';
                 mostrarToast('❌ O pagamento não foi confirmado. Tente novamente.', 'error');
@@ -611,109 +633,122 @@ document.addEventListener('DOMContentLoaded', () => {
         pararEscutaConfirmacaoPagamento();
     }
 
-    document.getElementById('fecharModalDepX')?.addEventListener('click', fecharModalDeposito);
-    document.getElementById('fecharModalDeposito')?.addEventListener('click', fecharModalDeposito);
-    document.getElementById('btnCancelarModalDep')?.addEventListener('click', fecharModalDeposito);
+    const fecharX = document.getElementById('fecharModalDepX');
+    if (fecharX) fecharX.addEventListener('click', fecharModalDeposito);
+    
+    const btnFechar = document.getElementById('fecharModalDeposito');
+    if (btnFechar) btnFechar.addEventListener('click', fecharModalDeposito);
+    
+    const btnCancelar = document.getElementById('btnCancelarModalDep');
+    if (btnCancelar) btnCancelar.addEventListener('click', fecharModalDeposito);
 
-    modalDep?.addEventListener('click', (e) => {
-        if (e.target === modalDep) fecharModalDeposito();
-    });
+    if (modalDep) {
+        modalDep.addEventListener('click', function(e) {
+            if (e.target === modalDep) fecharModalDeposito();
+        });
+    }
 
-    btnConfirmarModalDep?.addEventListener('click', async () => {
-        const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
-        const valorAtual = parseFloat(modalInput?.value || 0);
-        const inputCpf = document.getElementById('modalDepositoCpf');
-        const inputTelefone = document.getElementById('modalDepositoTelefone');
+    if (btnConfirmarModalDep) {
+        btnConfirmarModalDep.addEventListener('click', async function() {
+            const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
+            const valorAtual = parseFloat(modalInput ? modalInput.value : 0);
+            const inputCpf = document.getElementById('modalDepositoCpf');
+            const inputTelefone = document.getElementById('modalDepositoTelefone');
 
-        if (valorAtual < 10) {
-            if (modalToast) {
-                modalToast.classList.add('ativo');
-                modalToast.textContent = "O valor mínimo de depósito/plano é R$ 10,00.";
-                setTimeout(() => { if (modalToast) modalToast.classList.remove('ativo'); }, 4000);
-            }
-            return;
-        }
-
-        if (areaQrCodePix && !areaQrCodePix.classList.contains('ativo')) {
-            if (!userIdAtual) {
-                mostrarToast('❌ Você precisa estar logado para solicitar um depósito.', 'error');
+            if (valorAtual < 10) {
+                if (modalToast) {
+                    modalToast.classList.add('ativo');
+                    modalToast.textContent = "O valor mínimo de depósito/plano é R$ 10,00.";
+                    setTimeout(function() { if (modalToast) modalToast.classList.remove('ativo'); }, 4000);
+                }
                 return;
             }
 
-            const cpf = inputCpf?.value.trim() || '';
-            const telefone = inputTelefone?.value.trim() || '';
+            if (areaQrCodePix && !areaQrCodePix.classList.contains('ativo')) {
+                if (!userIdAtual) {
+                    mostrarToast('❌ Você precisa estar logado para solicitar um depósito.', 'error');
+                    return;
+                }
 
-            if (!cpf || !telefone) {
-                mostrarToast('⚠️ Informe CPF e telefone para gerar o Pix.', 'warning');
-                return;
-            }
+                const cpf = inputCpf ? inputCpf.value.trim() : '';
+                const telefone = inputTelefone ? inputTelefone.value.trim() : '';
 
-            setBotaoCarregando(btnConfirmarModalDep, true, 'Gerando Pix...');
-            try {
-                const depositosRef = ref(db, 'depositos/' + userIdAtual);
-                const novoDepositoRef = push(depositosRef);
-                const depositoId = novoDepositoRef.key;
+                if (!cpf || !telefone) {
+                    mostrarToast('⚠️ Informe CPF e telefone para gerar o Pix.', 'warning');
+                    return;
+                }
 
-                await set(novoDepositoRef, {
-                    valorPlano: valorAtual,
-                    status: 'pendente',
-                    dataSolicitacao: new Date().toISOString(),
-                });
+                setBotaoCarregando(btnConfirmarModalDep, true, 'Gerando Pix...');
+                try {
+                    const depositosRef = ref(db, 'depositos/' + userIdAtual);
+                    const novoDepositoRef = push(depositosRef);
+                    const depositoId = novoDepositoRef.key;
 
-                const respostaPix = await fetch(`${CONFIG.WORKER_BASE_URL}/api/pix/criar`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        uid: userIdAtual,
-                        depositoId,
+                    await set(novoDepositoRef, {
                         valorPlano: valorAtual,
-                        nome: nomeUsuarioAtual || 'Cliente',
-                        email: emailUsuarioAtual || '',
-                        telefone,
-                        cpf,
-                    }),
-                });
+                        status: 'pendente',
+                        dataSolicitacao: new Date().toISOString(),
+                    });
 
-                const dadosPix = await respostaPix.json();
-                if (!respostaPix.ok) {
-                    throw new Error(dadosPix.error || 'Erro ao gerar o Pix.');
+                    const respostaPix = await fetch(`${CONFIG.WORKER_BASE_URL}/api/pix/criar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            uid: userIdAtual,
+                            depositoId,
+                            valorPlano: valorAtual,
+                            nome: nomeUsuarioAtual || 'Cliente',
+                            email: emailUsuarioAtual || '',
+                            telefone,
+                            cpf,
+                        }),
+                    });
+
+                    const dadosPix = await respostaPix.json();
+                    if (!respostaPix.ok) {
+                        throw new Error(dadosPix.error || 'Erro ao gerar o Pix.');
+                    }
+
+                    await update(novoDepositoRef, { transactionId: dadosPix.transactionId });
+
+                    const qrImg = document.getElementById('imgQrCode');
+                    const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
+
+                    if (qrImg) {
+                        qrImg.src = dadosPix.pixImage
+                            ? dadosPix.pixImage
+                            : `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(dadosPix.pixCode)}`;
+                    }
+                    if (pixCopiaCola) pixCopiaCola.textContent = dadosPix.pixCode || '—';
+
+                    if (areaQrCodePix) areaQrCodePix.classList.add('ativo');
+                    if (statusPagamentoPix) statusPagamentoPix.style.display = 'block';
+                    if (btnCopiarPix && dadosPix.pixCode) btnCopiarPix.style.display = 'block';
+                    btnConfirmarModalDep.style.display = 'none';
+
+                    escutarConfirmacaoPagamento(userIdAtual, depositoId);
+                } catch (error) {
+                    console.error('Erro ao gerar Pix:', error);
+                    mostrarToast('❌ ' + error.message, 'error');
+                } finally {
+                    setBotaoCarregando(btnConfirmarModalDep, false);
                 }
-
-                await update(novoDepositoRef, { transactionId: dadosPix.transactionId });
-
-                const qrImg = document.getElementById('imgQrCode');
-                const pixCopiaCola = document.getElementById('txtChaveCopiaCola');
-
-                if (qrImg) {
-                    qrImg.src = dadosPix.pixImage
-                        ? dadosPix.pixImage
-                        : `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(dadosPix.pixCode)}`;
-                }
-                if (pixCopiaCola) pixCopiaCola.textContent = dadosPix.pixCode || '—';
-
-                if (areaQrCodePix) areaQrCodePix.classList.add('ativo');
-                if (statusPagamentoPix) statusPagamentoPix.style.display = 'block';
-                if (btnCopiarPix && dadosPix.pixCode) btnCopiarPix.style.display = 'block';
-                btnConfirmarModalDep.style.display = 'none';
-
-                escutarConfirmacaoPagamento(userIdAtual, depositoId);
-            } catch (error) {
-                console.error('Erro ao gerar Pix:', error);
-                mostrarToast('❌ ' + error.message, 'error');
-            } finally {
-                setBotaoCarregando(btnConfirmarModalDep, false);
             }
-        }
-    });
+        });
+    }
 
     const modalSaque = document.getElementById('modalSaque') || document.getElementById('modalSaqueSistema');
     const btnAbrirSaqueModal = document.getElementById('btnAbrirSaqueModal');
     const btnConfirmarModalSaque = document.getElementById('btnConfirmarModalSaque') || document.getElementById('btnSolicitarSaqueFinal') || document.getElementById('btnConfirmarModalSacar');
 
     function abrirModalSaque() {
-        const nomePerfil = document.getElementById('perfilNome')?.value || localStorage.getItem('usuarioNome') || 'Não informado';
-        const tipoPixPerfil = document.getElementById('perfilTipoPix')?.value || 'CPF';
-        const chavePixPerfil = document.getElementById('perfilChavePix')?.value || localStorage.getItem('usuarioChavePix') || '';
+        const perfNome = document.getElementById('perfilNome');
+        const perfTipo = document.getElementById('perfilTipoPix');
+        const perfChave = document.getElementById('perfilChavePix');
+        
+        const nomePerfil = (perfNome ? perfNome.value : null) || localStorage.getItem('usuarioNome') || 'Não informado';
+        const tipoPixPerfil = (perfTipo ? perfTipo.value : null) || 'CPF';
+        const chavePixPerfil = (perfChave ? perfChave.value : null) || localStorage.getItem('usuarioChavePix') || '';
 
         const elNome = document.getElementById('saqueNomeCompleto');
         const elTipo = document.getElementById('saqueTipoPix');
@@ -756,115 +791,133 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalSaque) modalSaque.style.display = 'none';
     }
 
-    btnAbrirSaqueModal?.addEventListener('click', (e) => {
-        e.preventDefault();
-        abrirModalSaque();
-    });
+    if (btnAbrirSaqueModal) {
+        btnAbrirSaqueModal.addEventListener('click', function(e) {
+            e.preventDefault();
+            abrirModalSaque();
+        });
+    }
 
-    document.getElementById('fecharModalSaqueX')?.addEventListener('click', fecharModalSaque);
-    document.getElementById('fecharModalSaque')?.addEventListener('click', fecharModalSaque);
-    document.getElementById('btnCancelarModalSaque')?.addEventListener('click', fecharModalSaque);
+    const fecharSaqueX = document.getElementById('fecharModalSaqueX');
+    if (fecharSaqueX) fecharSaqueX.addEventListener('click', fecharModalSaque);
+    
+    const btnFecharSaque = document.getElementById('fecharModalSaque');
+    if (btnFecharSaque) btnFecharSaque.addEventListener('click', fecharModalSaque);
+    
+    const btnCancelarSaque = document.getElementById('btnCancelarModalSaque');
+    if (btnCancelarSaque) btnCancelarSaque.addEventListener('click', fecharModalSaque);
 
-    modalSaque?.addEventListener('click', (e) => {
-        if (e.target === modalSaque) fecharModalSaque();
-    });
+    if (modalSaque) {
+        modalSaque.addEventListener('click', function(e) {
+            if (e.target === modalSaque) fecharModalSaque();
+        });
+    }
 
     const inputValSaque = document.getElementById('valorSaqueModal') || document.getElementById('modalValorSaque');
     const boxResumo = document.getElementById('resumoDescontoSaque') || document.getElementById('resumoValorLiquido');
 
-    inputValSaque?.addEventListener('input', (e) => {
-        const val = parseFloat(e.target.value);
-        const diaHoje = obterDiaSemanaBrasilia();
+    if (inputValSaque) {
+        inputValSaque.addEventListener('input', function(e) {
+            const val = parseFloat(e.target.value);
+            const diaHoje = obterDiaSemanaBrasilia();
 
-        if (!isNaN(val) && val > 0) {
-            const taxa = val * CONFIG.TAXA_SAQUE_PERCENTUAL;
-            const liquido = val - taxa;
+            if (!isNaN(val) && val > 0) {
+                const taxa = val * CONFIG.TAXA_SAQUE_PERCENTUAL;
+                const liquido = val - taxa;
 
-            if (boxResumo) {
-                boxResumo.classList.add('ativo');
-                boxResumo.innerHTML = `
-                    <div class="amount-note__row amount-note__row--negative">
-                        <span>Taxa (14%):</span>
-                        <span>- ${formatadorMoeda.format(taxa)}</span>
-                    </div>
-                    <div class="amount-note__row amount-note__row--positive">
-                        <span>Você vai receber:</span>
-                        <span>${formatadorMoeda.format(liquido)}</span>
-                    </div>
-                `;
-            }
-
-            if (btnConfirmarModalSaque) {
-                if (val > saldoAtualUsuario || val < CONFIG.VALOR_SAQUE_MINIMO || diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
-                    btnConfirmarModalSaque.disabled = true;
-                } else {
-                    btnConfirmarModalSaque.disabled = false;
+                if (boxResumo) {
+                    boxResumo.classList.add('ativo');
+                    boxResumo.innerHTML = `
+                        <div class="amount-note__row amount-note__row--negative">
+                            <span>Taxa (14%):</span>
+                            <span>- ${formatadorMoeda.format(taxa)}</span>
+                        </div>
+                        <div class="amount-note__row amount-note__row--positive">
+                            <span>Você vai receber:</span>
+                            <span>${formatadorMoeda.format(liquido)}</span>
+                        </div>
+                    `;
                 }
+
+                if (btnConfirmarModalSaque) {
+                    if (val > saldoAtualUsuario || val < CONFIG.VALOR_SAQUE_MINIMO || diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
+                        btnConfirmarModalSaque.disabled = true;
+                    } else {
+                        btnConfirmarModalSaque.disabled = false;
+                    }
+                }
+            } else {
+                if (boxResumo) boxResumo.classList.remove('ativo');
             }
-        } else {
-            if (boxResumo) boxResumo.classList.remove('ativo');
-        }
-    });
+        });
+    }
 
-    modalSaque?.querySelector('a[data-target="view-perfil"]')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        fecharModalSaque();
-        const navPerfil = document.querySelector('[data-target="view-perfil"]');
-        if (navPerfil) navPerfil.click();
-    });
-
-    btnConfirmarModalSaque?.addEventListener('click', async () => {
-        if (!userIdAtual || !userAtual) {
-            mostrarToast('❌ Você precisa estar logado para solicitar um saque.', 'error');
-            return;
-        }
-
-        const valorSaque = parseFloat(inputValSaque?.value || 0);
-
-        if (isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
-            mostrarToast(`⚠️ O valor mínimo para saque é ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`, 'warning');
-            return;
-        }
-
-        if (valorSaque > saldoAtualUsuario) {
-            mostrarToast('⚠️ Valor solicitado maior que o saldo disponível.', 'warning');
-            return;
-        }
-
-        setBotaoCarregando(btnConfirmarModalSaque, true, 'Processando...');
-        try {
-            const idToken = await userAtual.getIdToken();
-
-            const respostaSaque = await fetch(`${CONFIG.WORKER_BASE_URL}/api/saque/solicitar`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${idToken}`,
-                },
-                body: JSON.stringify({ valorSaque }),
+    if (modalSaque) {
+        const linkPerfil = modalSaque.querySelector('a[data-target="view-perfil"]');
+        if (linkPerfil) {
+            linkPerfil.addEventListener('click', function(e) {
+                e.preventDefault();
+                fecharModalSaque();
+                const navPerfil = document.querySelector('[data-target="view-perfil"]');
+                if (navPerfil) navPerfil.click();
             });
+        }
+    }
 
-            const dadosResposta = await respostaSaque.json();
-            if (!respostaSaque.ok) {
-                throw new Error(dadosResposta.error || 'Erro ao solicitar o saque.');
+    if (btnConfirmarModalSaque) {
+        btnConfirmarModalSaque.addEventListener('click', async function() {
+            if (!userIdAtual || !userAtual) {
+                mostrarToast('❌ Você precisa estar logado para solicitar um saque.', 'error');
+                return;
             }
 
-            const mensagemSaque = dadosResposta.automatico === 'pago'
-                ? 'Saque pago! O Pix já foi enviado.'
-                : dadosResposta.automatico === 'processando'
-                    ? 'Saque enviado! O Pix está sendo processado.'
-                    : 'Saque solicitado com sucesso!';
-            mostrarToast(mensagemSaque, 'success');
-            fecharModalSaque();
-        } catch (error) {
-            console.error('Erro ao solicitar saque:', error);
-            mostrarToast('❌ ' + error.message, 'error');
-        } finally {
-            setBotaoCarregando(btnConfirmarModalSaque, false);
-        }
-    });
+            const valorSaque = parseFloat(inputValSaque ? inputValSaque.value : 0);
 
-    auth.onAuthStateChanged((user) => {
+            if (isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
+                mostrarToast(`⚠️ O valor mínimo para saque é ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`, 'warning');
+                return;
+            }
+
+            if (valorSaque > saldoAtualUsuario) {
+                mostrarToast('⚠️ Valor solicitado maior que o saldo disponível.', 'warning');
+                return;
+            }
+
+            setBotaoCarregando(btnConfirmarModalSaque, true, 'Processando...');
+            try {
+                const idToken = await userAtual.getIdToken();
+
+                const respostaSaque = await fetch(`${CONFIG.WORKER_BASE_URL}/api/saque/solicitar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`,
+                    },
+                    body: JSON.stringify({ valorSaque }),
+                });
+
+                const dadosResposta = await respostaSaque.json();
+                if (!respostaSaque.ok) {
+                    throw new Error(dadosResposta.error || 'Erro ao solicitar o saque.');
+                }
+
+                const mensagemSaque = dadosResposta.automatico === 'pago'
+                    ? 'Saque pago! O Pix já foi enviado.'
+                    : dadosResposta.automatico === 'processando'
+                        ? 'Saque enviado! O Pix está sendo processado.'
+                        : 'Saque solicitado com sucesso!';
+                mostrarToast(mensagemSaque, 'success');
+                fecharModalSaque();
+            } catch (error) {
+                console.error('Erro ao solicitar saque:', error);
+                mostrarToast('❌ ' + error.message, 'error');
+            } finally {
+                setBotaoCarregando(btnConfirmarModalSaque, false);
+            }
+        });
+    }
+
+    auth.onAuthStateChanged(function(user) {
         if (!user) return;
         const userId = user.uid;
         userIdAtual = userId;
@@ -872,7 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
         emailUsuarioAtual = user.email || '';
 
         const userRef = ref(db, 'usuarios/' + userId);
-        onValue(userRef, (snapshot) => {
+        onValue(userRef, function(snapshot) {
             const dados = snapshot.val();
             if (dados) {
                 nomeUsuarioAtual = dados.nome || user.email || 'Usuário';
@@ -887,7 +940,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let codigo = dados.codigoIndicacao;
                 if (!codigo) {
                     codigo = gerarCodigoAleatorioCurto(6);
-                    update(userRef, { codigoIndicacao: codigo }).catch((error) => {
+                    update(userRef, { codigoIndicacao: codigo }).catch(function(error) {
                         console.error('Erro ao salvar código de indicação:', error);
                     });
                 }
@@ -897,7 +950,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const financeiroRef = ref(db, 'financeiro/' + userId);
-        onValue(financeiroRef, (snapshot) => {
+        onValue(financeiroRef, function(snapshot) {
             const dadosFinanceiros = snapshot.val() || {};
             saldoAtualUsuario = parseFloat(dadosFinanceiros.saldoRendimento || 0) + parseFloat(dadosFinanceiros.saldoComissao || 0);
             atualizarPainel(dadosFinanceiros);
@@ -911,7 +964,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
     const sections = document.querySelectorAll('.view-section');
     const sidebar = document.getElementById('sidebarPrincipal');
@@ -920,47 +973,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnSair = document.getElementById('btnSair');
 
     function fecharMenuMobile() {
-        sidebar?.classList.remove('aberta');
-        overlay?.classList.remove('ativo');
+        if (sidebar) sidebar.classList.remove('aberta');
+        if (overlay) overlay.classList.remove('ativo');
     }
 
-    btnAbrirMenuMobile?.addEventListener('click', () => {
-        sidebar?.classList.toggle('aberta');
-        overlay?.classList.toggle('ativo');
-    });
+    if (btnAbrirMenuMobile) {
+        btnAbrirMenuMobile.addEventListener('click', function() {
+            if (sidebar) sidebar.classList.toggle('aberta');
+            if (overlay) overlay.classList.toggle('ativo');
+        });
+    }
 
-    overlay?.addEventListener('click', fecharMenuMobile);
+    if (overlay) {
+        overlay.addEventListener('click', fecharMenuMobile);
+    }
 
-    navItems.forEach(item => {
-        item.addEventListener('click', function(e) {
+    for (let i = 0; i < navItems.length; i++) {
+        navItems[i].addEventListener('click', function(e) {
             e.preventDefault();
 
-            navItems.forEach(nav => nav.classList.remove('active'));
+            for (let j = 0; j < navItems.length; j++) {
+                navItems[j].classList.remove('active');
+            }
             this.classList.add('active');
 
             const targetId = this.getAttribute('data-target');
             if (targetId) {
-                sections.forEach(sec => {
+                for (let k = 0; k < sections.length; k++) {
+                    const sec = sections[k];
                     if (sec.id === targetId) {
                         sec.style.display = 'block';
                     } else {
                         sec.style.display = 'none';
                     }
-                });
+                }
             }
 
             fecharMenuMobile();
         });
-    });
+    }
 
-    btnSair?.addEventListener('click', async () => {
-        btnSair.disabled = true;
-        try {
-            await signOut(auth);
-        } catch (error) {
-            console.error('Erro ao sair:', error);
-            mostrarToast('❌ Erro ao sair: ' + error.message, 'error');
-            btnSair.disabled = false;
-        }
-    });
+    if (btnSair) {
+        btnSair.addEventListener('click', async function() {
+            btnSair.disabled = true;
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error('Erro ao sair:', error);
+                mostrarToast('❌ Erro ao sair: ' + error.message, 'error');
+                btnSair.disabled = false;
+            }
+        });
+    }
 });
