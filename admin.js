@@ -729,19 +729,24 @@ function iniciarFormularioRendimentoManual() {
             return;
         }
         if (motivo.length < 3) {
-            mostrarToast('Informe o motivo do crédito.', 'warning');
+            mostrarToast('Informe o motivo da operação.', 'warning');
             return;
         }
 
         const nomeAlvo = nomeDoUsuario(estado.usuarios || {}, uid);
-        const confirmado = window.confirm(`Creditar ${formatadorMoeda.format(valor)} de rendimento para "${nomeAlvo}"?\n\nO valor entra no saldo sacável na hora.`);
+        
+        // --- AQUI ESTÁ A NOVIDADE QUE LÊ O NOVO BOTÃO DE REMOVER/ADICIONAR ---
+        const tipoOperacao = document.getElementById('rmTipoOperacao')?.value || 'credito';
+        const acaoNome = tipoOperacao === 'debito' ? 'Remover' : 'Creditar';
+        
+        const confirmado = window.confirm(`${acaoNome} ${formatadorMoeda.format(valor)} da conta de "${nomeAlvo}"?`);
         if (!confirmado) return;
 
         if (!chaveOperacaoManual) chaveOperacaoManual = gerarChaveOperacao();
 
         btn.disabled = true;
         const textoOriginal = btn.textContent;
-        btn.textContent = 'Creditando...';
+        btn.textContent = 'Processando...';
 
         try {
             const idToken = await auth.currentUser.getIdToken();
@@ -752,28 +757,26 @@ function iniciarFormularioRendimentoManual() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`,
                 },
-                body: JSON.stringify({ uid, valor, motivo, chave: chaveOperacaoManual }),
+                body: JSON.stringify({ uid, valor, motivo, chave: chaveOperacaoManual, tipoOperacao }),
             });
 
             const dadosResposta = await resposta.json();
             if (!resposta.ok) {
-                throw new Error(dadosResposta.error || 'Erro ao creditar rendimento.');
+                throw new Error(dadosResposta.error || 'Erro ao processar operação.');
             }
 
             if (dadosResposta.jaProcessado) {
-                mostrarToast('Este crédito já havia sido processado. Nada foi somado de novo.', 'warning');
+                mostrarToast('Esta operação já havia sido processada.', 'warning');
             } else {
-                mostrarToast(`${formatadorMoeda.format(valor)} creditado para ${nomeAlvo}.`, 'success');
+                const acaoToast = tipoOperacao === 'debito' ? 'removido de' : 'creditado para';
+                mostrarToast(`${formatadorMoeda.format(valor)} ${acaoToast} ${nomeAlvo}.`, 'success');
             }
 
-            // Operação concluída: limpa o formulário e libera uma chave nova.
             chaveOperacaoManual = null;
             if (campoValor) campoValor.value = '';
             if (campoMotivo) campoMotivo.value = '';
         } catch (error) {
-            // A chave é mantida: se o crédito chegou a ser gravado, um novo
-            // clique com os mesmos dados não soma duas vezes.
-            console.error('Erro ao creditar rendimento manual:', error);
+            console.error('Erro na operação manual:', error);
             mostrarToast(error.message, 'error');
         } finally {
             btn.disabled = false;
@@ -936,8 +939,27 @@ function iniciarListenersAdmin() {
         estado.depositos = snapshot.val();
         rerenderizarTudo();
     });
-}
 
+    // --- NOVIDADE: Delegação de clique para excluir (arquivar) ajuste manual ---
+    const tbodyCreditos = document.getElementById('tabelaCreditosManuais');
+    if (tbodyCreditos && !tbodyCreditos.dataset.listenerAtivo) {
+        tbodyCreditos.addEventListener('click', (e) => {
+            const btnArquivar = e.target.closest('.btn-arquivar');
+            if (btnArquivar) {
+                const { colecao, id } = btnArquivar.dataset;
+                const uid = btnArquivar.dataset.uid || 'null'; // uid não é obrigatório para auditoria, mas a função espera
+                
+                const confirmado = window.confirm("Tem certeza que deseja excluir este registo do histórico?");
+                if (!confirmado) return;
+
+                btnArquivar.disabled = true;
+                btnArquivar.textContent = 'Excluindo...';
+                arquivarRegistro(colecao, uid, id);
+            }
+        });
+        tbodyCreditos.dataset.listenerAtivo = 'true';
+    }
+}
 auth.onAuthStateChanged((user) => {
     if (!user) return;
 
