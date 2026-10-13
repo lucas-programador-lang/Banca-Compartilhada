@@ -63,9 +63,16 @@
 
             <section class="table-section" id="secaoRendimentoManual">
                 <div class="table-section__head">
-                    <h3>Crédito Manual de Rendimento</h3>
+                    <h3>Ajuste Manual de Saldo</h3>
                 </div>
-                <p class="table-hint">Soma o valor no saldo sacável e no total de rendimentos do usuário e lança no Extrato dele como "Rendimento creditado pela administração". O motivo fica só no registro interno abaixo. Para pagar rendimento atrasado dos planos, use "Rodar cálculo de rendimentos agora".</p>
+                <p class="table-hint">Adicione rendimentos extras ou remova saldo da conta de qualquer usuário.</p>
+                
+                <div class="table-search">
+                    <select id="rmTipoOperacao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
+                        <option value="credito">➕ Adicionar Saldo (Crédito)</option>
+                        <option value="debito">➖ Remover Saldo (Débito)</option>
+                    </select>
+                </div>
                 <div class="table-search">
                     <input type="text" id="rmBusca" placeholder="Buscar usuário por nome ou e-mail...">
                 </div>
@@ -75,14 +82,14 @@
                     </select>
                 </div>
                 <div class="table-search">
-                    <input type="number" id="rmValor" min="0.01" step="0.01" inputmode="decimal" placeholder="Valor a creditar (R$)">
+                    <input type="number" id="rmValor" min="0.01" step="0.01" inputmode="decimal" placeholder="Valor (R$)">
                 </div>
                 <div class="table-search">
-                    <input type="text" id="rmMotivo" maxlength="120" placeholder="Motivo (ex.: ajuste do cron de segunda)">
+                    <input type="text" id="rmMotivo" maxlength="120" placeholder="Motivo (ex.: bônus, correção de erro, etc.)">
                 </div>
-                <button class="btn" id="btnCreditarManual" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Creditar rendimento</button>
+                <button class="btn" id="btnCreditarManual" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
 
-                <p class="table-hint">Últimos créditos manuais (quem creditou, quanto e por quê):</p>
+                <p class="table-hint">Últimos ajustes manuais (créditos e débitos):</p>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -91,11 +98,12 @@
                                 <th>Usuário</th>
                                 <th>Valor</th>
                                 <th>Motivo</th>
-                                <th>Creditado por</th>
+                                <th>Executado por</th>
+                                <th>Ações</th> <!-- NOVA COLUNA -->
                             </tr>
                         </thead>
                         <tbody id="tabelaCreditosManuais">
-                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                            <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
