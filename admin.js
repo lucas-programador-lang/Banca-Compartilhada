@@ -125,12 +125,17 @@ function renderizarTabelaSaques(saques, usuarios) {
                     </div>
                 `;
 
+            // NOVIDADE AQUI: Mostramos o valor solicitado e, logo abaixo, a taxa e o líquido
             return `
                 <tr>
                     <td>${formatarDataHora(saque.dataSolicitacao)}</td>
                     <td>${escapeHTML(nomeDoUsuario(usuarios, saque.uid))}</td>
                     <td>${escapeHTML(saque.chavePix) || '—'}</td>
-                    <td>${formatadorMoeda.format(saque.valorSolicitado || 0)}</td>
+                    <td>
+                        <strong style="color: var(--text-primary);">${formatadorMoeda.format(saque.valorSolicitado || 0)}</strong><br>
+                        <small style="color: var(--danger); font-size: 0.85em;">Taxa (14%): -${formatadorMoeda.format(saque.taxa || 0)}</small><br>
+                        <small style="color: var(--success); font-weight: 600;">Líquido: ${formatadorMoeda.format(saque.valorLiquido || 0)}</small>
+                    </td>
                     <td>${badgeStatus(saque.status)}</td>
                     <td>${acoes}</td>
                 </tr>
@@ -142,7 +147,6 @@ function renderizarTabelaSaques(saques, usuarios) {
     const elTotal = document.getElementById('totalSaquesPendentes');
     if (elTotal) elTotal.textContent = pendentes;
 }
-
 /**
  * Depósitos travados em 'aprovado_sem_plano' — Pix confirmado de
  * verdade, mas o Worker recusou criar o plano porque o usuário já
