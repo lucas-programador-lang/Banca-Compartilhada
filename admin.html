@@ -33,6 +33,12 @@
                 <div id="resumoRendimentos" style="display: none; margin-top: var(--space-sm); font-size: 0.85rem; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: var(--space-sm);"></div>
             </div>
             <div class="stats-grid">
+                <!-- NOVO CARD AQUI -->
+                <div class="stat-card">
+                    <h3>Total de Saques Pagos</h3>
+                    <p id="totalSaquesPagosGeral" style="color: var(--success); font-weight: bold;">R$ 0,00</p>
+                </div>
+                <!-- RESTO DOS CARDS QUE VOCÊ JÁ TINHA -->
                 <div class="stat-card">
                     <h3>Total de Saques Pendentes</h3>
                     <p id="totalSaquesPendentes">0</p>
@@ -111,11 +117,13 @@
                                 <th>E-mail</th>
                                 <th>Saldo</th>
                                 <th>Comissão Acumulada</th>
+                                <th>Total Depositado</th> <!-- COLUNA NOVA -->
+                                <th>Total Sacado</th>     <!-- COLUNA NOVA -->
                                 <th>Admin</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaUsuariosAdmin">
-                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                            <tr><td colspan="7" class="table-empty">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
