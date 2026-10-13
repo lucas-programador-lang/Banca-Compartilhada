@@ -32,13 +32,13 @@
                 <p class="table-hint" style="margin-top: 8px;">Roda o mesmo cálculo do Cron Trigger diário na hora, e mostra abaixo quem foi creditado ou por que alguém ficou de fora (conta não encontrada, data de ativação inválida, etc.).</p>
                 <div id="resumoRendimentos" style="display: none; margin-top: var(--space-sm); font-size: 0.85rem; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: var(--space-sm);"></div>
             </div>
+            
             <div class="stats-grid">
-                <!-- NOVO CARD AQUI -->
+                <!-- FASE 1: NOVO CARD -->
                 <div class="stat-card">
                     <h3>Total de Saques Pagos</h3>
                     <p id="totalSaquesPagosGeral" style="color: var(--success); font-weight: bold;">R$ 0,00</p>
                 </div>
-                <!-- RESTO DOS CARDS QUE VOCÊ JÁ TINHA -->
                 <div class="stat-card">
                     <h3>Total de Saques Pendentes</h3>
                     <p id="totalSaquesPendentes">0</p>
@@ -61,6 +61,7 @@
                 </div>
             </div>
 
+            <!-- FASE 2: AJUSTE MANUAL DE SALDO -->
             <section class="table-section" id="secaoRendimentoManual">
                 <div class="table-section__head">
                     <h3>Ajuste Manual de Saldo</h3>
@@ -99,7 +100,7 @@
                                 <th>Valor</th>
                                 <th>Motivo</th>
                                 <th>Executado por</th>
-                                <th>Ações</th> <!-- NOVA COLUNA -->
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaCreditosManuais">
@@ -107,6 +108,40 @@
                         </tbody>
                     </table>
                 </div>
+            </section>
+
+            <!-- FASE 3: GERENCIAR PLANOS (NOVIDADE) -->
+            <section class="table-section" id="secaoGerenciarPlanos">
+                <div class="table-section__head">
+                    <h3>Gerenciar Planos (Adicionar / Remover)</h3>
+                </div>
+                <p class="table-hint">Ative um plano instantaneamente para o usuário (ignora o limite de planos repetidos) ou cancele um plano ativo.</p>
+                
+                <div class="table-search">
+                    <select id="gpAcao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
+                        <option value="adicionar">➕ Adicionar Plano (Ativar)</option>
+                        <option value="remover">➖ Remover Plano Ativo (Cancelar)</option>
+                    </select>
+                </div>
+                <div class="table-search">
+                    <input type="text" id="gpBusca" placeholder="Buscar usuário por nome ou e-mail...">
+                </div>
+                <div class="table-search">
+                    <select id="gpUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                        <option value="">Carregando usuários...</option>
+                    </select>
+                </div>
+                <div class="table-search">
+                    <select id="gpValor" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                        <option value="">Selecione o valor do plano...</option>
+                        <option value="10">Ciclo Express - R$ 10,00</option>
+                        <option value="15">Ciclo Médio - R$ 15,00</option>
+                        <option value="30">Ciclo Premium - R$ 30,00</option>
+                        <option value="50">Ciclo Master - R$ 50,00</option>
+                        <option value="100">Ciclo Ouro - R$ 100,00</option>
+                    </select>
+                </div>
+                <button class="btn" id="btnGerenciarPlano" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
             </section>
 
             <section class="table-section">
@@ -125,8 +160,8 @@
                                 <th>E-mail</th>
                                 <th>Saldo</th>
                                 <th>Comissão Acumulada</th>
-                                <th>Total Depositado</th> <!-- COLUNA NOVA -->
-                                <th>Total Sacado</th>     <!-- COLUNA NOVA -->
+                                <th>Total Depositado</th>
+                                <th>Total Sacado</th>
                                 <th>Admin</th>
                             </tr>
                         </thead>
