@@ -672,24 +672,30 @@ function renderizarTabelaCreditosManuais(auditoriaObj, usuarios) {
 
     const creditos = Object.entries(auditoriaObj || {})
         .map(([id, dados]) => ({ id, ...dados }))
-        .filter(c => c.tipo === 'rendimento_manual' && c.status === 'concluido')
+        // Filtra para mostrar créditos e débitos, ignorando os que foram arquivados (excluídos do painel)
+        .filter(c => (c.tipo === 'rendimento_manual' || c.tipo === 'remocao_manual') && c.status === 'concluido' && !c.arquivado)
         .sort((a, b) => new Date(b.data || 0).getTime() - new Date(a.data || 0).getTime())
         .slice(0, 20);
 
     if (!creditos.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum crédito manual registrado ainda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhum ajuste manual registrado.</td></tr>';
         return;
     }
 
-    tbody.innerHTML = creditos.map(c => `
+    tbody.innerHTML = creditos.map(c => {
+        const cor = c.valor < 0 ? 'var(--danger)' : 'var(--success)';
+        return `
         <tr>
             <td>${formatarDataHora(c.data)}</td>
             <td>${escapeHTML(nomeDoUsuario(usuarios, c.uid))}</td>
-            <td>${formatadorMoeda.format(parseFloat(c.valor || 0))}</td>
+            <td style="color: ${cor}; font-weight: 600;">${formatadorMoeda.format(parseFloat(c.valor || 0))}</td>
             <td>${escapeHTML(c.motivo) || '—'}</td>
             <td>${escapeHTML(nomeDoUsuario(usuarios, c.adminUid))}</td>
+            <td>
+                <button class="btn-reject btn-arquivar" data-colecao="auditoriaCreditos" data-uid="null" data-id="${c.id}">Excluir</button>
+            </td>
         </tr>
-    `).join('');
+    `}).join('');
 }
 
 function iniciarFormularioRendimentoManual() {
