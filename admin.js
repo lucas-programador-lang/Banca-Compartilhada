@@ -50,11 +50,6 @@ function badgeStatus(status) {
     return `<span style="color: ${cor}; font-weight: 600;">${label}</span>`;
 }
 
-/**
- * Achata a estrutura saques/{uid}/{id} ou depositos/{uid}/{id} em uma
- * lista plana, já incluindo o uid de cada registro (necessário para
- * cruzar com o nome/email do usuário depois).
- */
 function achatarPorUsuario(dadosPorUsuario) {
     if (!dadosPorUsuario) return [];
     const lista = [];
@@ -76,13 +71,6 @@ function nomeDoUsuario(usuarios, uid) {
     return dados.nome || dados.email || uid;
 }
 
-/**
- * Escapa caracteres especiais de HTML antes de inserir qualquer dado
- * vindo do Firebase (nome, chave PIX etc.) dentro de innerHTML. Sem
- * isso, alguém poderia se cadastrar com um "nome" contendo tags/script
- * e esse código executaria no navegador de quem visualizar aquele
- * dado — inclusive o admin, ao abrir este painel.
- */
 function escapeHTML(texto) {
     return String(texto ?? '').replace(/[&<>"']/g, (c) => ({
         '&': '&amp;',
@@ -125,7 +113,6 @@ function renderizarTabelaSaques(saques, usuarios) {
                     </div>
                 `;
 
-            // NOVIDADE AQUI: Mostramos o valor solicitado e, logo abaixo, a taxa e o líquido
             return `
                 <tr>
                     <td>${formatarDataHora(saque.dataSolicitacao)}</td>
@@ -147,11 +134,7 @@ function renderizarTabelaSaques(saques, usuarios) {
     const elTotal = document.getElementById('totalSaquesPendentes');
     if (elTotal) elTotal.textContent = pendentes;
 }
-/**
- * Depósitos travados em 'aprovado_sem_plano' — Pix confirmado de
- * verdade, mas o Worker recusou criar o plano porque o usuário já
- * tinha um ativo do mesmo valor. Precisa de decisão manual do admin.
- */
+
 function renderizarTabelaPendenciasPlano(depositos, usuarios) {
     const tbody = document.getElementById('tabelaPendenciasPlano');
     if (!tbody) return;
@@ -242,14 +225,6 @@ function renderizarTabelaDepositos(depositos, usuarios) {
     if (elTotal) elTotal.textContent = pendentes;
 }
 
-/**
- * Lista de Usuários e Saldos — mostra, para cada cliente cadastrado em
- * usuarios/{uid}, o saldo sacável atual e a comissão de indicação
- * acumulada. Esses dois valores agora moram em financeiro/{uid}
- * (saldoRendimento + saldoComissao para o saldo, comissao para o total
- * histórico) — não mais em usuarios/{uid}, que só guarda dados de
- * perfil (nome, e-mail, chave PIX, isAdmin).
- */
 function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, filtro) {
     const tbody = document.getElementById('tabelaUsuariosAdmin');
     if (!tbody) return;
@@ -260,7 +235,6 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saqu
         const saldo = parseFloat(financeiro.saldoRendimento || 0) + parseFloat(financeiro.saldoComissao || 0);
         const comissao = parseFloat(financeiro.comissao || 0);
 
-        // --- MATEMÁTICA: Total Depositado pelo usuário ---
         let totalDepositado = 0;
         if (depositosObj && depositosObj[uid]) {
             Object.values(depositosObj[uid]).forEach(dep => {
@@ -271,13 +245,11 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saqu
             });
         }
 
-        // --- MATEMÁTICA: Total Sacado pelo usuário ---
         let totalSacado = 0;
         if (saquesObj && saquesObj[uid]) {
             Object.values(saquesObj[uid]).forEach(saq => {
                 const status = (saq.status || '').toLowerCase();
                 if (status === 'pago') {
-                    // Contabilizamos o valor total que saiu da conta dele
                     totalSacado += parseFloat(saq.valorSolicitado || 0); 
                 }
             });
@@ -325,28 +297,11 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saqu
     if (elTotalUsuarios) elTotalUsuarios.textContent = todosUids.length;
 }
 
-/**
- * URL base do mesmo Worker que já processa o Pix — as ações de admin
- * (aprovar/recusar depósito) agora passam por ele, autenticadas com o
- * ID Token do admin logado, em vez de escrever direto no Firebase pelo
- * SDK do navegador. Isso elimina a duplicação de creditarComissaoIndicacao
- * que existia aqui (schema antigo, causou o bug de comissão não
- * aparecer em Início/Equipe) — agora só existe uma implementação dessa
- * regra, dentro do worker.js, reaproveitada tanto pelo webhook real da
- * Vizzion Pay quanto pela aprovação manual.
- */
 const WORKER_BASE_URL = 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev';
 
-/**
- * Aprova um depósito chamando o Worker, que verifica se quem está
- * pedindo é admin de verdade (via ID Token + isAdmin no Firebase),
- * cria o plano, credita a comissão de indicação (se houver) e marca o
- * depósito como aprovado — tudo numa única fonte de verdade.
- */
 async function aprovarDeposito(uid, depositoId, valorPlano) {
     try {
         const idToken = await auth.currentUser.getIdToken();
-
         const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/aprovar-deposito`, {
             method: 'POST',
             headers: {
@@ -357,9 +312,7 @@ async function aprovarDeposito(uid, depositoId, valorPlano) {
         });
 
         const dadosResposta = await resposta.json();
-        if (!resposta.ok) {
-            throw new Error(dadosResposta.error || 'Erro ao aprovar depósito.');
-        }
+        if (!resposta.ok) throw new Error(dadosResposta.error || 'Erro ao aprovar depósito.');
 
         mostrarToast('✅ Depósito aprovado! O plano já está ativo na Carteira do usuário.', 'success');
     } catch (error) {
@@ -371,7 +324,6 @@ async function aprovarDeposito(uid, depositoId, valorPlano) {
 async function recusarDeposito(uid, depositoId) {
     try {
         const idToken = await auth.currentUser.getIdToken();
-
         const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/recusar-deposito`, {
             method: 'POST',
             headers: {
@@ -382,9 +334,7 @@ async function recusarDeposito(uid, depositoId) {
         });
 
         const dadosResposta = await resposta.json();
-        if (!resposta.ok) {
-            throw new Error(dadosResposta.error || 'Erro ao recusar depósito.');
-        }
+        if (!resposta.ok) throw new Error(dadosResposta.error || 'Erro ao recusar depósito.');
 
         mostrarToast('Depósito recusado.', 'warning');
     } catch (error) {
@@ -393,16 +343,9 @@ async function recusarDeposito(uid, depositoId) {
     }
 }
 
-/**
- * Resolve uma pendência de plano (depósito com status
- * 'aprovado_sem_plano'), chamando o Worker com a ação escolhida pelo
- * admin: criar o plano mesmo com o limite, ou só marcar como resolvido
- * sem criar plano nenhum.
- */
 async function resolverPendenciaPlano(uid, depositoId, acao) {
     try {
         const idToken = await auth.currentUser.getIdToken();
-
         const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/resolver-pendencia-plano`, {
             method: 'POST',
             headers: {
@@ -413,9 +356,7 @@ async function resolverPendenciaPlano(uid, depositoId, acao) {
         });
 
         const dadosResposta = await resposta.json();
-        if (!resposta.ok) {
-            throw new Error(dadosResposta.error || 'Erro ao resolver pendência.');
-        }
+        if (!resposta.ok) throw new Error(dadosResposta.error || 'Erro ao resolver pendência.');
 
         mostrarToast(
             acao === 'criar_plano' ? '✅ Plano criado manualmente.' : '✅ Pendência marcada como resolvida.',
@@ -427,16 +368,9 @@ async function resolverPendenciaPlano(uid, depositoId, acao) {
     }
 }
 
-/**
- * Arquiva um depósito ou saque (some da tabela, mas continua salvo no
- * Firebase). "colecao" é 'depositos' ou 'saques' — a mesma função
- * serve pras três tabelas que usam esse botão, porque Pendências de
- * Plano é só um filtro em cima da própria coleção de depósitos.
- */
 async function arquivarRegistro(colecao, uid, id) {
     try {
         const idToken = await auth.currentUser.getIdToken();
-
         const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/arquivar`, {
             method: 'POST',
             headers: {
@@ -447,9 +381,7 @@ async function arquivarRegistro(colecao, uid, id) {
         });
 
         const dadosResposta = await resposta.json();
-        if (!resposta.ok) {
-            throw new Error(dadosResposta.error || 'Erro ao excluir registro.');
-        }
+        if (!resposta.ok) throw new Error(dadosResposta.error || 'Erro ao excluir registro.');
 
         mostrarToast('Registro excluído da lista.', 'warning');
     } catch (error) {
@@ -458,15 +390,9 @@ async function arquivarRegistro(colecao, uid, id) {
     }
 }
 
-/**
- * Marca um saque como pago chamando o Worker, que atualiza tanto o
- * registro em saques/{uid} quanto a entrada correspondente no Extrato
- * do usuário — as duas usam o mesmo id, então ficam sempre em sincronia.
- */
 async function marcarSaquePago(uid, saqueId) {
     try {
         const idToken = await auth.currentUser.getIdToken();
-
         const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/marcar-saque-pago`, {
             method: 'POST',
             headers: {
@@ -477,9 +403,7 @@ async function marcarSaquePago(uid, saqueId) {
         });
 
         const dadosResposta = await resposta.json();
-        if (!resposta.ok) {
-            throw new Error(dadosResposta.error || 'Erro ao marcar saque como pago.');
-        }
+        if (!resposta.ok) throw new Error(dadosResposta.error || 'Erro ao marcar saque como pago.');
 
         mostrarToast('✅ Saque marcado como pago.', 'success');
     } catch (error) {
@@ -488,8 +412,6 @@ async function marcarSaquePago(uid, saqueId) {
     }
 }
 
-// Delegação de eventos pra tabela de Saques — mesmo padrão das outras
-// tabelas (botões recriados a cada render).
 function iniciarDelegacaoAcoesSaques() {
     const tbody = document.getElementById('tabelaSaquesAdmin');
     if (!tbody || tbody.dataset.listenerAtivo) return;
@@ -516,9 +438,6 @@ function iniciarDelegacaoAcoesSaques() {
     tbody.dataset.listenerAtivo = 'true';
 }
 
-// Delegação de eventos: os botões de aprovar/recusar são recriados a
-// cada render da tabela, então o listener fica no tbody (que existe
-// desde o carregamento da página) em vez de nos botões individuais.
 function iniciarDelegacaoAcoesDepositos() {
     const tbody = document.getElementById('tabelaDepositosAdmin');
     if (!tbody || tbody.dataset.listenerAtivo) return;
@@ -553,8 +472,6 @@ function iniciarDelegacaoAcoesDepositos() {
     tbody.dataset.listenerAtivo = 'true';
 }
 
-// Mesma ideia da delegação acima, mas pros botões da tabela de
-// Pendências de Plano (tbody diferente, recriado a cada render).
 function iniciarDelegacaoPendenciasPlano() {
     const tbody = document.getElementById('tabelaPendenciasPlano');
     if (!tbody || tbody.dataset.listenerAtivo) return;
@@ -581,26 +498,18 @@ function iniciarDelegacaoPendenciasPlano() {
     tbody.dataset.listenerAtivo = 'true';
 }
 
-// Campo de busca da tabela de Usuários — filtra em memória (sem nova
-// consulta ao Firebase) por nome ou e-mail a cada tecla digitada.
 function iniciarBuscaUsuarios() {
     const input = document.getElementById('buscaUsuarios');
     if (!input || input.dataset.listenerAtivo) return;
 
     input.addEventListener('input', (e) => {
         estado.filtroUsuarios = e.target.value;
-        renderizarTabelaUsuarios(estado.usuarios || {}, estado.financeiro || {}, estado.filtroUsuarios);
+        renderizarTabelaUsuarios(estado.usuarios || {}, estado.financeiro || {}, estado.depositos || {}, estado.saques || {}, estado.filtroUsuarios);
     });
 
     input.dataset.listenerAtivo = 'true';
 }
 
-/**
- * Mantém em memória a última versão de cada fonte de dados (usuários,
- * financeiro, saques, depósitos), já que os quatro chegam de listeners
- * independentes e as tabelas precisam sempre do cruzamento mais
- * recente de todos.
- */
 const estado = {
     usuarios: null,
     financeiro: null,
@@ -610,14 +519,8 @@ const estado = {
     filtroUsuarios: '',
 };
 
-/**
- * Crédito manual de rendimento: lista de usuários (filtrável por nome ou
- * e-mail) no <select>, histórico dos últimos créditos e envio ao Worker.
- * As opções são montadas com textContent (nunca innerHTML), então um nome
- * malicioso não executa nada.
- */
 const LIMITE_OPCOES_USUARIOS_MANUAL = 100;
-let chaveOperacaoManual = null; // reaproveitada se o envio falhar, para um reenvio não creditar duas vezes
+let chaveOperacaoManual = null;
 
 function gerarChaveOperacao() {
     if (window.crypto?.randomUUID) return window.crypto.randomUUID();
@@ -640,9 +543,7 @@ function atualizarOpcoesRendimentoManual() {
     select.textContent = '';
     const opcaoVazia = document.createElement('option');
     opcaoVazia.value = '';
-    opcaoVazia.textContent = usuarios.length
-        ? 'Selecione o usuário...'
-        : (termo ? 'Nenhum usuário encontrado' : 'Nenhum usuário cadastrado');
+    opcaoVazia.textContent = usuarios.length ? 'Selecione o usuário...' : (termo ? 'Nenhum usuário encontrado' : 'Nenhum usuário cadastrado');
     select.appendChild(opcaoVazia);
 
     usuarios.slice(0, LIMITE_OPCOES_USUARIOS_MANUAL).forEach((u) => {
@@ -660,7 +561,6 @@ function atualizarOpcoesRendimentoManual() {
         select.appendChild(aviso);
     }
 
-    // Mantém a seleção quando a lista é redesenhada por uma atualização em tempo real.
     if (selecionadoAntes && usuarios.some(u => u.uid === selecionadoAntes)) {
         select.value = selecionadoAntes;
     }
@@ -672,7 +572,6 @@ function renderizarTabelaCreditosManuais(auditoriaObj, usuarios) {
 
     const creditos = Object.entries(auditoriaObj || {})
         .map(([id, dados]) => ({ id, ...dados }))
-        // Filtra para mostrar créditos e débitos, ignorando os que foram arquivados (excluídos do painel)
         .filter(c => (c.tipo === 'rendimento_manual' || c.tipo === 'remocao_manual') && c.status === 'concluido' && !c.arquivado)
         .sort((a, b) => new Date(b.data || 0).getTime() - new Date(a.data || 0).getTime())
         .slice(0, 20);
@@ -709,7 +608,6 @@ function iniciarFormularioRendimentoManual() {
 
     campoBusca?.addEventListener('input', atualizarOpcoesRendimentoManual);
 
-    // Qualquer mudança no formulário é uma operação nova: gera outra chave.
     [campoUsuario, campoValor, campoMotivo].forEach((campo) => {
         campo?.addEventListener('input', () => { chaveOperacaoManual = null; });
         campo?.addEventListener('change', () => { chaveOperacaoManual = null; });
@@ -735,7 +633,6 @@ function iniciarFormularioRendimentoManual() {
 
         const nomeAlvo = nomeDoUsuario(estado.usuarios || {}, uid);
         
-        // --- AQUI ESTÁ A NOVIDADE QUE LÊ O NOVO BOTÃO DE REMOVER/ADICIONAR ---
         const tipoOperacao = document.getElementById('rmTipoOperacao')?.value || 'credito';
         const acaoNome = tipoOperacao === 'debito' ? 'Remover' : 'Creditar';
         
@@ -787,8 +684,106 @@ function iniciarFormularioRendimentoManual() {
     btn.dataset.listenerAtivo = 'true';
 }
 
+function atualizarOpcoesGerenciarPlano() {
+    const select = document.getElementById('gpUsuario');
+    if (!select) return;
+
+    const termo = (document.getElementById('gpBusca')?.value || '').trim().toLowerCase();
+    const selecionadoAntes = select.value;
+
+    let usuarios = Object.entries(estado.usuarios || {}).map(([uid, dados]) => ({ uid, nome: dados?.nome || '', email: dados?.email || '' }));
+    if (termo) {
+        usuarios = usuarios.filter(u => u.nome.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo));
+    }
+    usuarios.sort((a, b) => (a.nome || a.email).localeCompare(b.nome || b.email, 'pt-BR'));
+
+    select.textContent = '';
+    const opcaoVazia = document.createElement('option');
+    opcaoVazia.value = '';
+    opcaoVazia.textContent = usuarios.length ? 'Selecione o usuário...' : 'Nenhum usuário encontrado';
+    select.appendChild(opcaoVazia);
+
+    usuarios.slice(0, 100).forEach((u) => {
+        const opcao = document.createElement('option');
+        opcao.value = u.uid;
+        opcao.textContent = `${u.nome || 'Sem nome'} — ${u.email || u.uid}`;
+        select.appendChild(opcao);
+    });
+
+    if (selecionadoAntes && usuarios.some(u => u.uid === selecionadoAntes)) {
+        select.value = selecionadoAntes;
+    }
+}
+
+function iniciarFormularioGerenciarPlano() {
+    const btn = document.getElementById('btnGerenciarPlano');
+    if (!btn || btn.dataset.listenerAtivo) return;
+
+    const campoBusca = document.getElementById('gpBusca');
+    const campoUsuario = document.getElementById('gpUsuario');
+    const campoValor = document.getElementById('gpValor');
+    const campoAcao = document.getElementById('gpAcao');
+
+    campoBusca?.addEventListener('input', atualizarOpcoesGerenciarPlano);
+
+    btn.addEventListener('click', async () => {
+        const uid = campoUsuario?.value || '';
+        const valorPlano = parseFloat(campoValor?.value) || 0;
+        const acao = campoAcao?.value || 'adicionar';
+
+        if (!uid) {
+            mostrarToast('Selecione o usuário.', 'warning');
+            return;
+        }
+        if (!(valorPlano > 0)) {
+            mostrarToast('Selecione o valor do plano.', 'warning');
+            return;
+        }
+
+        const nomeAlvo = nomeDoUsuario(estado.usuarios || {}, uid);
+        const acaoNome = acao === 'adicionar' ? 'ADICIONAR um plano de' : 'REMOVER um plano ativo de';
+        
+        const confirmado = window.confirm(`Tem certeza que deseja ${acaoNome} ${formatadorMoeda.format(valorPlano)} na conta de "${nomeAlvo}"?`);
+        if (!confirmado) return;
+
+        btn.disabled = true;
+        const textoOriginal = btn.textContent;
+        btn.textContent = 'Processando...';
+
+        try {
+            const idToken = await auth.currentUser.getIdToken();
+
+            const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/gerenciar-plano`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ uid, acao, valorPlano }),
+            });
+
+            const dadosResposta = await resposta.json();
+            if (!resposta.ok) {
+                throw new Error(dadosResposta.error || 'Erro ao processar plano.');
+            }
+
+            mostrarToast(dadosResposta.mensagem || 'Operação realizada com sucesso!', 'success');
+            if (campoValor) campoValor.value = '';
+        } catch (error) {
+            console.error('Erro ao gerenciar plano:', error);
+            mostrarToast(error.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = textoOriginal;
+        }
+    });
+
+    btn.dataset.listenerAtivo = 'true';
+}
+
 function rerenderizarTudo() {
     atualizarOpcoesRendimentoManual();
+    atualizarOpcoesGerenciarPlano();
     
     if (estado.auditoria !== null) {
         renderizarTabelaCreditosManuais(estado.auditoria, estado.usuarios || {});
@@ -798,7 +793,6 @@ function rerenderizarTudo() {
         const saquesLista = achatarPorUsuario(estado.saques).filter(s => !s.arquivado);
         renderizarTabelaSaques(saquesLista, estado.usuarios || {});
         
-        // --- MATEMÁTICA: Somar TOTAL GERAL DE SAQUES PAGOS DA PLATAFORMA ---
         let somaTotalSaquesPagos = 0;
         achatarPorUsuario(estado.saques).forEach(s => {
             if ((s.status || '').toLowerCase() === 'pago') {
@@ -815,7 +809,6 @@ function rerenderizarTudo() {
         renderizarTabelaPendenciasPlano(depositosLista, estado.usuarios || {});
     }
     
-    // --- NOVIDADE: Passamos os objetos de depósitos e saques para a tabela de usuários ---
     if (estado.usuarios !== null) {
         renderizarTabelaUsuarios(
             estado.usuarios, 
@@ -827,11 +820,6 @@ function rerenderizarTudo() {
     }
 }
 
-/**
- * Chama o Worker pra rodar o cálculo de rendimentos na hora (mesma
- * lógica do Cron Trigger diário) e mostra o resumo — quantos foram
- * creditados e, principalmente, quem ficou de fora e por quê.
- */
 function iniciarBotaoRodarRendimentos() {
     const btn = document.getElementById('btnRodarRendimentos');
     const resumoEl = document.getElementById('resumoRendimentos');
@@ -905,14 +893,13 @@ function iniciarListenersAdmin() {
     iniciarBuscaUsuarios();
     iniciarBotaoRodarRendimentos();
     iniciarFormularioRendimentoManual();
+    iniciarFormularioGerenciarPlano();
 
     const auditoriaRef = ref(db, 'auditoriaCreditos');
     onValue(auditoriaRef, (snapshot) => {
         estado.auditoria = snapshot.val() || {};
         rerenderizarTudo();
     }, (error) => {
-        // Sem as Regras novas (auditoriaCreditos) a leitura é negada — o
-        // resto do painel continua funcionando normalmente.
         console.error('Erro ao carregar o histórico de créditos manuais (publique as Rules novas):', error);
     });
 
@@ -940,14 +927,13 @@ function iniciarListenersAdmin() {
         rerenderizarTudo();
     });
 
-    // --- NOVIDADE: Delegação de clique para excluir (arquivar) ajuste manual ---
     const tbodyCreditos = document.getElementById('tabelaCreditosManuais');
     if (tbodyCreditos && !tbodyCreditos.dataset.listenerAtivo) {
         tbodyCreditos.addEventListener('click', (e) => {
             const btnArquivar = e.target.closest('.btn-arquivar');
             if (btnArquivar) {
                 const { colecao, id } = btnArquivar.dataset;
-                const uid = btnArquivar.dataset.uid || 'null'; // uid não é obrigatório para auditoria, mas a função espera
+                const uid = btnArquivar.dataset.uid || 'null';
                 
                 const confirmado = window.confirm("Tem certeza que deseja excluir este registo do histórico?");
                 if (!confirmado) return;
@@ -960,18 +946,13 @@ function iniciarListenersAdmin() {
         tbodyCreditos.dataset.listenerAtivo = 'true';
     }
 }
+
 auth.onAuthStateChanged((user) => {
     if (!user) return;
 
     const acessoNegado = document.getElementById('acessoNegado');
     const conteudoAdmin = document.getElementById('conteudoAdmin');
 
-    // Verifica a flag isAdmin do usuário logado antes de exibir qualquer
-    // dado. Isto é só uma camada de conveniência de interface — a
-    // segurança de verdade precisa vir das Regras do Realtime Database,
-    // que devem bloquear a leitura de "usuarios", "financeiro", "saques"
-    // e "depositos" para quem não tiver essa mesma flag marcada no
-    // servidor.
     const perfilRef = ref(db, 'usuarios/' + user.uid + '/isAdmin');
     onValue(perfilRef, (snapshot) => {
         const ehAdmin = snapshot.val() === true;
@@ -985,9 +966,6 @@ auth.onAuthStateChanged((user) => {
             if (conteudoAdmin) conteudoAdmin.style.display = 'none';
         }
     }, (error) => {
-        // Se as Regras do Firebase corretamente negarem a leitura para
-        // não-admins, o Firebase dispara um erro de permissão aqui —
-        // tratamos isso da mesma forma que "não é admin".
         console.error('Erro ao verificar permissão de admin:', error);
         if (acessoNegado) acessoNegado.style.display = 'block';
         if (conteudoAdmin) conteudoAdmin.style.display = 'none';
