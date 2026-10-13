@@ -250,7 +250,7 @@ function renderizarTabelaDepositos(depositos, usuarios) {
  * histórico) — não mais em usuarios/{uid}, que só guarda dados de
  * perfil (nome, e-mail, chave PIX, isAdmin).
  */
-function renderizarTabelaUsuarios(usuariosObj, financeiroObj, filtro) {
+function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, filtro) {
     const tbody = document.getElementById('tabelaUsuariosAdmin');
     if (!tbody) return;
 
@@ -259,7 +259,31 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, filtro) {
         const financeiro = (financeiroObj || {})[uid] || {};
         const saldo = parseFloat(financeiro.saldoRendimento || 0) + parseFloat(financeiro.saldoComissao || 0);
         const comissao = parseFloat(financeiro.comissao || 0);
-        return { uid, ...dados, saldo, comissao };
+
+        // --- MATEMÁTICA: Total Depositado pelo usuário ---
+        let totalDepositado = 0;
+        if (depositosObj && depositosObj[uid]) {
+            Object.values(depositosObj[uid]).forEach(dep => {
+                const status = (dep.status || '').toLowerCase();
+                if (['aprovado', 'aprovado_sem_plano', 'resolvido_sem_plano'].includes(status)) {
+                    totalDepositado += parseFloat(dep.valorPlano || 0);
+                }
+            });
+        }
+
+        // --- MATEMÁTICA: Total Sacado pelo usuário ---
+        let totalSacado = 0;
+        if (saquesObj && saquesObj[uid]) {
+            Object.values(saquesObj[uid]).forEach(saq => {
+                const status = (saq.status || '').toLowerCase();
+                if (status === 'pago') {
+                    // Contabilizamos o valor total que saiu da conta dele
+                    totalSacado += parseFloat(saq.valorSolicitado || 0); 
+                }
+            });
+        }
+
+        return { uid, ...dados, saldo, comissao, totalDepositado, totalSacado };
     });
 
     if (termo) {
@@ -269,26 +293,25 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, filtro) {
         );
     }
 
-    // Maior saldo primeiro — é normalmente o que o admin quer ver de cara.
     lista.sort((a, b) => b.saldo - a.saldo);
 
     if (!lista.length) {
         const mensagem = termo ? 'Nenhum usuário encontrado para essa busca.' : 'Nenhum usuário cadastrado ainda.';
-        tbody.innerHTML = `<tr><td colspan="5" class="table-empty">${mensagem}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="table-empty">${mensagem}</td></tr>`;
     } else {
         tbody.innerHTML = lista.map(u => `
             <tr>
                 <td>${escapeHTML(u.nome) || '—'}</td>
                 <td>${escapeHTML(u.email) || '—'}</td>
-                <td>${formatadorMoeda.format(u.saldo)}</td>
+                <td><strong>${formatadorMoeda.format(u.saldo)}</strong></td>
                 <td>${formatadorMoeda.format(u.comissao)}</td>
+                <td style="color: var(--success); font-weight: 500;">+ ${formatadorMoeda.format(u.totalDepositado)}</td>
+                <td style="color: var(--danger); font-weight: 500;">- ${formatadorMoeda.format(u.totalSacado)}</td>
                 <td>${u.isAdmin ? '<span class="status-badge status-admin">Admin</span>' : '—'}</td>
             </tr>
         `).join('');
     }
 
-    // Total e contagem sempre refletem TODOS os usuários, não só o
-    // resultado filtrado da busca.
     const todosUids = Object.keys(usuariosObj || {});
     const somaSaldos = todosUids.reduce((soma, uid) => {
         const financeiro = (financeiroObj || {})[uid] || {};
@@ -757,20 +780,41 @@ function iniciarFormularioRendimentoManual() {
 
 function rerenderizarTudo() {
     atualizarOpcoesRendimentoManual();
+    
     if (estado.auditoria !== null) {
         renderizarTabelaCreditosManuais(estado.auditoria, estado.usuarios || {});
     }
+    
     if (estado.saques !== null) {
         const saquesLista = achatarPorUsuario(estado.saques).filter(s => !s.arquivado);
         renderizarTabelaSaques(saquesLista, estado.usuarios || {});
+        
+        // --- MATEMÁTICA: Somar TOTAL GERAL DE SAQUES PAGOS DA PLATAFORMA ---
+        let somaTotalSaquesPagos = 0;
+        achatarPorUsuario(estado.saques).forEach(s => {
+            if ((s.status || '').toLowerCase() === 'pago') {
+                somaTotalSaquesPagos += parseFloat(s.valorSolicitado || 0);
+            }
+        });
+        const elGeral = document.getElementById('totalSaquesPagosGeral');
+        if (elGeral) elGeral.textContent = formatadorMoeda.format(somaTotalSaquesPagos);
     }
+    
     if (estado.depositos !== null) {
         const depositosLista = achatarPorUsuario(estado.depositos).filter(d => !d.arquivado);
         renderizarTabelaDepositos(depositosLista, estado.usuarios || {});
         renderizarTabelaPendenciasPlano(depositosLista, estado.usuarios || {});
     }
+    
+    // --- NOVIDADE: Passamos os objetos de depósitos e saques para a tabela de usuários ---
     if (estado.usuarios !== null) {
-        renderizarTabelaUsuarios(estado.usuarios, estado.financeiro || {}, estado.filtroUsuarios);
+        renderizarTabelaUsuarios(
+            estado.usuarios, 
+            estado.financeiro || {}, 
+            estado.depositos || {}, 
+            estado.saques || {}, 
+            estado.filtroUsuarios
+        );
     }
 }
 
