@@ -157,7 +157,7 @@ function renderizarTabelaPendenciasPlano(depositos, usuarios) {
         tbody.innerHTML = pendencias.map(deposito => `
             <tr>
                 <td>${formatarDataHora(deposito.dataAprovacao || deposito.dataSolicitacao)}</td>
-                <td>${escapeHTML(nomeDoUsuario(usuarios, deposito.uid))}</td>
+                <td title="${escapeHTML(nomeDoUsuario(usuarios, deposito.uid))}">${escapeHTML(nomeDoUsuario(usuarios, deposito.uid))}</td>
                 <td>${formatadorMoeda.format(deposito.valorPlano || 0)}</td>
                 <td style="max-width: 320px; white-space: normal;">${escapeHTML(deposito.obsAdmin) || '—'}</td>
                 <td>
@@ -415,7 +415,7 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saqu
             return `
                 <tr>
                     <td>${escapeHTML(u.nome) || '—'}${infoPlanos}</td>
-                    <td>${escapeHTML(u.email) || '—'}</td>
+                    <td title="${escapeHTML(u.email)}">${escapeHTML(u.email) || '—'}</td>
                     <td><strong>${formatadorMoeda.format(u.saldo)}</strong></td>
                     <td>${formatadorMoeda.format(u.comissao)}</td>
                     <td style="color: var(--success); font-weight: 500;">+ ${formatadorMoeda.format(u.totalDepositado)}</td>
