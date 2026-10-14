@@ -258,11 +258,16 @@ function garantirSecaoPlanosNoHTML() {
     const classeWrapper = wrapperRef?.className || 'table-responsive';
 
     const secao = document.createElement('div');
-    secao.style.marginBottom = '2.5rem';
+    secao.className = 'planos-section';
     secao.innerHTML = `
-        <div style="margin-bottom: 1rem;">
-            <h2 style="margin: 0 0 0.35rem 0; font-size: 1.25rem;">Planos Adquiridos e Horários de Pagamento (<span id="totalPlanosAtivosAdmin">0</span> ativos)</h2>
-            <p id="infoUltimaExecucaoRobo" style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Carregando status do robô de rendimentos...</p>
+        <div class="planos-head">
+            <div class="planos-head__top">
+                <h2 class="planos-head__title">Planos Adquiridos e Horários de Pagamento</h2>
+                <span class="planos-head__count"><strong id="totalPlanosAtivosAdmin">0</strong> ativos</span>
+            </div>
+            <div id="infoUltimaExecucaoRobo" class="robo-status">
+                <div class="robo-status__card robo-status__card--vazio">Carregando status do robô de rendimentos...</div>
+            </div>
         </div>
         <div class="${classeWrapper}">
             <table class="${classeTabela}">
@@ -299,18 +304,34 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
     const elInfoRobo = document.getElementById('infoUltimaExecucaoRobo');
 
     if (elInfoRobo) {
+        const textoClientes = (n) => `${n} ${n === 1 ? 'cliente pago' : 'clientes pagos'}`;
+
+        const montarCard = (classe, titulo, execucao) => {
+            const total = execucao.usuariosCreditados || 0;
+            const obs = execucao.observacao ? ` — ${escapeHTML(execucao.observacao)}` : '';
+            return `
+                <div class="robo-status__card ${classe}">
+                    <span class="robo-status__label"><i class="robo-status__dot"></i>${titulo}</span>
+                    <strong class="robo-status__date">${formatarDataHora(execucao.data)}</strong>
+                    <span class="robo-status__meta">${textoClientes(total)}${obs}</span>
+                </div>
+            `;
+        };
+
         const ultimoCron = execucoesRendimentos?.cron;
         const ultimoManual = execucoesRendimentos?.manual;
-        const partes = [];
+        const cards = [];
+
         if (ultimoCron?.data) {
-            partes.push(`🤖 Último giro automático (Cron): <strong>${formatarDataHora(ultimoCron.data)}</strong> (${ultimoCron.usuariosCreditados || 0} clientes pagos${ultimoCron.observacao ? ' — ' + escapeHTML(ultimoCron.observacao) : ''})`);
+            cards.push(montarCard('robo-status__card--auto', 'Último giro automático (Cron)', ultimoCron));
         }
         if (ultimoManual?.data) {
-            partes.push(`👆 Último giro manual: <strong>${formatarDataHora(ultimoManual.data)}</strong> (${ultimoManual.usuariosCreditados || 0} clientes pagos)`);
+            cards.push(montarCard('robo-status__card--manual', 'Último giro manual', ultimoManual));
         }
-        elInfoRobo.innerHTML = partes.length
-            ? partes.join(' &nbsp;|&nbsp; ')
-            : 'Robô automático agendado para rodar de segunda a sexta às 23:00 (Brasília).';
+
+        elInfoRobo.innerHTML = cards.length
+            ? cards.join('')
+            : '<div class="robo-status__card robo-status__card--vazio">Robô automático agendado para rodar de segunda a sexta às 23:00 (Brasília).</div>';
     }
 
     if (!tbody) return;
@@ -357,7 +378,6 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
         `;
     }).join('');
 }
-
 function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, planosObj, filtro) {
     const tbody = document.getElementById('tabelaUsuariosAdmin');
     if (!tbody) return;
