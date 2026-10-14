@@ -4,7 +4,7 @@ import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth
 
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 32.50,
-    DIA_SAQUE_PERMITIDO: 0,// 1 = Segunda-feira (TESTE). Depois volte para 0 (Domingo)
+    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo (Padrão)
     TAXA_SAQUE_PERCENTUAL: 0.14,
     VALORES_PLANOS_PERMITIDOS: [10, 15, 30, 50, 60, 100, 150, 200, 300, 450, 500, 1000],
     WORKER_BASE_URL: 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev',
@@ -19,6 +19,14 @@ const formatadorData = new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
+});
+
+const formatadorDataHoraCurto = new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
 });
 
 function obterDiaSemanaBrasilia() {
@@ -216,18 +224,22 @@ function calcularEstadoPlano(plano) {
 
     const dataAtivacao = new Date(plano.dataAtivacao || Date.now());
     const agora = new Date();
-    const diasCorridos = isNaN(dataAtivacao.getTime()) ? 0 : contarDiasRendimento(dataAtivacao, agora);
+    const cancelado = plano.status === 'cancelado_pelo_admin';
+    const diasCorridos = (isNaN(dataAtivacao.getTime()) || cancelado) ? 0 : contarDiasRendimento(dataAtivacao, agora);
 
     const rendimentoDiario = valor * percentualDiario;
     const tetoValor = valor * tetoPercentual;
-    const rendimentoAcumulado = Math.min(rendimentoDiario * diasCorridos, tetoValor);
-    const finalizado = rendimentoAcumulado >= tetoValor && tetoValor > 0;
+    const rendimentoAcumulado = cancelado
+        ? parseFloat(plano.valorCreditado || 0)
+        : Math.min(rendimentoDiario * diasCorridos, tetoValor);
+    const finalizado = !cancelado && (plano.status === 'finalizado' || (rendimentoAcumulado >= tetoValor && tetoValor > 0));
 
     return {
         dataAtivacao,
         rendimentoDiario,
         rendimentoAcumulado,
         finalizado,
+        cancelado,
     };
 }
 
@@ -257,15 +269,29 @@ function renderizarTabelaCarteira(planosObj) {
         const valor = parseFloat(plano.valor || 0);
         const estado = calcularEstadoPlano(plano);
 
-        totalInvestido += valor;
-        totalRendimento += estado.rendimentoAcumulado;
+        if (!estado.cancelado) {
+            totalInvestido += valor;
+            totalRendimento += estado.rendimentoAcumulado;
+        }
 
-        const statusTexto = estado.finalizado ? 'Finalizado' : 'Ativo';
-        const statusClasse = estado.finalizado ? 'plan-row__value' : 'plan-row__value plan-row__value--positive';
+        let statusTexto = 'Ativo';
+        let statusClasse = 'plan-row__value plan-row__value--positive';
+        if (estado.cancelado) {
+            statusTexto = 'Cancelado';
+            statusClasse = 'plan-row__value plan-row__value--negative';
+        } else if (estado.finalizado) {
+            statusTexto = 'Finalizado';
+            statusClasse = 'plan-row__value';
+        }
+
+        // Mostra Data + Hora exata da ativação (que define o ciclo de 24h do plano)
+        const dataHoraAtivacao = !isNaN(estado.dataAtivacao.getTime())
+            ? formatadorDataHoraCurto.format(estado.dataAtivacao)
+            : '—';
 
         return `
             <tr>
-                <td>${formatadorData.format(estado.dataAtivacao)}</td>
+                <td>${dataHoraAtivacao}</td>
                 <td>${formatadorMoeda.format(valor)}</td>
                 <td>${formatadorMoeda.format(estado.rendimentoDiario)}</td>
                 <td>${formatadorMoeda.format(estado.rendimentoAcumulado)}</td>
@@ -292,8 +318,10 @@ function inicializarCarteiraUsuario(userId) {
 function atualizarDisponibilidadePlanos(planosObj) {
     const planos = planosObj ? Object.values(planosObj) : [];
     
-    // Filtramos os planos que não estão finalizados para saber quais já estão ativos
-    const ativos = planos.filter(function(p) { return p.status !== 'finalizado'; });
+    // Filtra apenas planos realmente ativos (ignora finalizados e cancelados pelo admin)
+    const ativos = planos.filter(function(p) {
+        return p.status !== 'finalizado' && p.status !== 'cancelado_pelo_admin';
+    });
     const valoresAtivos = new Set(ativos.map(function(p) { return parseFloat(p.valor); }));
 
     const planosIlimitados = [15, 60, 150, 200, 450];
@@ -325,7 +353,12 @@ function inicializarExtratoUsuario(userId) {
 
     const formatadorMesAno = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
     const formatadorDataHora = new Intl.DateTimeFormat('pt-BR', {
-        day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
     });
 
     const extratoRef = ref(db, 'extrato/' + userId);
@@ -350,13 +383,15 @@ function inicializarExtratoUsuario(userId) {
             const valor = parseFloat(registro.valor || 0);
             const classeValor = valor < 0 ? 'plan-row__value plan-row__value--negative' : 'plan-row__value plan-row__value--positive';
 
-            let statusHtml = '—';
+            let statusHtml = '<span class="status-badge status-aprovado">Creditado</span>';
             if (registro.status === 'pendente') {
                 statusHtml = '<span class="status-badge status-pendente">Pendente</span>';
             } else if (registro.status === 'processando') {
                 statusHtml = '<span class="status-badge status-pendente">Processando</span>';
             } else if (registro.status === 'pago') {
                 statusHtml = '<span class="status-badge status-aprovado">Pago</span>';
+            } else if (valor < 0 && !registro.status) {
+                statusHtml = '<span class="status-badge status-recusado">Debitado</span>';
             }
 
             return `
@@ -512,7 +547,7 @@ function inicializarEquipeUsuario(userId) {
         membros.sort(function(a, b) { return new Date(b.dataCadastro || 0) - new Date(a.dataCadastro || 0); });
 
         tbody.innerHTML = membros.map(function(membro) {
-            const dataCad = membro.dataCadastro ? formatadorData.format(new Date(membro.dataCadastro)) : '—';
+            const dataCad = membro.dataCadastro ? formatadorDataHoraCurto.format(new Date(membro.dataCadastro)) : '—';
             const nomeStr = escapeHTML(membro.nome) || '—';
             const emailStr = escapeHTML(membro.email) || '—';
             
