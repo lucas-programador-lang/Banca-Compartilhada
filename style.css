@@ -2073,15 +2073,14 @@ tbody tr:last-child td {
     overflow-x: auto; /* Mantém a rolagem para celular se a tela for muito pequena */
 }
 
-/* No computador (Desktop), força a tabela a ocupar 100% e evita scroll desnecessário */
 @media (min-width: 992px) {
-    .table-responsive {
-        overflow-x: visible;
+    .table-responsive, .table-container {
+        overflow-x: visible !important;
+        width: 100%;
     }
     
     table {
-        width: 100%;
-        table-layout: auto; /* Distribui o espaço igualmente entre as colunas */
+        width: 100% !important;
+        table-layout: auto !important;
     }
 }
-
