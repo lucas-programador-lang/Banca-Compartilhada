@@ -2069,7 +2069,7 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   CORREÇÃO DEFINITIVA: Tabelas Admin Fluídas, Proporcionais (100%) e sem Scroll
+   CORREÇÃO DEFINITIVA DE ALINHAMENTO: Tabelas Admin (Desktop)
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2085,13 +2085,13 @@ tbody tr:last-child td {
         width: 100% !important;
         border-collapse: collapse !important;
     }
-    #tabelaUsuariosAdmin th:nth-child(1), #tabelaUsuariosAdmin td:nth-child(1) { width: 22%; } /* Usuário */
-    #tabelaUsuariosAdmin th:nth-child(2), #tabelaUsuariosAdmin td:nth-child(2) { width: 28%; } /* E-mail */
-    #tabelaUsuariosAdmin th:nth-child(3), #tabelaUsuariosAdmin td:nth-child(3) { width: 10%; } /* Saldo */
-    #tabelaUsuariosAdmin th:nth-child(4), #tabelaUsuariosAdmin td:nth-child(4) { width: 12%; } /* Comissão */
-    #tabelaUsuariosAdmin th:nth-child(5), #tabelaUsuariosAdmin td:nth-child(5) { width: 12%; } /* Depósito */
-    #tabelaUsuariosAdmin th:nth-child(6), #tabelaUsuariosAdmin td:nth-child(6) { width: 10%; } /* Sacado */
-    #tabelaUsuariosAdmin th:nth-child(7), #tabelaUsuariosAdmin td:nth-child(7) { width: 6%; text-align: center; } /* Admin */
+    #tabelaUsuariosAdmin th:nth-child(1), #tabelaUsuariosAdmin td:nth-child(1) { width: 22%; }
+    #tabelaUsuariosAdmin th:nth-child(2), #tabelaUsuariosAdmin td:nth-child(2) { width: 28%; }
+    #tabelaUsuariosAdmin th:nth-child(3), #tabelaUsuariosAdmin td:nth-child(3) { width: 10%; }
+    #tabelaUsuariosAdmin th:nth-child(4), #tabelaUsuariosAdmin td:nth-child(4) { width: 12%; }
+    #tabelaUsuariosAdmin th:nth-child(5), #tabelaUsuariosAdmin td:nth-child(5) { width: 12%; }
+    #tabelaUsuariosAdmin th:nth-child(6), #tabelaUsuariosAdmin td:nth-child(6) { width: 10%; }
+    #tabelaUsuariosAdmin th:nth-child(7), #tabelaUsuariosAdmin td:nth-child(7) { width: 6%; text-align: center; }
 
     /* --------------------------------------------------------------------------
        2. Tabela de Planos Admin (6 colunas - Soma exata: 100%)
@@ -2101,12 +2101,12 @@ tbody tr:last-child td {
         width: 100% !important;
         border-collapse: collapse !important;
     }
-    #tabelaPlanosAdmin th:nth-child(1), #tabelaPlanosAdmin td:nth-child(1) { width: 25%; } /* Cliente */
-    #tabelaPlanosAdmin th:nth-child(2), #tabelaPlanosAdmin td:nth-child(2) { width: 20%; } /* Plano / Diário */
-    #tabelaPlanosAdmin th:nth-child(3), #tabelaPlanosAdmin td:nth-child(3) { width: 18%; } /* Horário */
-    #tabelaPlanosAdmin th:nth-child(4), #tabelaPlanosAdmin td:nth-child(4) { width: 18%; } /* Rendimento */
-    #tabelaPlanosAdmin th:nth-child(5), #tabelaPlanosAdmin td:nth-child(5) { width: 11%; } /* Teto */
-    #tabelaPlanosAdmin th:nth-child(6), #tabelaPlanosAdmin td:nth-child(6) { width: 8%; text-align: center; } /* Status */
+    #tabelaPlanosAdmin th:nth-child(1), #tabelaPlanosAdmin td:nth-child(1) { width: 25%; }
+    #tabelaPlanosAdmin th:nth-child(2), #tabelaPlanosAdmin td:nth-child(2) { width: 20%; }
+    #tabelaPlanosAdmin th:nth-child(3), #tabelaPlanosAdmin td:nth-child(3) { width: 18%; }
+    #tabelaPlanosAdmin th:nth-child(4), #tabelaPlanosAdmin td:nth-child(4) { width: 18%; }
+    #tabelaPlanosAdmin th:nth-child(5), #tabelaPlanosAdmin td:nth-child(5) { width: 11%; }
+    #tabelaPlanosAdmin th:nth-child(6), #tabelaPlanosAdmin td:nth-child(6) { width: 8%; text-align: center; }
 
     /* --------------------------------------------------------------------------
        3. Tabela de Depósitos Admin (5 colunas - Soma exata: 100%)
@@ -2123,7 +2123,7 @@ tbody tr:last-child td {
     #tabelaDepositosAdmin th:nth-child(5), #tabelaDepositosAdmin td:nth-child(5) { width: 15%; text-align: center; }
 
     /* --------------------------------------------------------------------------
-       Estilo e comportamento geral das linhas e células
+       Alinhamento Vertical e Tratamento de Texto Uniforme
        -------------------------------------------------------------------------- */
     tbody tr {
         background-color: var(--card-bg);
@@ -2136,17 +2136,17 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 14px 12px !important;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        padding: 16px 12px !important;
+        vertical-align: top !important; /* Alinha o conteúdo pelo topo para manter a harmonia quando houver quebra de linha */
         font-size: 0.85rem;
-        vertical-align: middle;
+        word-break: break-word;
     }
 
     th {
+        white-space: nowrap !important;
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
+        vertical-align: middle !important;
     }
 }
