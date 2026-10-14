@@ -2668,108 +2668,227 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   Estilos da Nova Aba de Suporte Central
+   CENTRAL DE ATENDIMENTO - ESTILO CONCIERGE VIP (Igual à 2ª Imagem)
    ========================================================================== */
-.support-grid-central {
+
+/* Card Grande Principal com Borda Arredondada */
+.concierge-panel {
+    background: var(--card-bg, #16120d);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    border-radius: 24px;
+    padding: 48px 32px 36px;
+    max-width: 820px;
+    margin: 10px auto;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 0 30px rgba(255, 215, 0, 0.02);
+    position: relative;
+}
+
+/* Selo Superior (Pílula) */
+.concierge-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 18px;
+    border-radius: 50px;
+    background: rgba(46, 204, 113, 0.08);
+    border: 1px solid rgba(46, 204, 113, 0.35);
+    color: #2ecc71;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+}
+
+.concierge-dot {
+    width: 7px;
+    height: 7px;
+    background-color: #2ecc71;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #2ecc71;
+}
+
+/* Título e Subtítulo */
+.concierge-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+}
+
+.concierge-subtitle {
+    font-size: 0.92rem;
+    color: var(--text-muted, #9e9589);
+    max-width: 380px;
+    margin: 0 auto 38px;
+    line-height: 1.5;
+}
+
+/* Fileira com os 3 Cards Verticais Lado a Lado */
+.concierge-cards-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 42px;
+}
+
+/* Card Individual Vertical */
+.concierge-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 215, 0, 0.18);
+    border-radius: 20px;
+    width: 175px;
+    padding: 28px 16px 22px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    margin-top: 20px;
-    max-width: 700px;
-}
-
-.support-card-glow-main {
-    display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 16px 20px;
-    background: var(--card-bg, #1a1510);
-    border: 1px solid rgba(255, 215, 0, 0.3);
-    border-radius: 12px;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
 }
 
-/* Bolha da foto com brilho dourado intenso */
-.support-avatar-wrapper-main {
+/* Efeito ao passar o mouse no Card */
+.concierge-card:hover {
+    transform: translateY(-6px);
+    background: rgba(255, 215, 0, 0.05);
+    border-color: rgba(255, 215, 0, 0.65);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.18);
+}
+
+/* Bolha da Foto com Brilho Intenso ao Redor */
+.concierge-avatar-box {
     position: relative;
-    width: 60px;
-    height: 60px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
-    flex-shrink: 0;
+    margin-bottom: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.support-avatar-wrapper-main::before {
+/* Halo Brilhante (Glow) atrás da foto */
+.concierge-avatar-box::before {
     content: '';
     position: absolute;
-    inset: -4px;
+    inset: -5px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ffd700, #ff8c00, #ffd700);
-    z-index: 0;
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.85) 0%, rgba(255, 140, 0, 0.4) 60%, transparent 100%);
     filter: blur(6px);
-    opacity: 0.9;
-    animation: supportGlowPulseMain 2.5s infinite alternate;
+    z-index: 0;
+    animation: conciergeGlow 2.5s infinite alternate;
 }
 
-.support-avatar-wrapper-main img {
+.concierge-avatar-box img {
     position: relative;
     z-index: 1;
-    width: 60px;
-    height: 60px;
+    width: 84px;
+    height: 84px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #fff;
+    border: 2px solid rgba(255, 215, 0, 0.9);
+    box-shadow: 0 0 14px rgba(255, 215, 0, 0.5);
 }
 
-@keyframes supportGlowPulseMain {
-    0% { opacity: 0.6; filter: blur(4px); }
-    100% { opacity: 1; filter: blur(8px); }
+@keyframes conciergeGlow {
+    0% { opacity: 0.65; transform: scale(0.96); }
+    100% { opacity: 1; transform: scale(1.06); }
 }
 
-/* Textos do cartão principal */
-.support-info-main {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    overflow: hidden;
+/* Bolinha Verde de Status Online no Canto Inferior Direito da Foto */
+.concierge-status-dot {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    z-index: 2;
+    width: 15px;
+    height: 15px;
+    background-color: #2ecc71;
+    border: 3px solid #16120d;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.9);
 }
 
-.support-info-main h3 {
-    font-size: 1.05rem;
-    font-weight: 600;
+/* Nome do Suporte */
+.concierge-name {
+    font-size: 1rem;
+    font-weight: 700;
     color: #ffffff;
-    margin-bottom: 2px;
+    margin: 0 0 6px;
 }
 
-.support-info-main p {
-    font-size: 0.85rem;
-    color: var(--text-muted, #a0a0a0);
-    margin-bottom: 4px;
-}
-
-.support-info-main .support-status-online {
-    font-size: 0.78rem;
+/* Cargo / Categoria em Verde/Dourado */
+.concierge-role {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
     color: #2ecc71;
-    font-weight: 500;
+    margin-bottom: 16px;
 }
 
-.support-action-btn {
-    flex-shrink: 0;
-    transition: transform 0.2s ease;
+/* Botãozinho com Ícone do Telegram dentro do Card */
+.concierge-tg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 50px;
+    background: rgba(55, 187, 254, 0.1);
+    border: 1px solid rgba(55, 187, 254, 0.3);
+    color: #37BBFE;
+    font-size: 0.76rem;
+    font-weight: 600;
+    transition: all 0.25s ease;
 }
 
-/* Efeito ao passar o mouse */
-.support-card-glow-main:hover {
-    background: rgba(255, 215, 0, 0.05);
-    border-color: rgba(255, 215, 0, 0.8);
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.2);
+.concierge-card:hover .concierge-tg-btn {
+    background: #37BBFE;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(55, 187, 254, 0.5);
 }
 
-.support-card-glow-main:hover .support-action-btn {
-    transform: scale(1.15);
+.concierge-card:hover .concierge-tg-btn svg path {
+    fill: #ffffff;
+}
+
+/* Rodapé Interno com Linhas Laterais */
+.concierge-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.concierge-footer-line {
+    width: 30px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.concierge-footer-text {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--text-muted, #7a7369);
+    text-transform: uppercase;
+}
+
+/* Responsivo para Celulares */
+@media (max-width: 600px) {
+    .concierge-panel {
+        padding: 32px 16px 24px;
+    }
+    .concierge-cards-row {
+        gap: 12px;
+    }
+    .concierge-card {
+        width: 100%;
+        max-width: 240px;
+    }
 }
