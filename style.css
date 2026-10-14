@@ -2073,6 +2073,9 @@ tbody tr:last-child td {
     overflow-x: auto; /* Mantém a rolagem para celular se a tela for muito pequena */
 }
 
+/* ==========================================================================
+   Alinhamento Perfeito e Fluido das Tabelas no Desktop
+   ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
         overflow-x: visible !important;
@@ -2082,16 +2085,34 @@ tbody tr:last-child td {
     table {
         width: 100% !important;
         table-layout: auto !important;
-        min-width: 0 !important;
+        border-collapse: separate !important;
+        border-spacing: 0 8px !important;
+    }
+
+    tbody tr {
+        background-color: var(--card-bg);
+        transition: background-color var(--transition-fast);
+    }
+
+    tbody tr:hover {
+        background-color: var(--card-bg-hover);
     }
 
     th, td {
-        padding: 16px 14px !important; /* Aumenta o espaço interno para dar respiro */
-        white-space: normal !important;
+        padding: 16px 16px !important; /* Espaçamento interno confortável */
+        white-space: nowrap !important; /* Mantém o texto alinhado sem quebras feias */
+    }
+
+    /* Permite que colunas de texto longo (como E-mail e Nome) tenham respiro */
+    td:nth-child(1), th:nth-child(1) {
+        text-align: left;
+    }
+    
+    /* Alinha colunas de ações e status ao centro */
+    td:last-child, th:last-child {
+        text-align: center;
     }
 }
-
-
 /* Espaçamento maior entre as linhas da tabela no desktop */
 @media (min-width: 992px) {
     table {
