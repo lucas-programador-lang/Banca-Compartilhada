@@ -2068,13 +2068,8 @@ tbody tr:last-child td {
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-.table-responsive {
-    width: 100%;
-    overflow-x: auto; /* Mantém a rolagem para celular se a tela for muito pequena */
-}
-
 /* ==========================================================================
-   Alinhamento Perfeito e Fluido das Tabelas no Desktop
+   CORREÇÃO DEFINITIVA: Tabelas Alinhadas, Sem Scroll e com Respiro no Desktop
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2084,13 +2079,13 @@ tbody tr:last-child td {
     
     table {
         width: 100% !important;
-        table-layout: auto !important;
-        border-collapse: separate !important;
-        border-spacing: 0 8px !important;
+        table-layout: fixed !important; /* Força o alinhamento rígido das colunas */
+        border-collapse: collapse !important;
     }
 
     tbody tr {
         background-color: var(--card-bg);
+        border-bottom: 1px solid var(--border-color); /* Linha divisoria sutil */
         transition: background-color var(--transition-fast);
     }
 
@@ -2099,79 +2094,21 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 16px 16px !important; /* Espaçamento interno confortável */
-        white-space: nowrap !important; /* Mantém o texto alinhado sem quebras feias */
+        padding: 16px 12px !important;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    /* Permite que colunas de texto longo (como E-mail e Nome) tenham respiro */
-    td:nth-child(1), th:nth-child(1) {
-        text-align: left;
-    }
-    
-    /* Alinha colunas de ações e status ao centro */
-    td:last-child, th:last-child {
-        text-align: center;
-    }
-}
-/* Espaçamento maior entre as linhas da tabela no desktop */
-@media (min-width: 992px) {
-    table {
-        border-collapse: separate;
-        border-spacing: 0 8px; /* Cria um espaço "invisível" de 8px entre uma linha e outra */
-    }
-
-    tbody tr {
-        background-color: var(--card-bg); /* Mantém o fundo bonito do card em cada linha separada */
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); /* Opcional: dá um leve destaque em cada linha */
-        transition: transform var(--transition-fast), background-color var(--transition-fast);
-    }
-
-    tbody tr:hover {
-        background-color: var(--card-bg-hover);
-        transform: translateY(-1px);
-    }
-
-    th, td {
-        padding: 16px 14px !important;
-    }
-
-    /* Arredonda as bordinhas da primeira e última célula de cada linha (opcional e fica super premium) */
-    tbody tr td:first-child {
-        border-top-left-radius: var(--radius-sm);
-        border-bottom-left-radius: var(--radius-sm);
-    }
-    tbody tr td:last-child {
-        border-top-right-radius: var(--radius-sm);
-        border-bottom-right-radius: var(--radius-sm);
-    }
-}
-
-/* Adiciona uma linha divisoria sutil entre as linhas da tabela */
-@media (min-width: 992px) {
-    tbody tr {
-        border-bottom: 1px solid var(--border-color);
-    }
-}
-
-/* Alinhamento e distribuição perfeita das colunas no Desktop */
-@media (min-width: 992px) {
     /* 1. Tabela de Planos Admin (6 colunas) */
-    table:has(#tabelaPlanosAdmin) {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
     table:has(#tabelaPlanosAdmin) th:nth-child(1), table:has(#tabelaPlanosAdmin) td:nth-child(1) { width: 22%; }
-    table:has(#tabelaPlanosAdmin) th:nth-child(2), table:has(#tabelaPlanosAdmin) td:nth-child(2) { width: 16%; }
+    table:has(#tabelaPlanosAdmin) th:nth-child(2), table:has(#tabelaPlanosAdmin) td:nth-child(2) { width: 18%; }
     table:has(#tabelaPlanosAdmin) th:nth-child(3), table:has(#tabelaPlanosAdmin) td:nth-child(3) { width: 20%; }
     table:has(#tabelaPlanosAdmin) th:nth-child(4), table:has(#tabelaPlanosAdmin) td:nth-child(4) { width: 20%; }
     table:has(#tabelaPlanosAdmin) th:nth-child(5), table:has(#tabelaPlanosAdmin) td:nth-child(5) { width: 12%; }
-    table:has(#tabelaPlanosAdmin) th:nth-child(6), table:has(#tabelaPlanosAdmin) td:nth-child(6) { width: 10%; text-align: center; }
+    table:has(#tabelaPlanosAdmin) th:nth-child(6), table:has(#tabelaPlanosAdmin) td:nth-child(6) { width: 8%; text-align: center; }
 
     /* 2. Tabela de Depósitos Admin (5 colunas) */
-    table:has(#tabelaDepositosAdmin) {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
     table:has(#tabelaDepositosAdmin) th:nth-child(1), table:has(#tabelaDepositosAdmin) td:nth-child(1) { width: 25%; }
     table:has(#tabelaDepositosAdmin) th:nth-child(2), table:has(#tabelaDepositosAdmin) td:nth-child(2) { width: 25%; }
     table:has(#tabelaDepositosAdmin) th:nth-child(3), table:has(#tabelaDepositosAdmin) td:nth-child(3) { width: 20%; }
@@ -2179,10 +2116,6 @@ tbody tr:last-child td {
     table:has(#tabelaDepositosAdmin) th:nth-child(5), table:has(#tabelaDepositosAdmin) td:nth-child(5) { width: 15%; text-align: center; }
 
     /* 3. Tabela de Usuários Admin (7 colunas) */
-    table:has(#tabelaUsuariosAdmin) {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
     table:has(#tabelaUsuariosAdmin) th:nth-child(1), table:has(#tabelaUsuariosAdmin) td:nth-child(1) { width: 22%; }
     table:has(#tabelaUsuariosAdmin) th:nth-child(2), table:has(#tabelaUsuariosAdmin) td:nth-child(2) { width: 26%; }
     table:has(#tabelaUsuariosAdmin) th:nth-child(3), table:has(#tabelaUsuariosAdmin) td:nth-child(3) { width: 12%; }
@@ -2191,4 +2124,3 @@ tbody tr:last-child td {
     table:has(#tabelaUsuariosAdmin) th:nth-child(6), table:has(#tabelaUsuariosAdmin) td:nth-child(6) { width: 11%; }
     table:has(#tabelaUsuariosAdmin) th:nth-child(7), table:has(#tabelaUsuariosAdmin) td:nth-child(7) { width: 6%; text-align: center; }
 }
-
