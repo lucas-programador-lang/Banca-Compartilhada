@@ -2244,7 +2244,7 @@ tbody tr:last-child td {
 }
 
 .robo-status__card {
-  --accent: 46, 204, 113;
+  --accent: 34, 176, 107;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -2265,7 +2265,7 @@ tbody tr:last-child td {
 }
 
 .robo-status__card--manual {
-  --accent: 255, 193, 7;
+  --accent: 220, 172, 77;
 }
 
 .robo-status__top {
@@ -2362,4 +2362,228 @@ tbody tr:last-child td {
   --accent: 160, 160, 160;
   font-size: 0.85rem;
   color: var(--text-muted);
+}
+
+
+/* ==========================================================================
+   MODAL DE CONFIRMAÇÃO (painel admin)
+   ========================================================================== */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+    background: rgba(0, 0, 0, 0.7);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    animation: confirmFadeIn 0.16s ease-out;
+}
+
+.confirm-overlay--saindo {
+    opacity: 0;
+    transition: opacity 0.14s ease-in;
+}
+
+.confirm-modal {
+    --tom: 196, 136, 73;            /* var(--primary) */
+    --tom-claro: 242, 206, 151;     /* var(--primary-hover) */
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    padding: var(--space-lg);
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(180deg, rgba(196, 136, 73, 0.06), transparent 35%),
+        var(--card-bg);
+    border: 1px solid var(--border-color);
+    box-shadow:
+        var(--shadow-card),
+        inset 0 1px 0 rgba(242, 206, 151, 0.08);
+    overflow: hidden;
+    animation: cardIn 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Fio dourado no topo, igual ao .card */
+.confirm-modal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--primary) 25%, var(--primary-hover) 50%, var(--primary) 75%, transparent);
+}
+
+.confirm-modal--danger {
+    --tom: 236, 91, 96;             /* var(--danger) */
+    --tom-claro: 255, 176, 179;
+}
+
+.confirm-modal--danger::before {
+    background: linear-gradient(90deg, transparent, var(--danger) 30%, #ff8a8e 50%, var(--danger) 70%, transparent);
+}
+
+.confirm-modal__head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: var(--space-md);
+}
+
+.confirm-modal__icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    color: rgb(var(--tom-claro));
+    background: rgba(var(--tom), 0.14);
+    border: 1px solid rgba(var(--tom), 0.35);
+}
+
+.confirm-modal__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    text-align: left;
+    color: var(--primary-hover);
+}
+
+.confirm-modal--danger .confirm-modal__title {
+    color: #ffb0b3;
+}
+
+.confirm-modal__body {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-sm);
+    background-color: var(--bg-color-elevated);
+    border: 1px solid var(--border-color);
+}
+
+.confirm-modal__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+}
+
+.confirm-modal__row + .confirm-modal__row {
+    border-top: 1px solid var(--border-color);
+}
+
+.confirm-modal__label {
+    flex: none;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.confirm-modal__value {
+    min-width: 0;
+    font-size: 0.9rem;
+    text-align: right;
+    overflow-wrap: anywhere;
+    color: var(--text-main);
+}
+
+.confirm-modal__value--big {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: rgb(var(--tom-claro));
+}
+
+.confirm-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-sm);
+    margin-top: var(--space-lg);
+}
+
+.confirm-modal__btn {
+    min-width: 120px;
+    padding: 12px 22px;
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: transform var(--transition-fast), filter var(--transition-fast),
+                background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.confirm-modal__btn:hover {
+    transform: translateY(-1px);
+}
+
+.confirm-modal__btn:active {
+    transform: translateY(0);
+}
+
+.confirm-modal__btn:focus-visible {
+    outline: 2px solid var(--primary-hover);
+    outline-offset: 2px;
+}
+
+/* Cancelar: mesmo estilo do .btn-outline */
+.confirm-modal__btn--cancel {
+    background: transparent;
+    color: var(--primary-hover);
+    border: 1px solid var(--border-color-strong);
+}
+
+.confirm-modal__btn--cancel:hover {
+    background: var(--card-bg-hover);
+    border-color: rgba(196, 136, 73, 0.5);
+}
+
+/* Confirmar: mesmo degradê bronze do .btn */
+.confirm-modal__btn--ok {
+    background: linear-gradient(135deg, var(--primary-deep), var(--primary) 55%, var(--primary-hover));
+    color: #17100a;
+    border: none;
+    box-shadow: 0 10px 24px rgba(138, 84, 41, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.confirm-modal__btn--ok:hover {
+    filter: brightness(1.08);
+}
+
+.confirm-modal--danger .confirm-modal__btn--ok {
+    background: linear-gradient(135deg, #b8383d, var(--danger));
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(236, 91, 96, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+@keyframes confirmFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@media (max-width: 480px) {
+    .confirm-modal__actions {
+        flex-direction: column-reverse;
+    }
+
+    .confirm-modal__btn {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .confirm-overlay,
+    .confirm-modal {
+        animation: none !important;
+    }
 }
