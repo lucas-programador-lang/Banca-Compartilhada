@@ -284,14 +284,19 @@ function renderizarTabelaCarteira(planosObj) {
             statusClasse = 'plan-row__value';
         }
 
-        // Mostra Data + Hora exata da ativação (que define o ciclo de 24h do plano)
+        // Mostra Data + Hora exata da ativação e, se já rendeu, mostra embaixo a hora do último pagamento
         const dataHoraAtivacao = !isNaN(estado.dataAtivacao.getTime())
             ? formatadorDataHoraCurto.format(estado.dataAtivacao)
             : '—';
 
+        const ultimoRend = plano.ultimoRendimentoEm ? new Date(plano.ultimoRendimentoEm) : null;
+        const textoUltimoRend = (ultimoRend && !isNaN(ultimoRend.getTime()))
+            ? `<div style="font-size: 0.75rem; opacity: 0.75; margin-top: 2px;">Últ. pago: ${formatadorDataHoraCurto.format(ultimoRend)}</div>`
+            : '';
+
         return `
             <tr>
-                <td>${dataHoraAtivacao}</td>
+                <td>${dataHoraAtivacao}${textoUltimoRend}</td>
                 <td>${formatadorMoeda.format(valor)}</td>
                 <td>${formatadorMoeda.format(estado.rendimentoDiario)}</td>
                 <td>${formatadorMoeda.format(estado.rendimentoAcumulado)}</td>
