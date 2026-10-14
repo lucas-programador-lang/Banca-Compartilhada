@@ -2069,7 +2069,7 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   Correção Completa: Tabelas Admin Fluídas, Espaçadas e Sem Cortes
+   Correção Definitiva para Todas as Tabelas Admin (Desktop)
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2079,7 +2079,7 @@ tbody tr:last-child td {
     
     table {
         width: 100% !important;
-        table-layout: fixed !important;
+        table-layout: auto !important;
         border-collapse: collapse !important;
     }
 
@@ -2094,17 +2094,38 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 16px 14px !important; /* Maior espaçamento interno para afastar os dados */
-        white-space: normal !important;
-        word-break: break-word;
-        font-size: 0.85rem;
+        padding: 16px 14px !important;
         vertical-align: middle;
+        font-size: 0.85rem;
     }
 
     th {
         white-space: nowrap !important;
         color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
+
+    /* Primeira coluna (Nome / Cliente): espaço confortável e quebra natural */
+    td:nth-child(1), th:nth-child(1) {
+        text-align: left;
+        white-space: normal !important;
+        word-break: break-word;
+        min-width: 200px;
+    }
+
+    /* Segunda coluna (E-mail / Plano): espaçamento adequado */
+    td:nth-child(2), th:nth-child(2) {
+        text-align: left;
+        word-break: break-word;
+    }
+
+    /* Última coluna (Ações / Status): centralizada */
+    td:last-child, th:last-child {
+        text-align: center;
+        white-space: nowrap !important;
+    }
+}
 
     /* 1. Tabela de Planos Admin (6 colunas) */
     table:has(#tabelaPlanosAdmin) th:nth-child(1), table:has(#tabelaPlanosAdmin) td:nth-child(1) { width: 22%; }
