@@ -2069,53 +2069,46 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   CORREÇÃO DEFINITIVA DE ALINHAMENTO: Tabelas Admin (Desktop)
+   CORREÇÃO ESTável: Tabelas Admin Ajustadas Dentro das Bordas (Desktop)
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
-        overflow-x: visible !important;
+        overflow-x: hidden !important;
         width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    table {
+        table-layout: fixed !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-collapse: collapse !important;
     }
 
     /* --------------------------------------------------------------------------
        1. Tabela de Usuários Admin (7 colunas - Soma exata: 100%)
        -------------------------------------------------------------------------- */
-    #tabelaUsuariosAdmin {
-        table-layout: fixed !important;
-        width: 100% !important;
-        border-collapse: collapse !important;
-    }
     #tabelaUsuariosAdmin th:nth-child(1), #tabelaUsuariosAdmin td:nth-child(1) { width: 22%; }
-    #tabelaUsuariosAdmin th:nth-child(2), #tabelaUsuariosAdmin td:nth-child(2) { width: 28%; }
-    #tabelaUsuariosAdmin th:nth-child(3), #tabelaUsuariosAdmin td:nth-child(3) { width: 10%; }
+    #tabelaUsuariosAdmin th:nth-child(2), #tabelaUsuariosAdmin td:nth-child(2) { width: 26%; }
+    #tabelaUsuariosAdmin th:nth-child(3), #tabelaUsuariosAdmin td:nth-child(3) { width: 11%; }
     #tabelaUsuariosAdmin th:nth-child(4), #tabelaUsuariosAdmin td:nth-child(4) { width: 12%; }
     #tabelaUsuariosAdmin th:nth-child(5), #tabelaUsuariosAdmin td:nth-child(5) { width: 12%; }
-    #tabelaUsuariosAdmin th:nth-child(6), #tabelaUsuariosAdmin td:nth-child(6) { width: 10%; }
+    #tabelaUsuariosAdmin th:nth-child(6), #tabelaUsuariosAdmin td:nth-child(6) { width: 11%; }
     #tabelaUsuariosAdmin th:nth-child(7), #tabelaUsuariosAdmin td:nth-child(7) { width: 6%; text-align: center; }
 
     /* --------------------------------------------------------------------------
        2. Tabela de Planos Admin (6 colunas - Soma exata: 100%)
        -------------------------------------------------------------------------- */
-    #tabelaPlanosAdmin {
-        table-layout: fixed !important;
-        width: 100% !important;
-        border-collapse: collapse !important;
-    }
-    #tabelaPlanosAdmin th:nth-child(1), #tabelaPlanosAdmin td:nth-child(1) { width: 25%; }
+    #tabelaPlanosAdmin th:nth-child(1), #tabelaPlanosAdmin td:nth-child(1) { width: 24%; }
     #tabelaPlanosAdmin th:nth-child(2), #tabelaPlanosAdmin td:nth-child(2) { width: 20%; }
     #tabelaPlanosAdmin th:nth-child(3), #tabelaPlanosAdmin td:nth-child(3) { width: 18%; }
     #tabelaPlanosAdmin th:nth-child(4), #tabelaPlanosAdmin td:nth-child(4) { width: 18%; }
-    #tabelaPlanosAdmin th:nth-child(5), #tabelaPlanosAdmin td:nth-child(5) { width: 11%; }
+    #tabelaPlanosAdmin th:nth-child(5), #tabelaPlanosAdmin td:nth-child(5) { width: 12%; }
     #tabelaPlanosAdmin th:nth-child(6), #tabelaPlanosAdmin td:nth-child(6) { width: 8%; text-align: center; }
 
     /* --------------------------------------------------------------------------
        3. Tabela de Depósitos Admin (5 colunas - Soma exata: 100%)
        -------------------------------------------------------------------------- */
-    #tabelaDepositosAdmin {
-        table-layout: fixed !important;
-        width: 100% !important;
-        border-collapse: collapse !important;
-    }
     #tabelaDepositosAdmin th:nth-child(1), #tabelaDepositosAdmin td:nth-child(1) { width: 25%; }
     #tabelaDepositosAdmin th:nth-child(2), #tabelaDepositosAdmin td:nth-child(2) { width: 25%; }
     #tabelaDepositosAdmin th:nth-child(3), #tabelaDepositosAdmin td:nth-child(3) { width: 20%; }
@@ -2123,7 +2116,7 @@ tbody tr:last-child td {
     #tabelaDepositosAdmin th:nth-child(5), #tabelaDepositosAdmin td:nth-child(5) { width: 15%; text-align: center; }
 
     /* --------------------------------------------------------------------------
-       Alinhamento Vertical e Tratamento de Texto Uniforme
+       Comportamento visual das linhas e células sem estourar o limite
        -------------------------------------------------------------------------- */
     tbody tr {
         background-color: var(--card-bg);
@@ -2136,9 +2129,11 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 16px 12px !important;
-        vertical-align: top !important; /* Alinha o conteúdo pelo topo para manter a harmonia quando houver quebra de linha */
-        font-size: 0.85rem;
+        padding: 14px 10px !important;
+        vertical-align: top !important; /* Alinha pelo topo para manter a ordem mesmo com quebras de linha */
+        font-size: 0.82rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
         word-break: break-word;
     }
 
