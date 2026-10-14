@@ -2892,3 +2892,30 @@ tbody tr:last-child td {
         max-width: 240px;
     }
 }
+
+
+/* ==========================================================================
+   Botão do Grupo Oficial do Telegram na Sidebar (Abaixo de Baixar App)
+   ========================================================================== */
+.sidebar-telegram-group-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background: rgba(55, 187, 254, 0.08);
+    border: 1px solid rgba(55, 187, 254, 0.3);
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.sidebar-telegram-group-btn:hover {
+    background: rgba(55, 187, 254, 0.18);
+    border-color: #37BBFE;
+    box-shadow: 0 0 15px rgba(55, 187, 254, 0.3);
+    transform: translateY(-2px);
+}
