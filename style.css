@@ -2100,7 +2100,7 @@ tbody tr:last-child td {
   }
 
   th, td {
-    padding: 12px 8px;
+    padding: 14px 16px;
     vertical-align: middle;
     font-size: 0.8rem;
   }
@@ -2145,7 +2145,7 @@ tbody tr:last-child td {
   }
 
   /* ---------- 1. Usuários (7 colunas = 100%) ---------- */
-  table:has(> #tabelaUsuariosAdmin) { min-width: 900px; }
+  table:has(> #tabelaUsuariosAdmin) { min-width: 1060px; }
   table:has(> #tabelaUsuariosAdmin) :is(th, td):nth-child(1) { width: 22%; }
   table:has(> #tabelaUsuariosAdmin) td:nth-child(1) { white-space: normal; overflow-wrap: anywhere; }
   table:has(> #tabelaUsuariosAdmin) :is(th, td):nth-child(2) { width: 22%; }
@@ -2161,12 +2161,12 @@ tbody tr:last-child td {
   /* Badge "Admin" nunca é cortado */
   table:has(> #tabelaUsuariosAdmin) td:nth-child(7) {
     overflow: visible;
-    padding-left: 4px;
-    padding-right: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   /* ---------- 2. Planos (6 colunas = 100%) ---------- */
-  table:has(> #tabelaPlanosAdmin) { min-width: 900px; }
+  table:has(> #tabelaPlanosAdmin) { min-width: 1020px; }
   table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(1) { width: 22%; }
   table:has(> #tabelaPlanosAdmin) td:nth-child(1) { white-space: normal; overflow-wrap: anywhere; }
   table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(2) { width: 21%; }
@@ -2176,7 +2176,7 @@ tbody tr:last-child td {
   table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(6) { width: 8%; text-align: center; }
 
   /* ---------- 3. Depósitos (5 colunas = 100%) ---------- */
-  table:has(> #tabelaDepositosAdmin) { min-width: 800px; }
+  table:has(> #tabelaDepositosAdmin) { min-width: 880px; }
   table:has(> #tabelaDepositosAdmin) :is(th, td):nth-child(1) { width: 24%; }
   table:has(> #tabelaDepositosAdmin) :is(th, td):nth-child(2) { width: 28%; }
   table:has(> #tabelaDepositosAdmin) :is(th, td):nth-child(3) { width: 20%; }
