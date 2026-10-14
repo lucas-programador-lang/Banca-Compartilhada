@@ -2124,3 +2124,10 @@ tbody tr:last-child td {
         border-bottom-right-radius: var(--radius-sm);
     }
 }
+
+/* Adiciona uma linha divisoria sutil entre as linhas da tabela */
+@media (min-width: 992px) {
+    tbody tr {
+        border-bottom: 1px solid var(--border-color);
+    }
+}
