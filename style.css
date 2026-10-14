@@ -2069,22 +2069,22 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   CORREÇÃO FINAL: Alinhado, Dentro das Bordas e Sem Scroll Horizontal Indesejado
+   CORREÇÃO DEFINITIVA GLOBAL: Espaçamento Perfeito e Nomes Completos (Desktop)
    ========================================================================== */
 @media (min-width: 992px) {
-    /* Permite que o contentor flua com a largura máxima sem gerar scroll desnecessário */
     .table-container, .table-responsive {
         width: 100% !important;
         max-width: 100% !important;
-        overflow-x: auto !important; /* Mantém seguro caso a tela seja redimensionada, mas evita barras fantasmas */
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
     }
 
-    /* Força a tabela a preencher exatamente 100% sem estourar o cartão */
     table {
         width: 100% !important;
         max-width: 100% !important;
         table-layout: auto !important;
         border-collapse: collapse !important;
+        box-sizing: border-box !important;
     }
 
     tbody tr {
@@ -2097,34 +2097,37 @@ tbody tr:last-child td {
         background-color: var(--card-bg-hover);
     }
 
-    /* Reduz levemente o padding lateral para dar respiro sem expandir demais a tabela */
+    /* Espaçamento interno (padding) intermédio e confortável: nem junto, nem espaçado demais */
     th, td {
-        padding: 14px 10px !important;
+        padding: 14px 16px !important;
         vertical-align: middle !important;
         font-size: 0.84rem;
-        word-break: break-word;
-        white-space: nowrap !important;
+        word-break: normal;
+        white-space: nowrap !important; /* Mantém os dados alinhados e arrumados na mesma linha */
     }
 
-    /* Cabeçalhos estilizados */
+    /* Cabeçalhos limpos */
     th {
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.03em;
     }
 
-    /* Primeira coluna (Nome / Cliente): ajuste seguro */
+    /* --------------------------------------------------------------------------
+       Garante que a primeira coluna (onde ficam os Nomes e Clientes) 
+       tenha espaço suficiente para exibir o nome completo sem cortar
+       -------------------------------------------------------------------------- */
     td:nth-child(1), th:nth-child(1) {
-        white-space: normal !important;
-        min-width: 150px;
+        min-width: 260px !important; /* Espaço folgado para nomes grandes como o seu */
+        white-space: nowrap !important; /* Mantém o nome completo numa única linha */
     }
 
-    /* Segunda coluna (E-mail / Plano) */
+    /* Ajuste para tabelas que possuem e-mail ou dados mais longos na 2ª coluna */
     td:nth-child(2), th:nth-child(2) {
-        min-width: 170px;
+        min-width: 220px !important;
     }
 
-    /* Centraliza sempre a última coluna (Ações / Status / Admin) */
+    /* Centraliza sempre a última coluna (Ações / Status / Admin) de qualquer tabela */
     table td:last-child, table th:last-child {
         text-align: center !important;
         white-space: nowrap !important;
