@@ -2068,25 +2068,23 @@ tbody tr:last-child td {
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-//* ==========================================================================
-   CORREÇÃO DEFINITIVA 100% DE ZOOM: Tabelas Alinhadas Dentro das Bordas
+/* ==========================================================================
+   CORREÇÃO FINAL: Alinhado, Dentro das Bordas e Sem Scroll Horizontal Indesejado
    ========================================================================== */
 @media (min-width: 992px) {
-    /* Garante que o contentor bloqueie qualquer transbordo e respeite a largura da tela */
+    /* Permite que o contentor flua com a largura máxima sem gerar scroll desnecessário */
     .table-container, .table-responsive {
         width: 100% !important;
         max-width: 100% !important;
-        overflow-x: hidden !important; /* Impede que a tabela transborde para fora do cartão */
-        box-sizing: border-box !important;
+        overflow-x: auto !important; /* Mantém seguro caso a tela seja redimensionada, mas evita barras fantasmas */
     }
 
-    /* Força a tabela a encaixar-se exatamente 100% dentro do cartão */
+    /* Força a tabela a preencher exatamente 100% sem estourar o cartão */
     table {
         width: 100% !important;
         max-width: 100% !important;
         table-layout: auto !important;
         border-collapse: collapse !important;
-        box-sizing: border-box !important;
     }
 
     tbody tr {
@@ -2099,9 +2097,9 @@ tbody tr:last-child td {
         background-color: var(--card-bg-hover);
     }
 
-    /* Espaçamento interno (padding) equilibrado para não esticar demais a tabela */
+    /* Reduz levemente o padding lateral para dar respiro sem expandir demais a tabela */
     th, td {
-        padding: 14px 12px !important;
+        padding: 14px 10px !important;
         vertical-align: middle !important;
         font-size: 0.84rem;
         word-break: break-word;
@@ -2115,18 +2113,15 @@ tbody tr:last-child td {
         letter-spacing: 0.03em;
     }
 
-    /* --------------------------------------------------------------------------
-       Ajustes de largura e comportamento para as colunas de texto
-       -------------------------------------------------------------------------- */
-    /* Primeira coluna (Nome / Cliente): permite quebra natural se o nome for gigante */
+    /* Primeira coluna (Nome / Cliente): ajuste seguro */
     td:nth-child(1), th:nth-child(1) {
         white-space: normal !important;
-        min-width: 160px;
+        min-width: 150px;
     }
 
     /* Segunda coluna (E-mail / Plano) */
     td:nth-child(2), th:nth-child(2) {
-        min-width: 180px;
+        min-width: 170px;
     }
 
     /* Centraliza sempre a última coluna (Ações / Status / Admin) */
