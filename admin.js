@@ -21,6 +21,22 @@ function formatarDataHora(isoString) {
     return formatadorData.format(data);
 }
 
+function tempoRelativo(isoString) {
+    if (!isoString) return '';
+    const data = new Date(isoString);
+    if (isNaN(data.getTime())) return '';
+    const minutos = Math.floor((Date.now() - data.getTime()) / 60000);
+    if (minutos < 1) return 'agora';
+    if (minutos < 60) return `há ${minutos} min`;
+    const horas = Math.floor(minutos / 60);
+    if (horas < 24) return `há ${horas} h`;
+    const dias = Math.floor(horas / 24);
+    return `há ${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+}
+
+const ICONE_ROBO_AUTO = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+const ICONE_ROBO_MANUAL = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>';
+
 const STATUS_LABELS = {
     pendente: 'Pendente',
     aprovado: 'Aprovado',
@@ -222,10 +238,12 @@ function renderizarTabelaDepositos(depositos, usuarios) {
                 ? `<div style="font-size: 0.78rem; color: var(--success); margin-top: 2px;">Adquirido: ${formatarDataHora(deposito.dataAprovacao)}</div>`
                 : '';
 
+            const nomeDeposito = escapeHTML(nomeDoUsuario(usuarios, deposito.uid));
+
             return `
                 <tr>
                     <td>${formatarDataHora(deposito.dataSolicitacao)}${horarioAprovacao}</td>
-                    <td>${escapeHTML(nomeDoUsuario(usuarios, deposito.uid))}</td>
+                    <td title="${nomeDeposito}">${nomeDeposito}</td>
                     <td>${formatadorMoeda.format(deposito.valorPlano || 0)}</td>
                     <td>${badgeStatus(deposito.status)}</td>
                     <td>${acoes}</td>
@@ -240,10 +258,7 @@ function renderizarTabelaDepositos(depositos, usuarios) {
 }
 
 /* ==========================================================================
-   NOVA TABELA: Planos Adquiridos e Horários de Rendimento
-   ========================================================================== */
-/* ==========================================================================
-   NOVA TABELA: Planos Adquiridos e Horários de Rendimento (Visual Idêntico)
+   Planos Adquiridos e Horários de Rendimento
    ========================================================================== */
 function garantirSecaoPlanosNoHTML() {
     if (document.getElementById('tabelaPlanosAdmin')) return;
@@ -251,7 +266,7 @@ function garantirSecaoPlanosNoHTML() {
     const conteudoAdmin = document.getElementById('conteudoAdmin');
     if (!conteudoAdmin) return;
 
-    // Pega as mesmas classes da tabela de Depósitos para ficar 100% igual ao seu CSS
+    // Pega as mesmas classes da tabela de Depósitos para ficar igual ao seu CSS
     const tabelaRef = document.getElementById('tabelaDepositosAdmin')?.closest('table');
     const wrapperRef = tabelaRef?.parentElement;
     const classeTabela = tabelaRef?.className || 'table';
@@ -296,6 +311,7 @@ function garantirSecaoPlanosNoHTML() {
         conteudoAdmin.appendChild(secao);
     }
 }
+
 function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendimentos) {
     garantirSecaoPlanosNoHTML();
 
@@ -304,16 +320,30 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
     const elInfoRobo = document.getElementById('infoUltimaExecucaoRobo');
 
     if (elInfoRobo) {
-        const textoClientes = (n) => `${n} ${n === 1 ? 'cliente pago' : 'clientes pagos'}`;
-
-        const montarCard = (classe, titulo, execucao) => {
+        const montarCard = (classe, icone, titulo, execucao) => {
             const total = execucao.usuariosCreditados || 0;
-            const obs = execucao.observacao ? ` — ${escapeHTML(execucao.observacao)}` : '';
+            const obs = execucao.observacao
+                ? `<span class="robo-status__obs">${escapeHTML(execucao.observacao)}</span>`
+                : '';
+            const [dia, hora] = formatarDataHora(execucao.data).split(', ');
+            const relativo = tempoRelativo(execucao.data);
+
             return `
                 <div class="robo-status__card ${classe}">
-                    <span class="robo-status__label"><i class="robo-status__dot"></i>${titulo}</span>
-                    <strong class="robo-status__date">${formatarDataHora(execucao.data)}</strong>
-                    <span class="robo-status__meta">${textoClientes(total)}${obs}</span>
+                    <div class="robo-status__top">
+                        <span class="robo-status__label">
+                            <span class="robo-status__icon">${icone}</span>${titulo}
+                        </span>
+                        ${relativo ? `<span class="robo-status__ago">${relativo}</span>` : ''}
+                    </div>
+                    <div class="robo-status__when">
+                        <strong class="robo-status__date">${dia}</strong>
+                        ${hora ? `<span class="robo-status__time">${hora}</span>` : ''}
+                    </div>
+                    <div class="robo-status__foot">
+                        <span class="robo-status__meta"><strong>${total}</strong> ${total === 1 ? 'cliente pago' : 'clientes pagos'}</span>
+                        ${obs}
+                    </div>
                 </div>
             `;
         };
@@ -323,10 +353,10 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
         const cards = [];
 
         if (ultimoCron?.data) {
-            cards.push(montarCard('robo-status__card--auto', 'Último giro automático (Cron)', ultimoCron));
+            cards.push(montarCard('robo-status__card--auto', ICONE_ROBO_AUTO, 'Último giro automático (Cron)', ultimoCron));
         }
         if (ultimoManual?.data) {
-            cards.push(montarCard('robo-status__card--manual', 'Último giro manual', ultimoManual));
+            cards.push(montarCard('robo-status__card--manual', ICONE_ROBO_MANUAL, 'Último giro manual', ultimoManual));
         }
 
         elInfoRobo.innerHTML = cards.length
@@ -378,6 +408,7 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
         `;
     }).join('');
 }
+
 function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, planosObj, filtro) {
     const tbody = document.getElementById('tabelaUsuariosAdmin');
     if (!tbody) return;
