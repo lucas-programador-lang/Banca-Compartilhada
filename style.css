@@ -2069,7 +2069,7 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   Ajuste de Largura Ampla para Nomes e E-mails no Desktop
+   Correção Completa: Tabelas Admin Fluídas, Espaçadas e Sem Cortes
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2079,7 +2079,7 @@ tbody tr:last-child td {
     
     table {
         width: 100% !important;
-        table-layout: fixed !important; /* Fixa a proporção para respeitar as larguras das colunas */
+        table-layout: fixed !important;
         border-collapse: collapse !important;
     }
 
@@ -2094,8 +2094,8 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 14px 12px !important;
-        white-space: normal !important; /* Permite que o nome quebre em mais de uma linha de forma natural */
+        padding: 16px 14px !important; /* Maior espaçamento interno para afastar os dados */
+        white-space: normal !important;
         word-break: break-word;
         font-size: 0.85rem;
         vertical-align: middle;
@@ -2103,30 +2103,8 @@ tbody tr:last-child td {
 
     th {
         white-space: nowrap !important;
+        color: var(--text-muted);
     }
-
-    /* 1. Tabela de Usuários / Início (Colunas amplas para Nome e E-mail) */
-    table:has(th:contains("E-MAIL")) th:nth-child(1), 
-    table:has(th:contains("E-MAIL")) td:nth-child(1) { width: 28%; } /* Coluna Usuário */
-
-    table:has(th:contains("E-MAIL")) th:nth-child(2), 
-    table:has(th:contains("E-MAIL")) td:nth-child(2) { 
-        width: 32%; 
-        white-space: nowrap !important; /* Mantém o e-mail em linha única preenchendo o espaço */
-        overflow: hidden;
-        text-overflow: ellipsis;
-    } /* Coluna E-mail */
-
-    table:has(th:contains("E-MAIL")) th:nth-child(3), table:has(th:contains("E-MAIL")) td:nth-child(3) { width: 10%; }
-    table:has(th:contains("E-MAIL")) th:nth-child(4), table:has(th:contains("E-MAIL")) td:nth-child(4) { width: 12%; }
-    table:has(th:contains("E-MAIL")) th:nth-child(5), table:has(th:contains("E-MAIL")) td:nth-child(5) { width: 10%; }
-    table:has(th:contains("E-MAIL")) th:nth-child(6), table:has(th:contains("E-MAIL")) td:nth-child(6) { width: 8%; text-align: center; }
-
-    /* Alinhamentos gerais para ações e status */
-    td:last-child, th:last-child {
-        text-align: center;
-    }
-}
 
     /* 1. Tabela de Planos Admin (6 colunas) */
     table:has(#tabelaPlanosAdmin) th:nth-child(1), table:has(#tabelaPlanosAdmin) td:nth-child(1) { width: 22%; }
@@ -2145,10 +2123,15 @@ tbody tr:last-child td {
 
     /* 3. Tabela de Usuários Admin (7 colunas) */
     table:has(#tabelaUsuariosAdmin) th:nth-child(1), table:has(#tabelaUsuariosAdmin) td:nth-child(1) { width: 22%; }
-    table:has(#tabelaUsuariosAdmin) th:nth-child(2), table:has(#tabelaUsuariosAdmin) td:nth-child(2) { width: 26%; }
+    table:has(#tabelaUsuariosAdmin) th:nth-child(2), table:has(#tabelaUsuariosAdmin) td:nth-child(2) { width: 26%; white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }
     table:has(#tabelaUsuariosAdmin) th:nth-child(3), table:has(#tabelaUsuariosAdmin) td:nth-child(3) { width: 12%; }
     table:has(#tabelaUsuariosAdmin) th:nth-child(4), table:has(#tabelaUsuariosAdmin) td:nth-child(4) { width: 12%; }
     table:has(#tabelaUsuariosAdmin) th:nth-child(5), table:has(#tabelaUsuariosAdmin) td:nth-child(5) { width: 11%; }
     table:has(#tabelaUsuariosAdmin) th:nth-child(6), table:has(#tabelaUsuariosAdmin) td:nth-child(6) { width: 11%; }
     table:has(#tabelaUsuariosAdmin) th:nth-child(7), table:has(#tabelaUsuariosAdmin) td:nth-child(7) { width: 6%; text-align: center; }
+
+    /* Alinhamento padrão para a última coluna de qualquer tabela (ações) */
+    td:last-child, th:last-child {
+        text-align: center;
+    }
 }
