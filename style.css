@@ -2069,7 +2069,7 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   CORREÇÃO FINAL ABSOLUTA: Tabelas Admin Limpas, Espaçadas e Sem Sobreposição
+   CORREÇÃO DEFINITIVA PARA AS TABELAS DO PAINEL ADMIN (Desktop)
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2079,7 +2079,7 @@ tbody tr:last-child td {
     }
 
     table {
-        table-layout: auto !important; /* Deixa o navegador calcular o espaço ideal dinamicamente */
+        table-layout: auto !important; /* Permite que o navegador ajuste o espaço dinamicamente sem espremer */
         width: 100% !important;
         max-width: 100% !important;
         border-collapse: collapse !important;
@@ -2095,35 +2095,38 @@ tbody tr:last-child td {
         background-color: var(--card-bg-hover);
     }
 
-    /* Espaçamento interno confortável para afastar os dados e dar respiro */
+    /* Espaçamento interno (padding) generoso para dar respiro aos dados */
     th, td {
         padding: 16px 14px !important;
         vertical-align: middle !important;
         font-size: 0.85rem;
         word-break: normal;
-        white-space: nowrap !important; /* Mantém cada dado na sua linha, evitando empilhamentos feios */
+        white-space: nowrap !important; /* Mantém cada valor na sua linha sem sobreposição */
     }
 
-    /* Cabeçalhos organizados */
+    /* Cabeçalhos */
     th {
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
     }
 
-    /* Ajustes específicos para a primeira e segunda coluna (Nomes e E-mails longos) */
-    #tabelaUsuariosAdmin td:nth-child(1), #tabelaUsuariosAdmin th:nth-child(1),
-    #tabelaPlanosAdmin td:nth-child(1), #tabelaPlanosAdmin th:nth-child(1),
-    #tabelaDepositosAdmin td:nth-child(1), #tabelaDepositosAdmin th:nth-child(1) {
-        min-width: 200px;
-    }
+    /* --------------------------------------------------------------------------
+       1. Tabela: Usuários e Saldos (#tabelaUsuariosAdmin - 7 colunas)
+       -------------------------------------------------------------------------- */
+    #tabelaUsuariosAdmin tr > td:nth-child(1), #tabelaUsuariosAdmin tr > th:nth-child(1) { min-width: 180px; white-space: normal !important; }
+    #tabelaUsuariosAdmin tr > td:nth-child(2), #tabelaUsuariosAdmin tr > th:nth-child(2) { min-width: 220px; }
 
-    #tabelaUsuariosAdmin td:nth-child(2), #tabelaUsuariosAdmin th:nth-child(2) {
-        min-width: 240px;
-    }
+    /* --------------------------------------------------------------------------
+       2. Tabela: Todos os Depósitos (#tabelaDepositosAdmin - 5 colunas)
+       -------------------------------------------------------------------------- */
+    #tabelaDepositosAdmin tr > td:nth-child(1), #tabelaDepositosAdmin tr > th:nth-child(1) { min-width: 160px; }
+    #tabelaDepositosAdmin tr > td:nth-child(2), #tabelaDepositosAdmin tr > th:nth-child(2) { min-width: 180px; white-space: normal !important; }
 
-    /* Centraliza a última coluna (Ações / Status) */
-    td:last-child, th:last-child {
+    /* --------------------------------------------------------------------------
+       Alinhamento automático da última coluna (Ações) de qualquer tabela
+       -------------------------------------------------------------------------- */
+    table td:last-child, table th:last-child {
         text-align: center !important;
     }
 }
