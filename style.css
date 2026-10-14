@@ -2069,7 +2069,7 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   Correção Final: Sem Cortes de Texto, Alinhado e Fluido no Desktop
+   Ajuste de Largura Ampla para Nomes e E-mails no Desktop
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2079,7 +2079,7 @@ tbody tr:last-child td {
     
     table {
         width: 100% !important;
-        table-layout: auto !important; /* Permite que o navegador ajuste o espaço pelo conteúdo */
+        table-layout: fixed !important; /* Fixa a proporção para respeitar as larguras das colunas */
         border-collapse: collapse !important;
     }
 
@@ -2094,17 +2094,35 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 14px 10px !important;
-        white-space: normal !important; /* Permite que o texto quebre linha se necessário, evitando cortes */
+        padding: 14px 12px !important;
+        white-space: normal !important; /* Permite que o nome quebre em mais de uma linha de forma natural */
         word-break: break-word;
         font-size: 0.85rem;
+        vertical-align: middle;
     }
 
     th {
-        white-space: nowrap !important; /* Mantém apenas os títulos do cabeçalho em linha única */
+        white-space: nowrap !important;
     }
 
-    /* Alinhamentos específicos */
+    /* 1. Tabela de Usuários / Início (Colunas amplas para Nome e E-mail) */
+    table:has(th:contains("E-MAIL")) th:nth-child(1), 
+    table:has(th:contains("E-MAIL")) td:nth-child(1) { width: 28%; } /* Coluna Usuário */
+
+    table:has(th:contains("E-MAIL")) th:nth-child(2), 
+    table:has(th:contains("E-MAIL")) td:nth-child(2) { 
+        width: 32%; 
+        white-space: nowrap !important; /* Mantém o e-mail em linha única preenchendo o espaço */
+        overflow: hidden;
+        text-overflow: ellipsis;
+    } /* Coluna E-mail */
+
+    table:has(th:contains("E-MAIL")) th:nth-child(3), table:has(th:contains("E-MAIL")) td:nth-child(3) { width: 10%; }
+    table:has(th:contains("E-MAIL")) th:nth-child(4), table:has(th:contains("E-MAIL")) td:nth-child(4) { width: 12%; }
+    table:has(th:contains("E-MAIL")) th:nth-child(5), table:has(th:contains("E-MAIL")) td:nth-child(5) { width: 10%; }
+    table:has(th:contains("E-MAIL")) th:nth-child(6), table:has(th:contains("E-MAIL")) td:nth-child(6) { width: 8%; text-align: center; }
+
+    /* Alinhamentos gerais para ações e status */
     td:last-child, th:last-child {
         text-align: center;
     }
