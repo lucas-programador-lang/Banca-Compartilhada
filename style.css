@@ -2069,7 +2069,7 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   CORREÇÃO DEFINITIVA: Tabelas Alinhadas, Sem Scroll e com Respiro no Desktop
+   Correção Final: Sem Cortes de Texto, Alinhado e Fluido no Desktop
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2079,13 +2079,13 @@ tbody tr:last-child td {
     
     table {
         width: 100% !important;
-        table-layout: fixed !important; /* Força o alinhamento rígido das colunas */
+        table-layout: auto !important; /* Permite que o navegador ajuste o espaço pelo conteúdo */
         border-collapse: collapse !important;
     }
 
     tbody tr {
         background-color: var(--card-bg);
-        border-bottom: 1px solid var(--border-color); /* Linha divisoria sutil */
+        border-bottom: 1px solid var(--border-color);
         transition: background-color var(--transition-fast);
     }
 
@@ -2094,11 +2094,21 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 16px 12px !important;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        padding: 14px 10px !important;
+        white-space: normal !important; /* Permite que o texto quebre linha se necessário, evitando cortes */
+        word-break: break-word;
+        font-size: 0.85rem;
     }
+
+    th {
+        white-space: nowrap !important; /* Mantém apenas os títulos do cabeçalho em linha única */
+    }
+
+    /* Alinhamentos específicos */
+    td:last-child, th:last-child {
+        text-align: center;
+    }
+}
 
     /* 1. Tabela de Planos Admin (6 colunas) */
     table:has(#tabelaPlanosAdmin) th:nth-child(1), table:has(#tabelaPlanosAdmin) td:nth-child(1) { width: 22%; }
