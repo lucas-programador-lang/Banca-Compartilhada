@@ -2069,11 +2069,11 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   CORREÇÃO ESTável: Tabelas Admin Ajustadas Dentro das Bordas (Desktop)
+   CORREÇÃO DEFINITIVA E ALINHADA: Tabelas Admin (Desktop)
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
-        overflow-x: hidden !important;
+        overflow-x: visible !important;
         width: 100% !important;
         max-width: 100% !important;
     }
@@ -2086,28 +2086,28 @@ tbody tr:last-child td {
     }
 
     /* --------------------------------------------------------------------------
-       1. Tabela de Usuários Admin (7 colunas - Soma exata: 100%)
+       1. Tabela de Usuários Admin (7 colunas - Proporção Otimizada)
        -------------------------------------------------------------------------- */
-    #tabelaUsuariosAdmin th:nth-child(1), #tabelaUsuariosAdmin td:nth-child(1) { width: 22%; }
-    #tabelaUsuariosAdmin th:nth-child(2), #tabelaUsuariosAdmin td:nth-child(2) { width: 26%; }
-    #tabelaUsuariosAdmin th:nth-child(3), #tabelaUsuariosAdmin td:nth-child(3) { width: 11%; }
-    #tabelaUsuariosAdmin th:nth-child(4), #tabelaUsuariosAdmin td:nth-child(4) { width: 12%; }
-    #tabelaUsuariosAdmin th:nth-child(5), #tabelaUsuariosAdmin td:nth-child(5) { width: 12%; }
-    #tabelaUsuariosAdmin th:nth-child(6), #tabelaUsuariosAdmin td:nth-child(6) { width: 11%; }
-    #tabelaUsuariosAdmin th:nth-child(7), #tabelaUsuariosAdmin td:nth-child(7) { width: 6%; text-align: center; }
+    #tabelaUsuariosAdmin th:nth-child(1), #tabelaUsuariosAdmin td:nth-child(1) { width: 18%; } /* Usuário */
+    #tabelaUsuariosAdmin th:nth-child(2), #tabelaUsuariosAdmin td:nth-child(2) { width: 24%; } /* E-mail */
+    #tabelaUsuariosAdmin th:nth-child(3), #tabelaUsuariosAdmin td:nth-child(3) { width: 11%; } /* Saldo */
+    #tabelaUsuariosAdmin th:nth-child(4), #tabelaUsuariosAdmin td:nth-child(4) { width: 15%; } /* Comissão Acumulada */
+    #tabelaUsuariosAdmin th:nth-child(5), #tabelaUsuariosAdmin td:nth-child(5) { width: 14%; } /* Total Depositado */
+    #tabelaUsuariosAdmin th:nth-child(6), #tabelaUsuariosAdmin td:nth-child(6) { width: 12%; } /* Total Sacado */
+    #tabelaUsuariosAdmin th:nth-child(7), #tabelaUsuariosAdmin td:nth-child(7) { width: 6%; text-align: center; } /* Admin */
 
     /* --------------------------------------------------------------------------
-       2. Tabela de Planos Admin (6 colunas - Soma exata: 100%)
+       2. Tabela de Planos Admin (6 colunas - Proporção Otimizada)
        -------------------------------------------------------------------------- */
-    #tabelaPlanosAdmin th:nth-child(1), #tabelaPlanosAdmin td:nth-child(1) { width: 24%; }
-    #tabelaPlanosAdmin th:nth-child(2), #tabelaPlanosAdmin td:nth-child(2) { width: 20%; }
-    #tabelaPlanosAdmin th:nth-child(3), #tabelaPlanosAdmin td:nth-child(3) { width: 18%; }
-    #tabelaPlanosAdmin th:nth-child(4), #tabelaPlanosAdmin td:nth-child(4) { width: 18%; }
-    #tabelaPlanosAdmin th:nth-child(5), #tabelaPlanosAdmin td:nth-child(5) { width: 12%; }
-    #tabelaPlanosAdmin th:nth-child(6), #tabelaPlanosAdmin td:nth-child(6) { width: 8%; text-align: center; }
+    #tabelaPlanosAdmin th:nth-child(1), #tabelaPlanosAdmin td:nth-child(1) { width: 20%; } /* Cliente */
+    #tabelaPlanosAdmin th:nth-child(2), #tabelaPlanosAdmin td:nth-child(2) { width: 18%; } /* Plano / Diário */
+    #tabelaPlanosAdmin th:nth-child(3), #tabelaPlanosAdmin td:nth-child(3) { width: 16%; } /* Horário */
+    #tabelaPlanosAdmin th:nth-child(4), #tabelaPlanosAdmin td:nth-child(4) { width: 22%; } /* Último Rendimento Pago */
+    #tabelaPlanosAdmin th:nth-child(5), #tabelaPlanosAdmin td:nth-child(5) { width: 16%; } /* Já Creditado / Teto */
+    #tabelaPlanosAdmin th:nth-child(6), #tabelaPlanosAdmin td:nth-child(6) { width: 8%; text-align: center; } /* Status */
 
     /* --------------------------------------------------------------------------
-       3. Tabela de Depósitos Admin (5 colunas - Soma exata: 100%)
+       3. Tabela de Depósitos Admin (5 colunas - Proporção Otimizada)
        -------------------------------------------------------------------------- */
     #tabelaDepositosAdmin th:nth-child(1), #tabelaDepositosAdmin td:nth-child(1) { width: 25%; }
     #tabelaDepositosAdmin th:nth-child(2), #tabelaDepositosAdmin td:nth-child(2) { width: 25%; }
@@ -2116,7 +2116,7 @@ tbody tr:last-child td {
     #tabelaDepositosAdmin th:nth-child(5), #tabelaDepositosAdmin td:nth-child(5) { width: 15%; text-align: center; }
 
     /* --------------------------------------------------------------------------
-       Comportamento visual das linhas e células sem estourar o limite
+       Estilização e Respiro das Células (Evita cortes e desalinhamentos)
        -------------------------------------------------------------------------- */
     tbody tr {
         background-color: var(--card-bg);
@@ -2130,18 +2130,16 @@ tbody tr:last-child td {
 
     th, td {
         padding: 14px 10px !important;
-        vertical-align: top !important; /* Alinha pelo topo para manter a ordem mesmo com quebras de linha */
+        vertical-align: middle !important;
         font-size: 0.82rem;
-        overflow: hidden;
-        text-overflow: ellipsis;
         word-break: break-word;
     }
 
     th {
-        white-space: nowrap !important;
+        white-space: normal !important; /* Permite que títulos longos quebrem linha e apareçam inteiros */
+        line-height: 1.3;
         color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        vertical-align: middle !important;
+        letter-spacing: 0.03em;
     }
 }
