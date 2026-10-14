@@ -2069,20 +2069,62 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   Correção Definitiva para Todas as Tabelas Admin (Desktop)
+   CORREÇÃO DEFINITIVA: Tabelas Admin Fluídas, Proporcionais (100%) e sem Scroll
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
         overflow-x: visible !important;
         width: 100% !important;
     }
-    
-    table {
+
+    /* --------------------------------------------------------------------------
+       1. Tabela de Usuários Admin (7 colunas - Soma exata: 100%)
+       -------------------------------------------------------------------------- */
+    #tabelaUsuariosAdmin {
+        table-layout: fixed !important;
         width: 100% !important;
-        table-layout: auto !important;
         border-collapse: collapse !important;
     }
+    #tabelaUsuariosAdmin th:nth-child(1), #tabelaUsuariosAdmin td:nth-child(1) { width: 22%; } /* Usuário */
+    #tabelaUsuariosAdmin th:nth-child(2), #tabelaUsuariosAdmin td:nth-child(2) { width: 28%; } /* E-mail */
+    #tabelaUsuariosAdmin th:nth-child(3), #tabelaUsuariosAdmin td:nth-child(3) { width: 10%; } /* Saldo */
+    #tabelaUsuariosAdmin th:nth-child(4), #tabelaUsuariosAdmin td:nth-child(4) { width: 12%; } /* Comissão */
+    #tabelaUsuariosAdmin th:nth-child(5), #tabelaUsuariosAdmin td:nth-child(5) { width: 12%; } /* Depósito */
+    #tabelaUsuariosAdmin th:nth-child(6), #tabelaUsuariosAdmin td:nth-child(6) { width: 10%; } /* Sacado */
+    #tabelaUsuariosAdmin th:nth-child(7), #tabelaUsuariosAdmin td:nth-child(7) { width: 6%; text-align: center; } /* Admin */
 
+    /* --------------------------------------------------------------------------
+       2. Tabela de Planos Admin (6 colunas - Soma exata: 100%)
+       -------------------------------------------------------------------------- */
+    #tabelaPlanosAdmin {
+        table-layout: fixed !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    #tabelaPlanosAdmin th:nth-child(1), #tabelaPlanosAdmin td:nth-child(1) { width: 25%; } /* Cliente */
+    #tabelaPlanosAdmin th:nth-child(2), #tabelaPlanosAdmin td:nth-child(2) { width: 20%; } /* Plano / Diário */
+    #tabelaPlanosAdmin th:nth-child(3), #tabelaPlanosAdmin td:nth-child(3) { width: 18%; } /* Horário */
+    #tabelaPlanosAdmin th:nth-child(4), #tabelaPlanosAdmin td:nth-child(4) { width: 18%; } /* Rendimento */
+    #tabelaPlanosAdmin th:nth-child(5), #tabelaPlanosAdmin td:nth-child(5) { width: 11%; } /* Teto */
+    #tabelaPlanosAdmin th:nth-child(6), #tabelaPlanosAdmin td:nth-child(6) { width: 8%; text-align: center; } /* Status */
+
+    /* --------------------------------------------------------------------------
+       3. Tabela de Depósitos Admin (5 colunas - Soma exata: 100%)
+       -------------------------------------------------------------------------- */
+    #tabelaDepositosAdmin {
+        table-layout: fixed !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    #tabelaDepositosAdmin th:nth-child(1), #tabelaDepositosAdmin td:nth-child(1) { width: 25%; }
+    #tabelaDepositosAdmin th:nth-child(2), #tabelaDepositosAdmin td:nth-child(2) { width: 25%; }
+    #tabelaDepositosAdmin th:nth-child(3), #tabelaDepositosAdmin td:nth-child(3) { width: 20%; }
+    #tabelaDepositosAdmin th:nth-child(4), #tabelaDepositosAdmin td:nth-child(4) { width: 15%; }
+    #tabelaDepositosAdmin th:nth-child(5), #tabelaDepositosAdmin td:nth-child(5) { width: 15%; text-align: center; }
+
+    /* --------------------------------------------------------------------------
+       Estilo e comportamento geral das linhas e células
+       -------------------------------------------------------------------------- */
     tbody tr {
         background-color: var(--card-bg);
         border-bottom: 1px solid var(--border-color);
@@ -2094,128 +2136,17 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 16px 14px !important;
-        vertical-align: middle;
-        font-size: 0.85rem;
-    }
-
-    th {
-        white-space: nowrap !important;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    /* Primeira coluna (Nome / Cliente): espaço confortável e quebra natural */
-    td:nth-child(1), th:nth-child(1) {
-        text-align: left;
-        white-space: normal !important;
-        word-break: break-word;
-        min-width: 200px;
-    }
-
-    /* Segunda coluna (E-mail / Plano): espaçamento adequado */
-    td:nth-child(2), th:nth-child(2) {
-        text-align: left;
-        word-break: break-word;
-    }
-
-    /* Última coluna (Ações / Status): centralizada */
-    td:last-child, th:last-child {
-        text-align: center;
-        white-space: nowrap !important;
-    }
-}
-
-    /* 1. Tabela de Planos Admin (6 colunas) */
-    table:has(#tabelaPlanosAdmin) th:nth-child(1), table:has(#tabelaPlanosAdmin) td:nth-child(1) { width: 22%; }
-    table:has(#tabelaPlanosAdmin) th:nth-child(2), table:has(#tabelaPlanosAdmin) td:nth-child(2) { width: 18%; }
-    table:has(#tabelaPlanosAdmin) th:nth-child(3), table:has(#tabelaPlanosAdmin) td:nth-child(3) { width: 20%; }
-    table:has(#tabelaPlanosAdmin) th:nth-child(4), table:has(#tabelaPlanosAdmin) td:nth-child(4) { width: 20%; }
-    table:has(#tabelaPlanosAdmin) th:nth-child(5), table:has(#tabelaPlanosAdmin) td:nth-child(5) { width: 12%; }
-    table:has(#tabelaPlanosAdmin) th:nth-child(6), table:has(#tabelaPlanosAdmin) td:nth-child(6) { width: 8%; text-align: center; }
-
-    /* 2. Tabela de Depósitos Admin (5 colunas) */
-    table:has(#tabelaDepositosAdmin) th:nth-child(1), table:has(#tabelaDepositosAdmin) td:nth-child(1) { width: 25%; }
-    table:has(#tabelaDepositosAdmin) th:nth-child(2), table:has(#tabelaDepositosAdmin) td:nth-child(2) { width: 25%; }
-    table:has(#tabelaDepositosAdmin) th:nth-child(3), table:has(#tabelaDepositosAdmin) td:nth-child(3) { width: 20%; }
-    table:has(#tabelaDepositosAdmin) th:nth-child(4), table:has(#tabelaDepositosAdmin) td:nth-child(4) { width: 15%; }
-    table:has(#tabelaDepositosAdmin) th:nth-child(5), table:has(#tabelaDepositosAdmin) td:nth-child(5) { width: 15%; text-align: center; }
-
-    /* 3. Tabela de Usuários Admin (7 colunas) */
-    table:has(#tabelaUsuariosAdmin) th:nth-child(1), table:has(#tabelaUsuariosAdmin) td:nth-child(1) { width: 22%; }
-    table:has(#tabelaUsuariosAdmin) th:nth-child(2), table:has(#tabelaUsuariosAdmin) td:nth-child(2) { width: 26%; white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; }
-    table:has(#tabelaUsuariosAdmin) th:nth-child(3), table:has(#tabelaUsuariosAdmin) td:nth-child(3) { width: 12%; }
-    table:has(#tabelaUsuariosAdmin) th:nth-child(4), table:has(#tabelaUsuariosAdmin) td:nth-child(4) { width: 12%; }
-    table:has(#tabelaUsuariosAdmin) th:nth-child(5), table:has(#tabelaUsuariosAdmin) td:nth-child(5) { width: 11%; }
-    table:has(#tabelaUsuariosAdmin) th:nth-child(6), table:has(#tabelaUsuariosAdmin) td:nth-child(6) { width: 11%; }
-    table:has(#tabelaUsuariosAdmin) th:nth-child(7), table:has(#tabelaUsuariosAdmin) td:nth-child(7) { width: 6%; text-align: center; }
-
-    /* Alinhamento padrão para a última coluna de qualquer tabela (ações) */
-    td:last-child, th:last-child {
-        text-align: center;
-    }
-}
-
-
-/* ==========================================================================
-   Larguras Fixas em Pixels para as Tabelas Admin (Desktop)
-   ========================================================================== */
-@media (min-width: 992px) {
-    .table-container, .table-responsive {
-        overflow-x: visible !important;
-        width: 100% !important;
-    }
-
-    /* --------------------------------------------------------------------------
-       1. Tabela de Usuários (7 colunas) - Exemplo com soma total proporcional
-       -------------------------------------------------------------------------- */
-    #tabelaUsuariosAdmin {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
-    #tabelaUsuariosAdmin th:nth-child(1), #tabelaUsuariosAdmin td:nth-child(1) { width: 240px; } /* Usuário */
-    #tabelaUsuariosAdmin th:nth-child(2), #tabelaUsuariosAdmin td:nth-child(2) { width: 280px; } /* E-mail */
-    #tabelaUsuariosAdmin th:nth-child(3), #tabelaUsuariosAdmin td:nth-child(3) { width: 120px; } /* Saldo */
-    #tabelaUsuariosAdmin th:nth-child(4), #tabelaUsuariosAdmin td:nth-child(4) { width: 150px; } /* Comissão */
-    #tabelaUsuariosAdmin th:nth-child(5), #tabelaUsuariosAdmin td:nth-child(5) { width: 150px; } /* Depósito */
-    #tabelaUsuariosAdmin th:nth-child(6), #tabelaUsuariosAdmin td:nth-child(6) { width: 140px; } /* Sacado */
-    #tabelaUsuariosAdmin th:nth-child(7), #tabelaUsuariosAdmin td:nth-child(7) { width: 100px; text-align: center; } /* Admin */
-
-    /* --------------------------------------------------------------------------
-       2. Tabela de Planos Admin (6 colunas)
-       -------------------------------------------------------------------------- */
-    #tabelaPlanosAdmin {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
-    #tabelaPlanosAdmin th:nth-child(1), #tabelaPlanosAdmin td:nth-child(1) { width: 250px; } /* Cliente */
-    #tabelaPlanosAdmin th:nth-child(2), #tabelaPlanosAdmin td:nth-child(2) { width: 180px; } /* Plano / Diário */
-    #tabelaPlanosAdmin th:nth-child(3), #tabelaPlanosAdmin td:nth-child(3) { width: 180px; } /* Horário */
-    #tabelaPlanosAdmin th:nth-child(4), #tabelaPlanosAdmin td:nth-child(4) { width: 200px; } /* Rendimento */
-    #tabelaPlanosAdmin th:nth-child(5), #tabelaPlanosAdmin td:nth-child(5) { width: 160px; } /* Teto */
-    #tabelaPlanosAdmin th:nth-child(6), #tabelaPlanosAdmin td:nth-child(6) { width: 100px; text-align: center; } /* Status */
-
-    /* --------------------------------------------------------------------------
-       3. Tabela de Depósitos Admin (5 colunas)
-       -------------------------------------------------------------------------- */
-    #tabelaDepositosAdmin {
-        table-layout: fixed !important;
-        width: 100% !important;
-    }
-    #tabelaDepositosAdmin th:nth-child(1), #tabelaDepositosAdmin td:nth-child(1) { width: 220px; }
-    #tabelaDepositosAdmin th:nth-child(2), #tabelaDepositosAdmin td:nth-child(2) { width: 250px; }
-    #tabelaDepositosAdmin th:nth-child(3), #tabelaDepositosAdmin td:nth-child(3) { width: 180px; }
-    #tabelaDepositosAdmin th:nth-child(4), #tabelaDepositosAdmin td:nth-child(4) { width: 150px; }
-    #tabelaDepositosAdmin th:nth-child(5), #tabelaDepositosAdmin td:nth-child(5) { width: 140px; text-align: center; }
-
-    /* Estilo geral das células para aplicar a largura em pixels perfeitamente */
-    #tabelaUsuariosAdmin th, #tabelaUsuariosAdmin td,
-    #tabelaPlanosAdmin th, #tabelaPlanosAdmin td,
-    #tabelaDepositosAdmin th, #tabelaDepositosAdmin td {
         padding: 14px 12px !important;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        font-size: 0.85rem;
+        vertical-align: middle;
+    }
+
+    th {
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
     }
 }
