@@ -2187,3 +2187,107 @@ tbody tr:last-child td {
   table:has(> #tabelaDepositosAdmin) :is(th, td):nth-child(4) { width: 14%; }
   table:has(> #tabelaDepositosAdmin) :is(th, td):nth-child(5) { width: 14%; text-align: center; }
 }
+
+/* ==========================================================================
+   CABEÇALHO DA SEÇÃO "PLANOS ADQUIRIDOS"
+   ========================================================================== */
+.planos-section {
+  margin-bottom: 2.5rem;
+}
+
+.planos-head {
+  margin-bottom: 1.25rem;
+}
+
+.planos-head__top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.planos-head__title {
+  margin: 0;
+  font-size: 1.25rem;
+  text-align: left;
+}
+
+/* remove qualquer linha decorativa herdada do h2 global */
+.planos-head__title::after,
+.planos-head__title::before {
+  display: none;
+}
+
+.planos-head__count {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: var(--success);
+  background: rgba(46, 204, 113, 0.12);
+  border: 1px solid rgba(46, 204, 113, 0.35);
+}
+
+.planos-head__count strong {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Status do robô ---------- */
+.robo-status {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.robo-status__card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 18px;
+  border-radius: var(--radius-sm, 10px);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+}
+
+.robo-status__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.robo-status__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.18);
+}
+
+.robo-status__card--manual .robo-status__dot {
+  background: var(--warning);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.18);
+}
+
+.robo-status__date {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-main, #fff);
+  font-variant-numeric: tabular-nums;
+}
+
+.robo-status__meta {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.robo-status__card--vazio {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
