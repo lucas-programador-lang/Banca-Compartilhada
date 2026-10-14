@@ -2667,42 +2667,109 @@ tbody tr:last-child td {
     }
 }
 
-/* Textos descritivos */
-.support-info {
+/* ==========================================================================
+   Estilos da Nova Aba de Suporte Central
+   ========================================================================== */
+.support-grid-central {
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    flex-grow: 1;
+    gap: 16px;
+    margin-top: 20px;
+    max-width: 700px;
 }
 
-.support-info span:first-child {
-    font-size: 0.82rem;
+.support-card-glow-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--card-bg, #1a1510);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Bolha da foto com brilho dourado intenso */
+.support-avatar-wrapper-main {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.support-avatar-wrapper-main::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd700, #ff8c00, #ffd700);
+    z-index: 0;
+    filter: blur(6px);
+    opacity: 0.9;
+    animation: supportGlowPulseMain 2.5s infinite alternate;
+}
+
+.support-avatar-wrapper-main img {
+    position: relative;
+    z-index: 1;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+}
+
+@keyframes supportGlowPulseMain {
+    0% { opacity: 0.6; filter: blur(4px); }
+    100% { opacity: 1; filter: blur(8px); }
+}
+
+/* Textos do cartão principal */
+.support-info-main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.support-info-main h3 {
+    font-size: 1.05rem;
     font-weight: 600;
     color: #ffffff;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin-bottom: 2px;
 }
 
-.support-status-online {
-    font-size: 0.7rem;
+.support-info-main p {
+    font-size: 0.85rem;
+    color: var(--text-muted, #a0a0a0);
+    margin-bottom: 4px;
+}
+
+.support-info-main .support-status-online {
+    font-size: 0.78rem;
     color: #2ecc71;
     font-weight: 500;
 }
 
-.support-telegram-icon {
+.support-action-btn {
     flex-shrink: 0;
     transition: transform 0.2s ease;
 }
 
-/* Efeito ao passar o rato (Hover) */
-.support-card-glow:hover {
-    background: rgba(255, 215, 0, 0.08);
-    border-color: rgba(255, 215, 0, 0.7);
-    transform: translateY(-2px);
-    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+/* Efeito ao passar o mouse */
+.support-card-glow-main:hover {
+    background: rgba(255, 215, 0, 0.05);
+    border-color: rgba(255, 215, 0, 0.8);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.2);
 }
 
-.support-card-glow:hover .support-telegram-icon {
+.support-card-glow-main:hover .support-action-btn {
     transform: scale(1.15);
 }
