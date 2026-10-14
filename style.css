@@ -2068,21 +2068,25 @@ tbody tr:last-child td {
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z'/%3E%3Cpath d='M12 9v4M12 17h.01'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-/* ==========================================================================
-   CORREÇÃO DEFINITIVA PARA AS TABELAS DO PAINEL ADMIN (Desktop)
+//* ==========================================================================
+   CORREÇÃO DEFINITIVA 100% DE ZOOM: Tabelas Alinhadas Dentro das Bordas
    ========================================================================== */
 @media (min-width: 992px) {
+    /* Garante que o contentor bloqueie qualquer transbordo e respeite a largura da tela */
     .table-container, .table-responsive {
-        overflow-x: visible !important;
         width: 100% !important;
         max-width: 100% !important;
+        overflow-x: hidden !important; /* Impede que a tabela transborde para fora do cartão */
+        box-sizing: border-box !important;
     }
 
+    /* Força a tabela a encaixar-se exatamente 100% dentro do cartão */
     table {
-        table-layout: auto !important; /* Permite que o navegador ajuste o espaço dinamicamente sem espremer */
         width: 100% !important;
         max-width: 100% !important;
+        table-layout: auto !important;
         border-collapse: collapse !important;
+        box-sizing: border-box !important;
     }
 
     tbody tr {
@@ -2095,38 +2099,39 @@ tbody tr:last-child td {
         background-color: var(--card-bg-hover);
     }
 
-    /* Espaçamento interno (padding) generoso para dar respiro aos dados */
+    /* Espaçamento interno (padding) equilibrado para não esticar demais a tabela */
     th, td {
-        padding: 16px 14px !important;
+        padding: 14px 12px !important;
         vertical-align: middle !important;
-        font-size: 0.85rem;
-        word-break: normal;
-        white-space: nowrap !important; /* Mantém cada valor na sua linha sem sobreposição */
+        font-size: 0.84rem;
+        word-break: break-word;
+        white-space: nowrap !important;
     }
 
-    /* Cabeçalhos */
+    /* Cabeçalhos estilizados */
     th {
         color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.03em;
     }
 
     /* --------------------------------------------------------------------------
-       1. Tabela: Usuários e Saldos (#tabelaUsuariosAdmin - 7 colunas)
+       Ajustes de largura e comportamento para as colunas de texto
        -------------------------------------------------------------------------- */
-    #tabelaUsuariosAdmin tr > td:nth-child(1), #tabelaUsuariosAdmin tr > th:nth-child(1) { min-width: 180px; white-space: normal !important; }
-    #tabelaUsuariosAdmin tr > td:nth-child(2), #tabelaUsuariosAdmin tr > th:nth-child(2) { min-width: 220px; }
+    /* Primeira coluna (Nome / Cliente): permite quebra natural se o nome for gigante */
+    td:nth-child(1), th:nth-child(1) {
+        white-space: normal !important;
+        min-width: 160px;
+    }
 
-    /* --------------------------------------------------------------------------
-       2. Tabela: Todos os Depósitos (#tabelaDepositosAdmin - 5 colunas)
-       -------------------------------------------------------------------------- */
-    #tabelaDepositosAdmin tr > td:nth-child(1), #tabelaDepositosAdmin tr > th:nth-child(1) { min-width: 160px; }
-    #tabelaDepositosAdmin tr > td:nth-child(2), #tabelaDepositosAdmin tr > th:nth-child(2) { min-width: 180px; white-space: normal !important; }
+    /* Segunda coluna (E-mail / Plano) */
+    td:nth-child(2), th:nth-child(2) {
+        min-width: 180px;
+    }
 
-    /* --------------------------------------------------------------------------
-       Alinhamento automático da última coluna (Ações) de qualquer tabela
-       -------------------------------------------------------------------------- */
+    /* Centraliza sempre a última coluna (Ações / Status / Admin) */
     table td:last-child, table th:last-child {
         text-align: center !important;
+        white-space: nowrap !important;
     }
 }
