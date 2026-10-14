@@ -2085,46 +2085,85 @@ tbody tr:last-child td {
     }
 }
 
-/* Ajuste de largura específica para cada coluna da tabela de Planos Admin */
-#tabelaPlanosAdmin, 
-table:has(#tabelaPlanosAdmin) {
-    table-layout: fixed; /* Força a tabela a respeitar as larguras definidas */
+/* Ajuste de largura específica para cada coluna da tabela de Depósitos Admin */
+#tabelaDepositosAdmin, 
+table:has(#tabelaDepositosAdmin) {
+    table-layout: fixed;
     width: 100%;
 }
 
-/* Coluna 1: Cliente */
-table:has(#tabelaPlanosAdmin) th:nth-child(1),
-table:has(#tabelaPlanosAdmin) td:nth-child(1) {
+/* Coluna 1: Data/Horário */
+table:has(#tabelaDepositosAdmin) th:nth-child(1),
+table:has(#tabelaDepositosAdmin) td:nth-child(1) {
+    width: 25%;
+}
+
+/* Coluna 2: Usuário */
+table:has(#tabelaDepositosAdmin) th:nth-child(2),
+table:has(#tabelaDepositosAdmin) td:nth-child(2) {
+    width: 25%;
+}
+
+/* Coluna 3: Valor do Plano */
+table:has(#tabelaDepositosAdmin) th:nth-child(3),
+table:has(#tabelaDepositosAdmin) td:nth-child(3) {
+    width: 20%;
+}
+
+/* Coluna 4: Status */
+table:has(#tabelaDepositosAdmin) th:nth-child(4),
+table:has(#tabelaDepositosAdmin) td:nth-child(4) {
+    width: 15%;
+}
+
+/* Coluna 5: Ações */
+table:has(#tabelaDepositosAdmin) th:nth-child(5),
+table:has(#tabelaDepositosAdmin) td:nth-child(5) {
+    width: 15%;
+    text-align: center;
+}
+
+/* Ajuste de largura específica para cada coluna da tabela de Saques Admin */
+#tabelaSaquesAdmin, 
+table:has(#tabelaSaquesAdmin) {
+    table-layout: fixed;
+    width: 100%;
+}
+
+/* Coluna 1: Data/Horário */
+table:has(#tabelaSaquesAdmin) th:nth-child(1),
+table:has(#tabelaSaquesAdmin) td:nth-child(1) {
+    width: 18%;
+}
+
+/* Coluna 2: Usuário */
+table:has(#tabelaSaquesAdmin) th:nth-child(2),
+table:has(#tabelaSaquesAdmin) td:nth-child(2) {
+    width: 18%;
+}
+
+/* Coluna 3: Chave Pix */
+table:has(#tabelaSaquesAdmin) th:nth-child(3),
+table:has(#tabelaSaquesAdmin) td:nth-child(3) {
     width: 22%;
+    word-break: break-all; /* Garante que chaves longas quebrem linha e não estiquem a tabela */
 }
 
-/* Coluna 2: Plano / Diário */
-table:has(#tabelaPlanosAdmin) th:nth-child(2),
-table:has(#tabelaPlanosAdmin) td:nth-child(2) {
-    width: 16%;
+/* Coluna 4: Valor / Taxa / Líquido */
+table:has(#tabelaSaquesAdmin) th:nth-child(4),
+table:has(#tabelaSaquesAdmin) td:nth-child(4) {
+    width: 18%;
 }
 
-/* Coluna 3: Horário que Adquiriu */
-table:has(#tabelaPlanosAdmin) th:nth-child(3),
-table:has(#tabelaPlanosAdmin) td:nth-child(3) {
-    width: 20%;
-}
-
-/* Coluna 4: Último Rendimento Pago */
-table:has(#tabelaPlanosAdmin) th:nth-child(4),
-table:has(#tabelaPlanosAdmin) td:nth-child(4) {
-    width: 20%;
-}
-
-/* Coluna 5: Já Creditado / Teto */
-table:has(#tabelaPlanosAdmin) th:nth-child(5),
-table:has(#tabelaPlanosAdmin) td:nth-child(5) {
+/* Coluna 5: Status */
+table:has(#tabelaSaquesAdmin) th:nth-child(5),
+table:has(#tabelaSaquesAdmin) td:nth-child(5) {
     width: 12%;
 }
 
-/* Coluna 6: Status */
-table:has(#tabelaPlanosAdmin) th:nth-child(6),
-table:has(#tabelaPlanosAdmin) td:nth-child(6) {
-    width: 10%;
+/* Coluna 6: Ações */
+table:has(#tabelaSaquesAdmin) th:nth-child(6),
+table:has(#tabelaSaquesAdmin) td:nth-child(6) {
+    width: 12%;
     text-align: center;
 }
