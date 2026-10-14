@@ -30,6 +30,9 @@ const STATUS_LABELS = {
     enviando: 'Enviando...',
     processando: 'Processando (automático)',
     verificar: 'Verificar na Vizzion',
+    ativo: 'Ativo',
+    finalizado: 'Finalizado',
+    cancelado_pelo_admin: 'Cancelado (Admin)',
 };
 
 const STATUS_CORES = {
@@ -41,6 +44,9 @@ const STATUS_CORES = {
     enviando: 'var(--warning)',
     processando: 'var(--warning)',
     verificar: 'var(--danger)',
+    ativo: 'var(--success)',
+    finalizado: 'var(--text-muted)',
+    cancelado_pelo_admin: 'var(--danger)',
 };
 
 function badgeStatus(status) {
@@ -59,8 +65,8 @@ function achatarPorUsuario(dadosPorUsuario) {
         });
     });
     return lista.sort((a, b) => {
-        const dataA = new Date(a.dataSolicitacao || 0).getTime();
-        const dataB = new Date(b.dataSolicitacao || 0).getTime();
+        const dataA = new Date(a.dataSolicitacao || a.dataAtivacao || 0).getTime();
+        const dataB = new Date(b.dataSolicitacao || b.dataAtivacao || 0).getTime();
         return dataB - dataA;
     });
 }
@@ -113,9 +119,13 @@ function renderizarTabelaSaques(saques, usuarios) {
                     </div>
                 `;
 
+            const horarioPago = saque.dataPagamento
+                ? `<div style="font-size: 0.78rem; color: var(--success); margin-top: 2px;">Pago: ${formatarDataHora(saque.dataPagamento)}</div>`
+                : '';
+
             return `
                 <tr>
-                    <td>${formatarDataHora(saque.dataSolicitacao)}</td>
+                    <td>${formatarDataHora(saque.dataSolicitacao)}${horarioPago}</td>
                     <td>${escapeHTML(nomeDoUsuario(usuarios, saque.uid))}</td>
                     <td>${escapeHTML(saque.chavePix) || '—'}</td>
                     <td>
@@ -208,9 +218,13 @@ function renderizarTabelaDepositos(depositos, usuarios) {
                     </div>
                 `;
 
+            const horarioAprovacao = deposito.dataAprovacao
+                ? `<div style="font-size: 0.78rem; color: var(--success); margin-top: 2px;">Adquirido: ${formatarDataHora(deposito.dataAprovacao)}</div>`
+                : '';
+
             return `
                 <tr>
-                    <td>${formatarDataHora(deposito.dataSolicitacao)}</td>
+                    <td>${formatarDataHora(deposito.dataSolicitacao)}${horarioAprovacao}</td>
                     <td>${escapeHTML(nomeDoUsuario(usuarios, deposito.uid))}</td>
                     <td>${formatadorMoeda.format(deposito.valorPlano || 0)}</td>
                     <td>${badgeStatus(deposito.status)}</td>
@@ -225,7 +239,121 @@ function renderizarTabelaDepositos(depositos, usuarios) {
     if (elTotal) elTotal.textContent = pendentes;
 }
 
-function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, filtro) {
+/* ==========================================================================
+   NOVA TABELA: Planos Adquiridos e Horários de Rendimento
+   ========================================================================== */
+function garantirSecaoPlanosNoHTML() {
+    if (document.getElementById('tabelaPlanosAdmin')) return;
+
+    const conteudoAdmin = document.getElementById('conteudoAdmin');
+    if (!conteudoAdmin) return;
+
+    const secao = document.createElement('section');
+    secao.className = 'card';
+    secao.style.marginTop = '1.5rem';
+    secao.innerHTML = `
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.15rem;">Planos Adquiridos e Horários de Pagamento (<span id="totalPlanosAtivosAdmin">0</span> ativos)</h2>
+                <p id="infoUltimaExecucaoRobo" style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Carregando status do robô de rendimentos...</p>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Cliente</th>
+                        <th>Plano / Diário</th>
+                        <th>Horário que Adquiriu</th>
+                        <th>Último Rendimento Pago</th>
+                        <th>Já Creditado / Teto</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaPlanosAdmin">
+                    <tr><td colspan="6" class="table-empty">Carregando planos...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    // Insere logo acima da tabela de todos os depósitos ou no final do painel
+    const tabelaDepositosCard = document.getElementById('tabelaDepositosAdmin')?.closest('.card, section');
+    if (tabelaDepositosCard && tabelaDepositosCard.parentNode) {
+        tabelaDepositosCard.parentNode.insertBefore(secao, tabelaDepositosCard);
+    } else {
+        conteudoAdmin.appendChild(secao);
+    }
+}
+
+function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendimentos) {
+    garantirSecaoPlanosNoHTML();
+
+    const tbody = document.getElementById('tabelaPlanosAdmin');
+    const elTotalAtivos = document.getElementById('totalPlanosAtivosAdmin');
+    const elInfoRobo = document.getElementById('infoUltimaExecucaoRobo');
+
+    if (elInfoRobo) {
+        const ultimoCron = execucoesRendimentos?.cron;
+        const ultimoManual = execucoesRendimentos?.manual;
+        const partes = [];
+        if (ultimoCron?.data) {
+            partes.push(`🤖 Último giro automático (Cron): <strong>${formatarDataHora(ultimoCron.data)}</strong> (${ultimoCron.usuariosCreditados || 0} clientes pagos${ultimoCron.observacao ? ' — ' + escapeHTML(ultimoCron.observacao) : ''})`);
+        }
+        if (ultimoManual?.data) {
+            partes.push(`👆 Último giro manual: <strong>${formatarDataHora(ultimoManual.data)}</strong> (${ultimoManual.usuariosCreditados || 0} clientes pagos)`);
+        }
+        elInfoRobo.innerHTML = partes.length
+            ? partes.join(' &nbsp;|&nbsp; ')
+            : 'Robô automático agendado para rodar de segunda a sexta às 23:00 (Brasília).';
+    }
+
+    if (!tbody) return;
+
+    const todosPlanos = achatarPorUsuario(planosPorUsuario);
+    const ativosCount = todosPlanos.filter(p => p.status !== 'finalizado' && p.status !== 'cancelado_pelo_admin').length;
+    if (elTotalAtivos) elTotalAtivos.textContent = ativosCount;
+
+    if (!todosPlanos.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhum plano adquirido ainda.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = todosPlanos.map(plano => {
+        const valor = parseFloat(plano.valor || 0);
+        const percDiario = parseFloat(plano.percentualDiario || 0);
+        const tetoPerc = parseFloat(plano.tetoPercentual || 0);
+        const valorDiario = valor * percDiario;
+        const valorTeto = valor * tetoPerc;
+        const jaCreditado = parseFloat(plano.valorCreditado || 0);
+
+        const horarioAdquiriu = formatarDataHora(plano.dataAtivacao);
+        const horarioUltimoPagamento = plano.ultimoRendimentoEm
+            ? `<span style="color: var(--success); font-weight: 600;">${formatarDataHora(plano.ultimoRendimentoEm)}</span>`
+            : (jaCreditado > 0
+                ? `<span style="color: var(--success);">Já pago (${formatadorMoeda.format(jaCreditado)})</span>`
+                : `<span style="color: var(--text-muted); font-size: 0.85em;">⏳ Aguardando ciclo (24h)</span>`);
+
+        return `
+            <tr>
+                <td>${escapeHTML(nomeDoUsuario(usuarios, plano.uid))}</td>
+                <td>
+                    <strong>${formatadorMoeda.format(valor)}</strong><br>
+                    <small style="color: var(--success); font-size: 0.82em;">+${formatadorMoeda.format(valorDiario)}/dia (${(percDiario * 100).toFixed(1)}%)</small>
+                </td>
+                <td>${horarioAdquiriu}</td>
+                <td>${horarioUltimoPagamento}</td>
+                <td>
+                    <strong>${formatadorMoeda.format(jaCreditado)}</strong>
+                    <small style="color: var(--text-muted);"> / ${formatadorMoeda.format(valorTeto)}</small>
+                </td>
+                <td>${badgeStatus(plano.status || 'ativo')}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, planosObj, filtro) {
     const tbody = document.getElementById('tabelaUsuariosAdmin');
     if (!tbody) return;
 
@@ -255,7 +383,10 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saqu
             });
         }
 
-        return { uid, ...dados, saldo, comissao, totalDepositado, totalSacado };
+        const planosUsuario = Object.values((planosObj || {})[uid] || {});
+        const planosAtivos = planosUsuario.filter(p => p.status !== 'finalizado' && p.status !== 'cancelado_pelo_admin');
+
+        return { uid, ...dados, saldo, comissao, totalDepositado, totalSacado, qtdPlanosAtivos: planosAtivos.length };
     });
 
     if (termo) {
@@ -271,17 +402,23 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saqu
         const mensagem = termo ? 'Nenhum usuário encontrado para essa busca.' : 'Nenhum usuário cadastrado ainda.';
         tbody.innerHTML = `<tr><td colspan="7" class="table-empty">${mensagem}</td></tr>`;
     } else {
-        tbody.innerHTML = lista.map(u => `
-            <tr>
-                <td>${escapeHTML(u.nome) || '—'}</td>
-                <td>${escapeHTML(u.email) || '—'}</td>
-                <td><strong>${formatadorMoeda.format(u.saldo)}</strong></td>
-                <td>${formatadorMoeda.format(u.comissao)}</td>
-                <td style="color: var(--success); font-weight: 500;">+ ${formatadorMoeda.format(u.totalDepositado)}</td>
-                <td style="color: var(--danger); font-weight: 500;">- ${formatadorMoeda.format(u.totalSacado)}</td>
-                <td>${u.isAdmin ? '<span class="status-badge status-admin">Admin</span>' : '—'}</td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = lista.map(u => {
+            const infoPlanos = u.qtdPlanosAtivos > 0
+                ? `<div style="font-size: 0.75rem; color: var(--success); margin-top: 2px;">${u.qtdPlanosAtivos} plano(s) ativo(s)</div>`
+                : `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">Sem plano ativo</div>`;
+
+            return `
+                <tr>
+                    <td>${escapeHTML(u.nome) || '—'}${infoPlanos}</td>
+                    <td>${escapeHTML(u.email) || '—'}</td>
+                    <td><strong>${formatadorMoeda.format(u.saldo)}</strong></td>
+                    <td>${formatadorMoeda.format(u.comissao)}</td>
+                    <td style="color: var(--success); font-weight: 500;">+ ${formatadorMoeda.format(u.totalDepositado)}</td>
+                    <td style="color: var(--danger); font-weight: 500;">- ${formatadorMoeda.format(u.totalSacado)}</td>
+                    <td>${u.isAdmin ? '<span class="status-badge status-admin">Admin</span>' : '—'}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     const todosUids = Object.keys(usuariosObj || {});
@@ -504,7 +641,14 @@ function iniciarBuscaUsuarios() {
 
     input.addEventListener('input', (e) => {
         estado.filtroUsuarios = e.target.value;
-        renderizarTabelaUsuarios(estado.usuarios || {}, estado.financeiro || {}, estado.depositos || {}, estado.saques || {}, estado.filtroUsuarios);
+        renderizarTabelaUsuarios(
+            estado.usuarios || {},
+            estado.financeiro || {},
+            estado.depositos || {},
+            estado.saques || {},
+            estado.planos || {},
+            estado.filtroUsuarios
+        );
     });
 
     input.dataset.listenerAtivo = 'true';
@@ -515,6 +659,8 @@ const estado = {
     financeiro: null,
     saques: null,
     depositos: null,
+    planos: null,
+    execucoesRendimentos: null,
     auditoria: null,
     filtroUsuarios: '',
 };
@@ -808,6 +954,14 @@ function rerenderizarTudo() {
         renderizarTabelaDepositos(depositosLista, estado.usuarios || {});
         renderizarTabelaPendenciasPlano(depositosLista, estado.usuarios || {});
     }
+
+    if (estado.planos !== null || estado.execucoesRendimentos !== null) {
+        renderizarTabelaPlanosAdmin(
+            estado.planos || {},
+            estado.usuarios || {},
+            estado.execucoesRendimentos || {}
+        );
+    }
     
     if (estado.usuarios !== null) {
         renderizarTabelaUsuarios(
@@ -815,6 +969,7 @@ function rerenderizarTudo() {
             estado.financeiro || {}, 
             estado.depositos || {}, 
             estado.saques || {}, 
+            estado.planos || {},
             estado.filtroUsuarios
         );
     }
@@ -900,7 +1055,7 @@ function iniciarListenersAdmin() {
         estado.auditoria = snapshot.val() || {};
         rerenderizarTudo();
     }, (error) => {
-        console.error('Erro ao carregar o histórico de créditos manuais (publique as Rules novas):', error);
+        console.error('Erro ao carregar o histórico de créditos manuais:', error);
     });
 
     const usuariosRef = ref(db, 'usuarios');
@@ -925,6 +1080,22 @@ function iniciarListenersAdmin() {
     onValue(depositosRef, (snapshot) => {
         estado.depositos = snapshot.val();
         rerenderizarTudo();
+    });
+
+    const planosRef = ref(db, 'planos');
+    onValue(planosRef, (snapshot) => {
+        estado.planos = snapshot.val() || {};
+        rerenderizarTudo();
+    }, (error) => {
+        console.error('Erro ao carregar planos no admin:', error);
+    });
+
+    const execucoesRef = ref(db, 'controle/execucoesRendimentos');
+    onValue(execucoesRef, (snapshot) => {
+        estado.execucoesRendimentos = snapshot.val() || {};
+        rerenderizarTudo();
+    }, (error) => {
+        console.warn('Não foi possível ler controle/execucoesRendimentos (opcional):', error.message);
     });
 
     const tbodyCreditos = document.getElementById('tabelaCreditosManuais');
