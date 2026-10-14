@@ -2069,7 +2069,7 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   SOLUÇÃO DEFINITIVA 100% DE ZOOM: Nomes e E-mails Completos Sem Cortes
+   CORREÇÃO FINAL: E-mails em Linha Única, Nomes Completos e Sem Cortes
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2097,13 +2097,13 @@ tbody tr:last-child td {
         background-color: var(--card-bg-hover);
     }
 
-    /* Espaçamento limpo e elegante entre as colunas */
+    /* Espaçamento interno otimizado e tamanho de fonte levemente ajustado para caber tudo */
     th, td {
-        padding: 12px 10px !important;
+        padding: 12px 8px !important;
         vertical-align: middle !important;
-        font-size: 0.82rem;
-        word-break: break-word;
-        white-space: nowrap !important;
+        font-size: 0.78rem; /* Reduz milimetricamente para o e-mail não precisar quebrar */
+        word-break: normal;
+        white-space: nowrap !important; /* Mantém todos os dados e e-mails rigorosamente em linha única */
     }
 
     /* Cabeçalhos */
@@ -2111,32 +2111,27 @@ tbody tr:last-child td {
         color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.02em;
+        font-size: 0.75rem;
     }
 
     /* --------------------------------------------------------------------------
-       1. Tabela de Usuários Admin (7 colunas - E-mail e Usuário com mais espaço)
+       1. Tabela de Usuários Admin (7 colunas)
        -------------------------------------------------------------------------- */
-    #tabelaUsuariosAdmin tr > td:nth-child(1), #tabelaUsuariosAdmin tr > th:nth-child(1) { width: 19%; white-space: normal !important; } /* Usuário / Nome */
-    #tabelaUsuariosAdmin tr > td:nth-child(2), #tabelaUsuariosAdmin tr > th:nth-child(2) { width: 31%; white-space: normal !important; } /* E-mail (Largo para caber inteiro) */
+    #tabelaUsuariosAdmin tr > td:nth-child(1), #tabelaUsuariosAdmin tr > th:nth-child(1) { width: 21%; white-space: normal !important; } /* Usuário / Nome */
+    #tabelaUsuariosAdmin tr > td:nth-child(2), #tabelaUsuariosAdmin tr > th:nth-child(2) { width: 32%; } /* E-mail (Garante espaço total em linha única) */
     #tabelaUsuariosAdmin tr > td:nth-child(3), #tabelaUsuariosAdmin tr > th:nth-child(3) { width: 10%; } /* Saldo */
-    #tabelaUsuariosAdmin tr > td:nth-child(4), #tabelaUsuariosAdmin tr > th:nth-child(4) { width: 14%; } /* Comissão */
-    #tabelaUsuariosAdmin tr > td:nth-child(5), #tabelaUsuariosAdmin tr > th:nth-child(5) { width: 11%; } /* Depositado */
-    #tabelaUsuariosAdmin tr > td:nth-child(6), #tabelaUsuariosAdmin tr > th:nth-child(6) { width: 9%; }  /* Sacado */
+    #tabelaUsuariosAdmin tr > td:nth-child(4), #tabelaUsuariosAdmin tr > th:nth-child(4) { width: 13%; } /* Comissão */
+    #tabelaUsuariosAdmin tr > td:nth-child(5), #tabelaUsuariosAdmin tr > th:nth-child(5) { width: 10%; } /* Depositado */
+    #tabelaUsuariosAdmin tr > td:nth-child(6), #tabelaUsuariosAdmin tr > th:nth-child(6) { width: 8%; }  /* Sacado */
     #tabelaUsuariosAdmin tr > td:nth-child(7), #tabelaUsuariosAdmin tr > th:nth-child(7) { width: 6%; text-align: center !important; } /* Admin */
 
-    /* Desliga o corte por reticências para que o e-mail se ajuste ou quebre de forma limpa se necessário */
-    #tabelaUsuariosAdmin td:nth-child(2) {
-        overflow: visible !important;
-        text-overflow: clip !important;
-    }
-
     /* --------------------------------------------------------------------------
-       2. Tabela de Planos Admin (6 colunas - Cliente com espaço amplo)
+       2. Tabela de Planos Admin (6 colunas)
        -------------------------------------------------------------------------- */
-    #tabelaPlanosAdmin tr > td:nth-child(1), #tabelaPlanosAdmin tr > th:nth-child(1) { width: 25%; white-space: normal !important; } /* Cliente (Nome longo) */
-    #tabelaPlanosAdmin tr > td:nth-child(2), #tabelaPlanosAdmin tr > th:nth-child(2) { width: 20%; } /* Plano / Diário */
+    #tabelaPlanosAdmin tr > td:nth-child(1), #tabelaPlanosAdmin tr > th:nth-child(1) { width: 22%; white-space: normal !important; } /* Cliente */
+    #tabelaPlanosAdmin tr > td:nth-child(2), #tabelaPlanosAdmin tr > th:nth-child(2) { width: 21%; } /* Plano / Diário */
     #tabelaPlanosAdmin tr > td:nth-child(3), #tabelaPlanosAdmin tr > th:nth-child(3) { width: 16%; } /* Horário */
-    #tabelaPlanosAdmin tr > td:nth-child(4), #tabelaPlanosAdmin tr > th:nth-child(4) { width: 18%; } /* Último Rendimento */
+    #tabelaPlanosAdmin tr > td:nth-child(4), #tabelaPlanosAdmin tr > th:nth-child(4) { width: 20%; } /* Último Rendimento */
     #tabelaPlanosAdmin tr > td:nth-child(5), #tabelaPlanosAdmin tr > th:nth-child(5) { width: 13%; } /* Já Creditado */
     #tabelaPlanosAdmin tr > td:nth-child(6), #tabelaPlanosAdmin tr > th:nth-child(6) { width: 8%; text-align: center !important; } /* Status */
 
@@ -2144,7 +2139,7 @@ tbody tr:last-child td {
        3. Tabela de Depósitos Admin (5 colunas)
        -------------------------------------------------------------------------- */
     #tabelaDepositosAdmin tr > td:nth-child(1), #tabelaDepositosAdmin tr > th:nth-child(1) { width: 24%; }
-    #tabelaDepositosAdmin tr > td:nth-child(2), #tabelaDepositosAdmin tr > th:nth-child(2) { width: 28%; white-space: normal !important; }
+    #tabelaDepositosAdmin tr > td:nth-child(2), #tabelaDepositosAdmin tr > th:nth-child(2) { width: 28%; }
     #tabelaDepositosAdmin tr > td:nth-child(3), #tabelaDepositosAdmin tr > th:nth-child(3) { width: 20%; }
     #tabelaDepositosAdmin tr > td:nth-child(4), #tabelaDepositosAdmin tr > th:nth-child(4) { width: 14%; }
     #tabelaDepositosAdmin tr > td:nth-child(5), #tabelaDepositosAdmin tr > th:nth-child(5) { width: 14%; text-align: center !important; }
