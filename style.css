@@ -2587,3 +2587,122 @@ tbody tr:last-child td {
         animation: none !important;
     }
 }
+
+/* ==========================================================================
+   Seção de Suporte com Brilho Intenso na Sidebar
+   ========================================================================== */
+.sidebar-support-container {
+    margin: 14px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.support-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    padding-left: 4px;
+}
+
+/* Cartão do suporte */
+.support-card-glow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    background: rgba(255, 215, 0, 0.03);
+    border: 1px solid rgba(255, 215, 0, 0.25);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Envoltório da foto com o efeito de brilho intenso (Glow) ao redor */
+.support-avatar-wrapper {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Brilho dourado luminoso constante ao redor da foto */
+.support-avatar-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffd700, #ff8c00, #ffd700);
+    z-index: 0;
+    filter: blur(4px);
+    opacity: 0.85;
+    animation: supportGlowPulse 2.5s infinite alternate;
+}
+
+/* A foto em si redonda */
+.support-avatar-wrapper img {
+    position: relative;
+    z-index: 1;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+}
+
+/* Animação suave para pulsar o brilho */
+@keyframes supportGlowPulse {
+    0% {
+        opacity: 0.6;
+        filter: blur(3px);
+    }
+    100% {
+        opacity: 1;
+        filter: blur(6px);
+    }
+}
+
+/* Textos descritivos */
+.support-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.support-info span:first-child {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.support-status-online {
+    font-size: 0.7rem;
+    color: #2ecc71;
+    font-weight: 500;
+}
+
+.support-telegram-icon {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+}
+
+/* Efeito ao passar o rato (Hover) */
+.support-card-glow:hover {
+    background: rgba(255, 215, 0, 0.08);
+    border-color: rgba(255, 215, 0, 0.7);
+    transform: translateY(-2px);
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+}
+
+.support-card-glow:hover .support-telegram-icon {
+    transform: scale(1.15);
+}
