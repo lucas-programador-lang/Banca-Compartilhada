@@ -242,32 +242,38 @@ function renderizarTabelaDepositos(depositos, usuarios) {
 /* ==========================================================================
    NOVA TABELA: Planos Adquiridos e Horários de Rendimento
    ========================================================================== */
+/* ==========================================================================
+   NOVA TABELA: Planos Adquiridos e Horários de Rendimento (Visual Idêntico)
+   ========================================================================== */
 function garantirSecaoPlanosNoHTML() {
     if (document.getElementById('tabelaPlanosAdmin')) return;
 
     const conteudoAdmin = document.getElementById('conteudoAdmin');
     if (!conteudoAdmin) return;
 
-    const secao = document.createElement('section');
-    secao.className = 'card';
-    secao.style.marginTop = '1.5rem';
+    // Pega as mesmas classes da tabela de Depósitos para ficar 100% igual ao seu CSS
+    const tabelaRef = document.getElementById('tabelaDepositosAdmin')?.closest('table');
+    const wrapperRef = tabelaRef?.parentElement;
+    const classeTabela = tabelaRef?.className || 'table';
+    const classeWrapper = wrapperRef?.className || 'table-responsive';
+
+    const secao = document.createElement('div');
+    secao.style.marginBottom = '2.5rem';
     secao.innerHTML = `
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
-            <div>
-                <h2 style="margin: 0; font-size: 1.15rem;">Planos Adquiridos e Horários de Pagamento (<span id="totalPlanosAtivosAdmin">0</span> ativos)</h2>
-                <p id="infoUltimaExecucaoRobo" style="margin: 4px 0 0; font-size: 0.85rem; color: var(--text-muted);">Carregando status do robô de rendimentos...</p>
-            </div>
+        <div style="margin-bottom: 1rem;">
+            <h2 style="margin: 0 0 0.35rem 0; font-size: 1.25rem;">Planos Adquiridos e Horários de Pagamento (<span id="totalPlanosAtivosAdmin">0</span> ativos)</h2>
+            <p id="infoUltimaExecucaoRobo" style="margin: 0; font-size: 0.9rem; opacity: 0.8;">Carregando status do robô de rendimentos...</p>
         </div>
-        <div class="table-responsive">
-            <table class="table">
+        <div class="${classeWrapper}">
+            <table class="${classeTabela}">
                 <thead>
                     <tr>
-                        <th>Cliente</th>
-                        <th>Plano / Diário</th>
-                        <th>Horário que Adquiriu</th>
-                        <th>Último Rendimento Pago</th>
-                        <th>Já Creditado / Teto</th>
-                        <th>Status</th>
+                        <th>CLIENTE</th>
+                        <th>PLANO / DIÁRIO</th>
+                        <th>HORÁRIO QUE ADQUIRIU</th>
+                        <th>ÚLTIMO RENDIMENTO PAGO</th>
+                        <th>JÁ CREDITADO / TETO</th>
+                        <th>STATUS</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaPlanosAdmin">
@@ -277,15 +283,14 @@ function garantirSecaoPlanosNoHTML() {
         </div>
     `;
 
-    // Insere logo acima da tabela de todos os depósitos ou no final do painel
-    const tabelaDepositosCard = document.getElementById('tabelaDepositosAdmin')?.closest('.card, section');
-    if (tabelaDepositosCard && tabelaDepositosCard.parentNode) {
-        tabelaDepositosCard.parentNode.insertBefore(secao, tabelaDepositosCard);
+    // Insere logo acima do bloco de "Todos os Depósitos"
+    const blocoDepositos = wrapperRef?.parentElement || wrapperRef;
+    if (blocoDepositos && blocoDepositos.parentNode) {
+        blocoDepositos.parentNode.insertBefore(secao, blocoDepositos);
     } else {
         conteudoAdmin.appendChild(secao);
     }
 }
-
 function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendimentos) {
     garantirSecaoPlanosNoHTML();
 
