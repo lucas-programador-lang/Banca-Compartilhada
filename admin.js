@@ -103,6 +103,84 @@ function escapeHTML(texto) {
     }[c]));
 }
 
+/* ==========================================================================
+   Modal de confirmação (substitui window.confirm)
+   ========================================================================== */
+function confirmarAcao({
+    titulo,
+    detalhes = [],
+    textoConfirmar = 'Confirmar',
+    textoCancelar = 'Cancelar',
+    perigo = false,
+}) {
+    return new Promise((resolve) => {
+        const focoAnterior = document.activeElement;
+
+        const iconeNormal = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="8 12.5 11 15.5 16 9"/></svg>';
+        const iconePerigo = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+
+        const linhas = detalhes
+            .filter(d => d && d.valor !== undefined && d.valor !== '')
+            .map(d => `
+                <div class="confirm-modal__row">
+                    <span class="confirm-modal__label">${escapeHTML(d.rotulo)}</span>
+                    <span class="confirm-modal__value${d.destaque ? ' confirm-modal__value--big' : ''}">${escapeHTML(d.valor)}</span>
+                </div>
+            `).join('');
+
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+        overlay.innerHTML = `
+            <div class="confirm-modal${perigo ? ' confirm-modal--danger' : ''}" role="dialog" aria-modal="true" aria-label="${escapeHTML(titulo)}">
+                <div class="confirm-modal__head">
+                    <span class="confirm-modal__icon">${perigo ? iconePerigo : iconeNormal}</span>
+                    <h3 class="confirm-modal__title">${escapeHTML(titulo)}</h3>
+                </div>
+                <div class="confirm-modal__body">${linhas}</div>
+                <div class="confirm-modal__actions">
+                    <button type="button" class="confirm-modal__btn confirm-modal__btn--cancel">${escapeHTML(textoCancelar)}</button>
+                    <button type="button" class="confirm-modal__btn confirm-modal__btn--ok">${escapeHTML(textoConfirmar)}</button>
+                </div>
+            </div>
+        `;
+
+        const btnCancelar = overlay.querySelector('.confirm-modal__btn--cancel');
+        const btnConfirmar = overlay.querySelector('.confirm-modal__btn--ok');
+
+        function fechar(resultado) {
+            document.removeEventListener('keydown', aoTeclar, true);
+            overlay.classList.add('confirm-overlay--saindo');
+            setTimeout(() => {
+                overlay.remove();
+                if (focoAnterior && typeof focoAnterior.focus === 'function') focoAnterior.focus();
+            }, 140);
+            resolve(resultado);
+        }
+
+        function aoTeclar(e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                fechar(false);
+            } else if (e.key === 'Tab') {
+                // mantém o foco dentro do modal
+                e.preventDefault();
+                (document.activeElement === btnCancelar ? btnConfirmar : btnCancelar).focus();
+            }
+        }
+
+        btnCancelar.addEventListener('click', () => fechar(false));
+        btnConfirmar.addEventListener('click', () => fechar(true));
+        overlay.addEventListener('mousedown', (e) => {
+            if (e.target === overlay) fechar(false);
+        });
+        document.addEventListener('keydown', aoTeclar, true);
+
+        document.body.appendChild(overlay);
+        // operação perigosa: foco no Cancelar; as demais: foco no Confirmar
+        (perigo ? btnCancelar : btnConfirmar).focus();
+    });
+}
+
 function renderizarTabelaSaques(saques, usuarios) {
     const tbody = document.getElementById('tabelaSaquesAdmin');
     if (!tbody) return;
@@ -434,7 +512,7 @@ function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saqu
             Object.values(saquesObj[uid]).forEach(saq => {
                 const status = (saq.status || '').toLowerCase();
                 if (status === 'pago') {
-                    totalSacado += parseFloat(saq.valorSolicitado || 0); 
+                    totalSacado += parseFloat(saq.valorSolicitado || 0);
                 }
             });
         }
@@ -834,11 +912,20 @@ function iniciarFormularioRendimentoManual() {
         }
 
         const nomeAlvo = nomeDoUsuario(estado.usuarios || {}, uid);
-        
         const tipoOperacao = document.getElementById('rmTipoOperacao')?.value || 'credito';
-        const acaoNome = tipoOperacao === 'debito' ? 'Remover' : 'Creditar';
-        
-        const confirmado = window.confirm(`${acaoNome} ${formatadorMoeda.format(valor)} da conta de "${nomeAlvo}"?`);
+        const ehDebito = tipoOperacao === 'debito';
+
+        const confirmado = await confirmarAcao({
+            titulo: ehDebito ? 'Remover saldo da conta' : 'Adicionar saldo à conta',
+            detalhes: [
+                { rotulo: 'Usuário', valor: nomeAlvo },
+                { rotulo: 'Operação', valor: ehDebito ? 'Débito (remover)' : 'Crédito (adicionar)' },
+                { rotulo: 'Valor', valor: formatadorMoeda.format(valor), destaque: true },
+                { rotulo: 'Motivo', valor: motivo },
+            ],
+            textoConfirmar: ehDebito ? 'Remover saldo' : 'Adicionar saldo',
+            perigo: ehDebito,
+        });
         if (!confirmado) return;
 
         if (!chaveOperacaoManual) chaveOperacaoManual = gerarChaveOperacao();
@@ -867,7 +954,7 @@ function iniciarFormularioRendimentoManual() {
             if (dadosResposta.jaProcessado) {
                 mostrarToast('Esta operação já havia sido processada.', 'warning');
             } else {
-                const acaoToast = tipoOperacao === 'debito' ? 'removido de' : 'creditado para';
+                const acaoToast = ehDebito ? 'removido de' : 'creditado para';
                 mostrarToast(`${formatadorMoeda.format(valor)} ${acaoToast} ${nomeAlvo}.`, 'success');
             }
 
@@ -943,9 +1030,21 @@ function iniciarFormularioGerenciarPlano() {
         }
 
         const nomeAlvo = nomeDoUsuario(estado.usuarios || {}, uid);
-        const acaoNome = acao === 'adicionar' ? 'ADICIONAR um plano de' : 'REMOVER um plano ativo de';
-        
-        const confirmado = window.confirm(`Tem certeza que deseja ${acaoNome} ${formatadorMoeda.format(valorPlano)} na conta de "${nomeAlvo}"?`);
+        const ehRemocao = acao !== 'adicionar';
+        const nomePlano = campoValor?.selectedOptions?.[0]?.textContent?.split(' - ')[0]?.trim();
+
+        const confirmado = await confirmarAcao({
+            titulo: ehRemocao ? 'Cancelar plano ativo' : 'Ativar plano para o usuário',
+            detalhes: [
+                { rotulo: 'Usuário', valor: nomeAlvo },
+                { rotulo: 'Operação', valor: ehRemocao ? 'Remover plano ativo (cancelar)' : 'Adicionar plano (ativar)' },
+                { rotulo: 'Plano', valor: nomePlano },
+                { rotulo: 'Valor', valor: formatadorMoeda.format(valorPlano), destaque: true },
+            ],
+            textoConfirmar: ehRemocao ? 'Cancelar plano' : 'Ativar plano',
+            textoCancelar: 'Voltar',
+            perigo: ehRemocao,
+        });
         if (!confirmado) return;
 
         btn.disabled = true;
@@ -986,15 +1085,15 @@ function iniciarFormularioGerenciarPlano() {
 function rerenderizarTudo() {
     atualizarOpcoesRendimentoManual();
     atualizarOpcoesGerenciarPlano();
-    
+
     if (estado.auditoria !== null) {
         renderizarTabelaCreditosManuais(estado.auditoria, estado.usuarios || {});
     }
-    
+
     if (estado.saques !== null) {
         const saquesLista = achatarPorUsuario(estado.saques).filter(s => !s.arquivado);
         renderizarTabelaSaques(saquesLista, estado.usuarios || {});
-        
+
         let somaTotalSaquesPagos = 0;
         achatarPorUsuario(estado.saques).forEach(s => {
             if ((s.status || '').toLowerCase() === 'pago') {
@@ -1004,7 +1103,7 @@ function rerenderizarTudo() {
         const elGeral = document.getElementById('totalSaquesPagosGeral');
         if (elGeral) elGeral.textContent = formatadorMoeda.format(somaTotalSaquesPagos);
     }
-    
+
     if (estado.depositos !== null) {
         const depositosLista = achatarPorUsuario(estado.depositos).filter(d => !d.arquivado);
         renderizarTabelaDepositos(depositosLista, estado.usuarios || {});
@@ -1018,13 +1117,13 @@ function rerenderizarTudo() {
             estado.execucoesRendimentos || {}
         );
     }
-    
+
     if (estado.usuarios !== null) {
         renderizarTabelaUsuarios(
-            estado.usuarios, 
-            estado.financeiro || {}, 
-            estado.depositos || {}, 
-            estado.saques || {}, 
+            estado.usuarios,
+            estado.financeiro || {},
+            estado.depositos || {},
+            estado.saques || {},
             estado.planos || {},
             estado.filtroUsuarios
         );
@@ -1156,19 +1255,26 @@ function iniciarListenersAdmin() {
 
     const tbodyCreditos = document.getElementById('tabelaCreditosManuais');
     if (tbodyCreditos && !tbodyCreditos.dataset.listenerAtivo) {
-        tbodyCreditos.addEventListener('click', (e) => {
+        tbodyCreditos.addEventListener('click', async (e) => {
             const btnArquivar = e.target.closest('.btn-arquivar');
-            if (btnArquivar) {
-                const { colecao, id } = btnArquivar.dataset;
-                const uid = btnArquivar.dataset.uid || 'null';
-                
-                const confirmado = window.confirm("Tem certeza que deseja excluir este registo do histórico?");
-                if (!confirmado) return;
+            if (!btnArquivar) return;
 
-                btnArquivar.disabled = true;
-                btnArquivar.textContent = 'Excluindo...';
-                arquivarRegistro(colecao, uid, id);
-            }
+            const { colecao, id } = btnArquivar.dataset;
+            const uid = btnArquivar.dataset.uid || 'null';
+
+            const confirmado = await confirmarAcao({
+                titulo: 'Excluir registro do histórico',
+                detalhes: [
+                    { rotulo: 'Ação', valor: 'O registro deixa de aparecer na lista de ajustes manuais.' },
+                ],
+                textoConfirmar: 'Excluir',
+                perigo: true,
+            });
+            if (!confirmado) return;
+
+            btnArquivar.disabled = true;
+            btnArquivar.textContent = 'Excluindo...';
+            arquivarRegistro(colecao, uid, id);
         });
         tbodyCreditos.dataset.listenerAtivo = 'true';
     }
