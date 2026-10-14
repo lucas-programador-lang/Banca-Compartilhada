@@ -2069,7 +2069,7 @@ tbody tr:last-child td {
 }
 
 /* ==========================================================================
-   CORREÇÃO DEFINITIVA GLOBAL: Espaçamento Perfeito e Nomes Completos (Desktop)
+   CORREÇÃO DEFINITIVA 100% VISÍVEL: Tabelas Proporcionais sem Estourar a Tela
    ========================================================================== */
 @media (min-width: 992px) {
     .table-container, .table-responsive {
@@ -2082,7 +2082,7 @@ tbody tr:last-child td {
     table {
         width: 100% !important;
         max-width: 100% !important;
-        table-layout: auto !important;
+        table-layout: fixed !important; /* Fixa a proporção para caber perfeitamente sem vazar */
         border-collapse: collapse !important;
         box-sizing: border-box !important;
     }
@@ -2097,39 +2097,45 @@ tbody tr:last-child td {
         background-color: var(--card-bg-hover);
     }
 
-    /* Espaçamento interno (padding) intermédio e confortável: nem junto, nem espaçado demais */
+    /* Espaçamento interno equilibrado e elegante */
     th, td {
-        padding: 14px 16px !important;
+        padding: 12px 8px !important;
         vertical-align: middle !important;
-        font-size: 0.84rem;
-        word-break: normal;
-        white-space: nowrap !important; /* Mantém os dados alinhados e arrumados na mesma linha */
+        font-size: 0.81rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap !important;
     }
 
     /* Cabeçalhos limpos */
     th {
         color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.03em;
+        letter-spacing: 0.02em;
     }
 
     /* --------------------------------------------------------------------------
-       Garante que a primeira coluna (onde ficam os Nomes e Clientes) 
-       tenha espaço suficiente para exibir o nome completo sem cortar
+       Larguras Proporcionais Exatas para a Tabela de Usuários (7 colunas = 100%)
        -------------------------------------------------------------------------- */
-    td:nth-child(1), th:nth-child(1) {
-        min-width: 260px !important; /* Espaço folgado para nomes grandes como o seu */
-        white-space: nowrap !important; /* Mantém o nome completo numa única linha */
-    }
+    #tabelaUsuariosAdmin tr > td:nth-child(1), #tabelaUsuariosAdmin tr > th:nth-child(1) { width: 20%; white-space: normal !important; } /* Nome completo com espaço e quebra se necessário */
+    #tabelaUsuariosAdmin tr > td:nth-child(2), #tabelaUsuariosAdmin tr > th:nth-child(2) { width: 25%; } /* E-mail */
+    #tabelaUsuariosAdmin tr > td:nth-child(3), #tabelaUsuariosAdmin tr > th:nth-child(3) { width: 10%; } /* Saldo */
+    #tabelaUsuariosAdmin tr > td:nth-child(4), #tabelaUsuariosAdmin tr > th:nth-child(4) { width: 15%; } /* Comissão */
+    #tabelaUsuariosAdmin tr > td:nth-child(5), #tabelaUsuariosAdmin tr > th:nth-child(5) { width: 13%; } /* Depositado */
+    #tabelaUsuariosAdmin tr > td:nth-child(6), #tabelaUsuariosAdmin tr > th:nth-child(6) { width: 11%; } /* Sacado */
+    #tabelaUsuariosAdmin tr > td:nth-child(7), #tabelaUsuariosAdmin tr > th:nth-child(7) { width: 6%; text-align: center !important; } /* Admin */
 
-    /* Ajuste para tabelas que possuem e-mail ou dados mais longos na 2ª coluna */
-    td:nth-child(2), th:nth-child(2) {
-        min-width: 220px !important;
-    }
+    /* --------------------------------------------------------------------------
+       Larguras Proporcionais Exatas para a Tabela de Depósitos (5 colunas = 100%)
+       -------------------------------------------------------------------------- */
+    #tabelaDepositosAdmin tr > td:nth-child(1), #tabelaDepositosAdmin tr > th:nth-child(1) { width: 22%; }
+    #tabelaDepositosAdmin tr > td:nth-child(2), #tabelaDepositosAdmin tr > th:nth-child(2) { width: 28%; white-space: normal !important; }
+    #tabelaDepositosAdmin tr > td:nth-child(3), #tabelaDepositosAdmin tr > th:nth-child(3) { width: 20%; }
+    #tabelaDepositosAdmin tr > td:nth-child(4), #tabelaDepositosAdmin tr > th:nth-child(4) { width: 15%; }
+    #tabelaDepositosAdmin tr > td:nth-child(5), #tabelaDepositosAdmin tr > th:nth-child(5) { width: 15%; text-align: center !important; }
 
-    /* Centraliza sempre a última coluna (Ações / Status / Admin) de qualquer tabela */
+    /* Outras tabelas do painel (Planos, Saques, Pendências) */
     table td:last-child, table th:last-child {
         text-align: center !important;
-        white-space: nowrap !important;
     }
 }
