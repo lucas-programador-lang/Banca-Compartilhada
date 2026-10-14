@@ -2086,7 +2086,7 @@ tbody tr:last-child td {
     }
 
     th, td {
-        padding: 10px 8px !important; /* Reduz o espaço lateral para caber mais conteúdo */
-        white-space: normal !important; /* Permite que textos longos quebrem linha se necessário */
+        padding: 16px 14px !important; /* Aumenta o espaço interno para dar respiro */
+        white-space: normal !important;
     }
 }
