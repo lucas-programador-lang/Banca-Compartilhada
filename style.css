@@ -3060,21 +3060,26 @@ tbody tr:last-child td {
     .admin-page tr,
     .admin-page td { display: block; width: 100%; }
 
+    /* cada linha vira um card com 2 colunas (campos curtos lado a lado) */
     .admin-page tbody tr {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 16px;
         margin-bottom: 12px;
-        padding: 4px 16px;
+        padding: 16px;
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
         background: var(--card-bg);
     }
-    .admin-page td {
+    .admin-page td,
+    .admin-page tbody tr:last-child td {
         display: block;
-        padding: 10px 0;
+        padding: 0;
+        border-bottom: 0;
         text-align: left;
         white-space: normal;
         overflow-wrap: anywhere;
     }
-    .admin-page td:last-child { border-bottom: 0; }
     .admin-page td[data-label]::before {
         content: attr(data-label);
         display: block;
@@ -3084,6 +3089,21 @@ tbody tr:last-child td {
         text-transform: uppercase;
         letter-spacing: 0.06em;
         color: var(--text-muted);
+    }
+    /* campos que ocupam a linha inteira */
+    .admin-page td:first-child,
+    .admin-page td:has(> .admin-actions),
+    .admin-page td:has(> .btn-reject),
+    .admin-page td.table-empty,
+    .admin-page table:has(> #tabelaUsuariosAdmin) td:nth-child(2),
+    .admin-page table:has(> #tabelaSaquesAdmin) td:nth-child(3),
+    .admin-page table:has(> #tabelaPendenciasPlano) td:nth-child(4),
+    .admin-page table:has(> #tabelaCreditosManuais) td:nth-child(4) { grid-column: 1 / -1; }
+    /* ações: separadas por uma linha fina */
+    .admin-page td:has(> .admin-actions),
+    .admin-page td:has(> .btn-reject) {
+        padding-top: 14px;
+        border-top: 1px solid var(--border-color);
     }
     .admin-page td.table-empty { display: block; text-align: center; }
 
