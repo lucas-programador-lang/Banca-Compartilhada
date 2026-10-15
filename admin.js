@@ -1,4 +1,4 @@
-Import { auth, db, mostrarToast } from './auth.js';
+import { auth, db, mostrarToast } from './auth.js';
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
