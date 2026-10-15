@@ -3,1148 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin · Banca Compartilhada</title>
+    <title>Painel Admin - Banca Compartilhada</title>
     
+    <!-- Ícone tradicional para computadores -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    
+    <!-- Ícone para dispositivos Apple (iPhones e iPads) -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    
+    <!-- O "Bilhete de Identidade" para os telemóveis Android lerem as imagens 192x192 e 512x512 -->
     <link rel="manifest" href="site.webmanifest">
     
+    <!-- Estilos do site -->
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
-
-    <style>
-        /* ==========================================================================
-           Layout Profissional do Painel ADM (Compatível com style.css)
-           ========================================================================== */
-        :root {
-            --adm-sidebar-w: 268px;
-            --adm-topbar-h: 68px;
-            --adm-bg: var(--bg-color, #0b0f17);
-            --adm-surface: var(--bg-color-elevated, #131a26);
-            --adm-surface-hover: rgba(255, 255, 255, 0.04);
-            --adm-border: var(--border-color, rgba(255, 255, 255, 0.09));
-            --adm-primary: var(--primary, #10b981);
-            --adm-text: var(--text-main, #f1f5f9);
-            --adm-muted: var(--text-muted, #94a3b8);
-            --adm-success: var(--success, #10b981);
-            --adm-warning: var(--warning, #f59e0b);
-            --adm-danger: var(--danger, #ef4444);
-            --adm-radius: var(--radius-sm, 10px);
-        }
-
-        body.adm-body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--adm-bg);
-            color: var(--adm-text);
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-
-        .adm-shell {
-            display: flex;
-            min-height: 100vh;
-            width: 100%;
-        }
-
-        /* Sidebar Lateral */
-        .adm-sidebar {
-            width: var(--adm-sidebar-w);
-            background: var(--adm-surface);
-            border-right: 1px solid var(--adm-border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            z-index: 100;
-            transition: transform 0.25s ease;
-        }
-
-        .adm-sidebar__brand {
-            padding: 20px 20px 16px;
-            border-bottom: 1px solid var(--adm-border);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .adm-sidebar__logo {
-            width: 38px;
-            height: 38px;
-            border-radius: 10px;
-            object-fit: cover;
-            border: 1px solid var(--adm-border);
-        }
-
-        .adm-sidebar__title {
-            font-size: 1rem;
-            font-weight: 700;
-            margin: 0;
-            line-height: 1.2;
-            color: var(--adm-text);
-        }
-
-        .adm-sidebar__subtitle {
-            font-size: 0.75rem;
-            color: var(--adm-primary);
-            font-weight: 600;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-        }
-
-        .adm-nav {
-            flex: 1;
-            padding: 14px 12px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .adm-nav__group-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--adm-muted);
-            padding: 10px 10px 4px;
-            font-weight: 600;
-        }
-
-        .adm-nav__btn {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            padding: 11px 12px;
-            border: 1px solid transparent;
-            background: transparent;
-            color: var(--adm-muted);
-            border-radius: var(--adm-radius);
-            font-size: 0.88rem;
-            font-weight: 500;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.15s ease;
-            font-family: inherit;
-        }
-
-        .adm-nav__btn:hover {
-            background: var(--adm-surface-hover);
-            color: var(--adm-text);
-        }
-
-        .adm-nav__btn.is-active {
-            background: rgba(16, 185, 129, 0.12);
-            color: var(--adm-primary);
-            border-color: rgba(16, 185, 129, 0.28);
-            font-weight: 600;
-        }
-
-        .adm-nav__btn-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .adm-nav__badge {
-            font-size: 0.72rem;
-            font-weight: 700;
-            padding: 2px 7px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--adm-text);
-        }
-
-        .adm-nav__badge--warn {
-            background: rgba(245, 158, 11, 0.2);
-            color: var(--adm-warning);
-        }
-
-        .adm-nav__badge--danger {
-            background: rgba(239, 68, 68, 0.22);
-            color: var(--adm-danger);
-        }
-
-        .adm-sidebar__footer {
-            padding: 14px 16px;
-            border-top: 1px solid var(--adm-border);
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .adm-back-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 9px 12px;
-            border-radius: var(--adm-radius);
-            border: 1px solid var(--adm-border);
-            color: var(--adm-text);
-            text-decoration: none;
-            font-size: 0.84rem;
-            font-weight: 500;
-            transition: background 0.15s;
-        }
-
-        .adm-back-link:hover {
-            background: var(--adm-surface-hover);
-        }
-
-        /* Área Principal */
-        .adm-main {
-            flex: 1;
-            margin-left: var(--adm-sidebar-w);
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        .adm-topbar {
-            height: var(--adm-topbar-h);
-            background: var(--adm-surface);
-            border-bottom: 1px solid var(--adm-border);
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 80;
-        }
-
-        .adm-topbar__left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .adm-menu-toggle {
-            display: none;
-            background: transparent;
-            border: 1px solid var(--adm-border);
-            color: var(--adm-text);
-            border-radius: 8px;
-            padding: 8px 10px;
-            cursor: pointer;
-        }
-
-        .adm-topbar__title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .adm-topbar__right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .adm-admin-pill {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-            border-radius: 999px;
-            font-size: 0.8rem;
-            color: var(--adm-primary);
-            font-weight: 600;
-        }
-
-        .adm-content {
-            padding: 24px;
-            max-width: 1440px;
-            width: 100%;
-            margin: 0 auto;
-            box-sizing: border-box;
-        }
-
-        /* Sistema de Abas */
-        .adm-tab-pane {
-            display: none;
-            animation: admFadeIn 0.18s ease;
-        }
-
-        .adm-tab-pane.is-active {
-            display: block;
-        }
-
-        @keyframes admFadeIn {
-            from { opacity: 0; transform: translateY(4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Cards e Grids */
-        .adm-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
-        .adm-stat-card {
-            background: var(--adm-surface);
-            border: 1px solid var(--adm-border);
-            border-radius: 12px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .adm-stat-card__label {
-            font-size: 0.8rem;
-            color: var(--adm-muted);
-            font-weight: 500;
-        }
-
-        .adm-stat-card__value {
-            font-size: 1.45rem;
-            font-weight: 700;
-            color: var(--adm-text);
-            margin: 0;
-        }
-
-        .adm-stat-card__sub {
-            font-size: 0.76rem;
-            color: var(--adm-muted);
-        }
-
-        /* Painéis e Barras de Filtro */
-        .adm-panel {
-            background: var(--adm-surface);
-            border: 1px solid var(--adm-border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-
-        .adm-panel__head {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .adm-panel__title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .adm-panel__subtitle {
-            font-size: 0.83rem;
-            color: var(--adm-muted);
-            margin: 4px 0 0;
-        }
-
-        .adm-toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 14px;
-        }
-
-        .adm-input, .adm-select {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--adm-border);
-            color: var(--adm-text);
-            border-radius: var(--adm-radius);
-            padding: 9px 12px;
-            font-size: 0.86rem;
-            font-family: inherit;
-        }
-
-        .adm-input--grow {
-            flex: 1;
-            min-width: 210px;
-        }
-
-        .adm-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 9px 14px;
-            border-radius: var(--adm-radius);
-            font-size: 0.84rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid transparent;
-            font-family: inherit;
-            transition: opacity 0.15s, background 0.15s;
-        }
-
-        .adm-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .adm-btn--primary {
-            background: var(--adm-primary);
-            color: #06281e;
-        }
-
-        .adm-btn--ghost {
-            background: transparent;
-            border-color: var(--adm-border);
-            color: var(--adm-text);
-        }
-
-        .adm-btn--ghost:hover {
-            background: var(--adm-surface-hover);
-        }
-
-        .adm-btn--danger {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.35);
-            color: var(--adm-danger);
-        }
-
-        /* Barra de Seleção em Massa */
-        .adm-bulk-bar {
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 10px 14px;
-            margin-bottom: 14px;
-            border-radius: var(--adm-radius);
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            font-size: 0.85rem;
-        }
-
-        .adm-bulk-bar.is-visible {
-            display: flex;
-        }
-
-        /* Paginação */
-        .adm-pagination {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding-top: 14px;
-            margin-top: 14px;
-            border-top: 1px solid var(--adm-border);
-            font-size: 0.83rem;
-            color: var(--adm-muted);
-        }
-
-        .adm-pagination__controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Formulário em Grid */
-        .adm-form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 12px;
-            margin-bottom: 14px;
-        }
-
-        .adm-field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .adm-field label {
-            font-size: 0.78rem;
-            font-weight: 600;
-            color: var(--adm-muted);
-        }
-
-        /* Checkboxes de Tabela */
-        .adm-check {
-            width: 16px;
-            height: 16px;
-            cursor: pointer;
-            accent-color: var(--adm-primary);
-        }
-
-        /* Modal de Detalhes do Usuário */
-        .adm-user-modal-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin: 12px 0;
-        }
-
-        .adm-user-stat {
-            background: rgba(0, 0, 0, 0.25);
-            border: 1px solid var(--adm-border);
-            padding: 10px;
-            border-radius: 8px;
-        }
-
-        .adm-user-stat span {
-            display: block;
-            font-size: 0.74rem;
-            color: var(--adm-muted);
-        }
-
-        .adm-user-stat strong {
-            font-size: 0.96rem;
-            color: var(--adm-text);
-        }
-
-        .adm-sidebar-backdrop {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 90;
-        }
-
-        @media (max-width: 960px) {
-            .adm-sidebar {
-                transform: translateX(-100%);
-            }
-            .adm-sidebar.is-open {
-                transform: translateX(0);
-            }
-            .adm-sidebar-backdrop.is-open {
-                display: block;
-            }
-            .adm-main {
-                margin-left: 0;
-            }
-            .adm-menu-toggle {
-                display: inline-flex;
-            }
-            .adm-content {
-                padding: 16px;
-            }
-        }
-    </style>
 </head>
-<body class="protected-page adm-body">
-
-    <!-- Aviso exibido se o usuário logado não for Admin -->
-    <div id="acessoNegado" class="warning-banner" style="display: none; margin: 40px auto; max-width: 540px;">
-        ⚠️ Você não tem permissão para acessar esta página administrativa.
-        <div style="margin-top: 12px;">
-            <a href="index.html" class="link-text">&larr; Voltar ao Aplicativo</a>
-        </div>
-    </div>
-
-    <!-- Estrutura Completa do Painel Admin -->
-    <div id="conteudoAdmin" class="adm-shell" style="display: none;">
-        
-        <div id="admSidebarBackdrop" class="adm-sidebar-backdrop"></div>
-
-        <!-- MENU LATERAL FIXO -->
-        <aside id="admSidebar" class="adm-sidebar">
-            <div class="adm-sidebar__brand">
-                <img src="logo.png" alt="Logo" class="adm-sidebar__logo" onerror="this.style.display='none'">
+<body class="protected-page">
+    <div class="dashboard-container">
+        <header class="admin-header">
+            <div class="admin-header__title">
+                <div class="admin-header__icon" aria-hidden="true">⚙️</div>
                 <div>
-                    <h1 class="adm-sidebar__title">Banca Compartilhada</h1>
-                    <span class="adm-sidebar__subtitle">Painel Admin</span>
+                    <h2>Painel Administrativo</h2>
+                    <p>Todos os saques, depósitos e saldos da plataforma, em tempo real.</p>
+                </div>
+            </div>
+            <a href="index.html" class="link-text admin-back">&larr; Voltar ao Painel</a>
+        </header>
+
+        <!-- Mensagem exibida caso o usuário logado não seja admin -->
+        <div id="acessoNegado" class="warning-banner" style="display: none;">
+            ⚠️ Você não tem permissão para acessar esta página.
+        </div>
+
+        <div id="conteudoAdmin" style="display: none;">
+            <div class="table-section" style="margin-bottom: var(--space-lg);">
+                <button class="btn" id="btnRodarRendimentos" type="button" style="width: auto; padding: 12px 24px;">Rodar cálculo de rendimentos agora</button>
+                <p class="table-hint" style="margin-top: 8px;">Só funciona de segunda a sexta (horário de Brasília). Sábado e domingo não rendem.</p>
+                <p class="table-hint" style="margin-top: 8px;">Roda o mesmo cálculo do Cron Trigger diário na hora, e mostra abaixo quem foi creditado ou por que alguém ficou de fora (conta não encontrada, data de ativação inválida, etc.).</p>
+                <div id="resumoRendimentos" style="display: none; margin-top: var(--space-sm); font-size: 0.85rem; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: var(--space-sm);"></div>
+            </div>
+            
+            <div class="stats-grid">
+                <!-- FASE 1: NOVO CARD -->
+                <div class="stat-card">
+                    <h3>Total de Saques Pagos</h3>
+                    <p id="totalSaquesPagosGeral" style="color: var(--success); font-weight: bold;">R$ 0,00</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total de Saques Pendentes</h3>
+                    <p id="totalSaquesPendentes">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Total de Depósitos Pendentes</h3>
+                    <p id="totalDepositosPendentes">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Pendências de Plano</h3>
+                    <p id="totalPendenciasPlano">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Saldo Total dos Usuários</h3>
+                    <p id="totalSaldoUsuarios">R$ 0,00</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Usuários Cadastrados</h3>
+                    <p id="totalUsuariosCadastrados">0</p>
                 </div>
             </div>
 
-            <nav class="adm-nav" aria-label="Menu Administrativo">
-                <div class="adm-nav__group-label">Visão Geral</div>
-                <button type="button" class="adm-nav__btn is-active" data-tab="dashboard">
-                    <span class="adm-nav__btn-left">📊 <span>Dashboard</span></span>
-                </button>
-                <button type="button" class="adm-nav__btn" data-tab="usuarios">
-                    <span class="adm-nav__btn-left">👥 <span>Usuários</span></span>
-                    <span class="adm-nav__badge" id="navBadgeUsuarios">0</span>
-                </button>
-
-                <div class="adm-nav__group-label">Financeiro</div>
-                <button type="button" class="adm-nav__btn" data-tab="saques">
-                    <span class="adm-nav__btn-left">💸 <span>Saques</span></span>
-                    <span class="adm-nav__badge adm-nav__badge--warn" id="navBadgeSaques">0</span>
-                </button>
-                <button type="button" class="adm-nav__btn" data-tab="depositos">
-                    <span class="adm-nav__btn-left">💰 <span>Depósitos</span></span>
-                    <span class="adm-nav__badge adm-nav__badge--warn" id="navBadgeDepositos">0</span>
-                </button>
-                <button type="button" class="adm-nav__btn" data-tab="pendencias">
-                    <span class="adm-nav__btn-left">⚠️ <span>Pendências de Plano</span></span>
-                    <span class="adm-nav__badge adm-nav__badge--danger" id="navBadgePendencias">0</span>
-                </button>
-
-                <div class="adm-nav__group-label">Operações e Segurança</div>
-                <button type="button" class="adm-nav__btn" data-tab="planos">
-                    <span class="adm-nav__btn-left">📈 <span>Planos e Ciclos</span></span>
-                    <span class="adm-nav__badge" id="navBadgePlanos">0</span>
-                </button>
-                <button type="button" class="adm-nav__btn" data-tab="ajustes">
-                    <span class="adm-nav__btn-left">⚖️ <span>Ajustes e Auditoria</span></span>
-                </button>
-                <button type="button" class="adm-nav__btn" data-tab="arquivo">
-                    <span class="adm-nav__btn-left">🗄️ <span>Arquivo / Lixeira</span></span>
-                    <span class="adm-nav__badge" id="navBadgeArquivo">0</span>
-                </button>
-            </nav>
-
-            <div class="adm-sidebar__footer">
-                <a href="index.html" class="adm-back-link">&larr; Voltar ao Painel do Cliente</a>
-            </div>
-        </aside>
-
-        <!-- CONTEÚDO PRINCIPAL -->
-        <div class="adm-main">
-            <header class="adm-topbar">
-                <div class="adm-topbar__left">
-                    <button type="button" id="admMenuToggle" class="adm-menu-toggle" aria-label="Abrir Menu">☰</button>
-                    <h2 id="admPageTitle" class="adm-topbar__title">Dashboard Geral</h2>
+            <!-- FASE 2: AJUSTE MANUAL DE SALDO -->
+            <section class="table-section" id="secaoRendimentoManual">
+                <div class="table-section__head">
+                    <h3>Ajuste Manual de Saldo</h3>
                 </div>
-                <div class="adm-topbar__right">
-                    <div class="adm-admin-pill">
-                        <span>🛡️</span>
-                        <span id="admHeaderAdminName">Administrador</span>
-                    </div>
+                <p class="table-hint">Adicione rendimentos extras ou remova saldo da conta de qualquer usuário.</p>
+                
+                <div class="table-search">
+                    <select id="rmTipoOperacao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
+                        <option value="credito">➕ Adicionar Saldo (Crédito)</option>
+                        <option value="debito">➖ Remover Saldo (Débito)</option>
+                    </select>
                 </div>
-            </header>
+                <div class="table-search">
+                    <input type="text" id="rmBusca" placeholder="Buscar usuário por nome ou e-mail...">
+                </div>
+                <div class="table-search">
+                    <select id="rmUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                        <option value="">Carregando usuários...</option>
+                    </select>
+                </div>
+                <div class="table-search">
+                    <input type="number" id="rmValor" min="0.01" step="0.01" inputmode="decimal" placeholder="Valor (R$)">
+                </div>
+                <div class="table-search">
+                    <input type="text" id="rmMotivo" maxlength="120" placeholder="Motivo (ex.: bônus, correção de erro, etc.)">
+                </div>
+                <button class="btn" id="btnCreditarManual" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
 
-            <main class="adm-content">
+                <p class="table-hint">Últimos ajustes manuais (créditos e débitos):</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Horário</th>
+                                <th>Usuário</th>
+                                <th>Valor</th>
+                                <th>Motivo</th>
+                                <th>Executado por</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCreditosManuais">
+                            <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-                <!-- =========================================================
-                     ABA 1: DASHBOARD
-                     ========================================================= -->
-                <section id="tab-dashboard" class="adm-tab-pane is-active">
-                    <div class="adm-stats-grid">
-                        <div class="adm-stat-card">
-                            <span class="adm-stat-card__label">Total de Saques Pagos</span>
-                            <p class="adm-stat-card__value" id="totalSaquesPagosGeral" style="color: var(--adm-success);">R$ 0,00</p>
-                            <span class="adm-stat-card__sub">Histórico acumulado</span>
-                        </div>
-                        <div class="adm-stat-card">
-                            <span class="adm-stat-card__label">Saques Pendentes</span>
-                            <p class="adm-stat-card__value" id="totalSaquesPendentes" style="color: var(--adm-warning);">0</p>
-                            <span class="adm-stat-card__sub"><a href="#" data-goto-tab="saques" class="link-text">Gerenciar saques &rarr;</a></span>
-                        </div>
-                        <div class="adm-stat-card">
-                            <span class="adm-stat-card__label">Depósitos Pendentes</span>
-                            <p class="adm-stat-card__value" id="totalDepositosPendentes" style="color: var(--adm-warning);">0</p>
-                            <span class="adm-stat-card__sub"><a href="#" data-goto-tab="depositos" class="link-text">Revisar depósitos &rarr;</a></span>
-                        </div>
-                        <div class="adm-stat-card">
-                            <span class="adm-stat-card__label">Pendências de Plano</span>
-                            <p class="adm-stat-card__value" id="totalPendenciasPlano" style="color: var(--adm-danger);">0</p>
-                            <span class="adm-stat-card__sub"><a href="#" data-goto-tab="pendencias" class="link-text">Resolver conflitos &rarr;</a></span>
-                        </div>
-                        <div class="adm-stat-card">
-                            <span class="adm-stat-card__label">Saldo Total dos Usuários</span>
-                            <p class="adm-stat-card__value" id="totalSaldoUsuarios">R$ 0,00</p>
-                            <span class="adm-stat-card__sub">Rendimento + Comissão</span>
-                        </div>
-                        <div class="adm-stat-card">
-                            <span class="adm-stat-card__label">Total Depositado (Aprovado)</span>
-                            <p class="adm-stat-card__value" id="totalDepositosAprovadosGeral" style="color: var(--adm-success);">R$ 0,00</p>
-                            <span class="adm-stat-card__sub">Volume confirmado</span>
-                        </div>
-                        <div class="adm-stat-card">
-                            <span class="adm-stat-card__label">Usuários Cadastrados</span>
-                            <p class="adm-stat-card__value" id="totalUsuariosCadastrados">0</p>
-                            <span class="adm-stat-card__sub"><a href="#" data-goto-tab="usuarios" class="link-text">Ver carteira de clientes &rarr;</a></span>
-                        </div>
-                        <div class="adm-stat-card">
-                            <span class="adm-stat-card__label">Planos Ativos no Sistema</span>
-                            <p class="adm-stat-card__value" id="dashTotalPlanosAtivos" style="color: var(--adm-primary);">0</p>
-                            <span class="adm-stat-card__sub"><a href="#" data-goto-tab="planos" class="link-text">Ver ciclos ativos &rarr;</a></span>
-                        </div>
-                    </div>
+            <!-- FASE 3: GERENCIAR PLANOS (NOVIDADE) -->
+            <section class="table-section" id="secaoGerenciarPlanos">
+                <div class="table-section__head">
+                    <h3>Gerenciar Planos (Adicionar / Remover)</h3>
+                </div>
+                <p class="table-hint">Ative um plano instantaneamente para o usuário (ignora o limite de planos repetidos) ou cancele um plano ativo.</p>
+                
+                <div class="table-search">
+                    <select id="gpAcao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
+                        <option value="adicionar">➕ Adicionar Plano (Ativar)</option>
+                        <option value="remover">➖ Remover Plano Ativo (Cancelar)</option>
+                    </select>
+                </div>
+                <div class="table-search">
+                    <input type="text" id="gpBusca" placeholder="Buscar usuário por nome ou e-mail...">
+                </div>
+                <div class="table-search">
+                    <select id="gpUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                        <option value="">Carregando usuários...</option>
+                    </select>
+                </div>
+                <div class="table-search">
+                    <select id="gpValor" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                        <option value="">Selecione o valor do plano...</option>
+                        <option value="10">Ciclo Express - R$ 10,00 (Teto 140%)</option>
+                        <option value="15">Ciclo Médio 15 - R$ 15,00 (Teto 200%)</option>
+                        <option value="30">Banca Starter - R$ 30,00 (Teto 170%)</option>
+                        <option value="50">Banca Bronze - R$ 50,00 (Teto 170%)</option>
+                        <option value="60">Ciclo Médio 60 - R$ 60,00 (Teto 200%)</option>
+                        <option value="100">Banca Prata - R$ 100,00 (Teto 160%)</option>
+                        <option value="150">Ciclo Médio 150 - R$ 150,00 (Teto 180%)</option>
+                        <option value="200">Ciclo Médio 200 - R$ 200,00 (Teto 190%)</option>
+                        <option value="300">Banca Ouro - R$ 300,00 (Teto 160%)</option>
+                        <option value="450">Ciclo Longo 450 - R$ 450,00 (Teto 210%)</option>
+                        <option value="500">Banca Platinum - R$ 500,00 (Teto 160%)</option>
+                        <option value="1000">Banca Master - R$ 1.000,00 (Teto 160%)</option>
+                    </select>
+                </div>
+                <button class="btn" id="btnGerenciarPlano" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
+            </section>
 
-                    <!-- Controle do Robô de Rendimentos -->
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Robô de Cálculo de Rendimentos Diários</h3>
-                                <p class="adm-panel__subtitle">Funciona de segunda a sexta (horário de Brasília). Sábado e domingo não rendem.</p>
-                            </div>
-                            <button class="btn" id="btnRodarRendimentos" type="button" style="width: auto; padding: 11px 20px;">
-                                ⚡ Rodar cálculo de rendimentos agora
-                            </button>
-                        </div>
+            <section class="table-section">
+                <div class="table-section__head">
+                    <h3>Usuários e Saldos</h3>
+                </div>
+                <p class="table-hint">Saldo sacável e comissão de indicação acumulada de cada cliente cadastrado.</p>
+                <div class="table-search">
+                    <input type="text" id="buscaUsuarios" placeholder="Buscar por nome ou e-mail...">
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Usuário</th>
+                                <th>E-mail</th>
+                                <th>Saldo</th>
+                                <th>Comissão Acumulada</th>
+                                <th>Total Depositado</th>
+                                <th>Total Sacado</th>
+                                <th>Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaUsuariosAdmin">
+                            <tr><td colspan="7" class="table-empty">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-                        <div id="infoUltimaExecucaoRobo" class="robo-status" style="margin-top: 12px;">
-                            <div class="robo-status__card robo-status__card--vazio">Carregando status do robô de rendimentos...</div>
-                        </div>
+            <section class="table-section">
+                <div class="table-section__head">
+                    <h3>Pendências de Plano</h3>
+                </div>
+                <p class="table-hint">Pix confirmado e dinheiro recebido, mas o usuário já tinha um plano ativo desse valor no momento da confirmação — precisa de uma decisão manual: criar o plano mesmo assim (ignora o limite) ou marcar como resolvido sem criar plano (ex.: reembolso feito fora do sistema).</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Horário</th>
+                                <th>Usuário</th>
+                                <th>Valor</th>
+                                <th>Observação</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPendenciasPlano">
+                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-                        <div id="resumoRendimentos" style="display: none; margin-top: 14px; font-size: 0.85rem; white-space: pre-wrap; background: rgba(0,0,0,0.3); border: 1px solid var(--adm-border); border-radius: 8px; padding: 12px;"></div>
-                    </div>
+            <section class="table-section">
+                <div class="table-section__head">
+                    <h3>Todos os Saques</h3>
+                </div>
+                <p class="table-hint">Ao marcar um saque como pago, o Extrato do usuário é atualizado automaticamente.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Horário</th>
+                                <th>Usuário</th>
+                                <th>Chave PIX</th>
+                                <th>Valor Solicitado</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaSaquesAdmin">
+                            <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-                    <!-- Atalhos Rápidos de Operação -->
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Acesso Rápido às Operações</h3>
-                                <p class="adm-panel__subtitle">Navegue diretamente para a fila que precisa de atenção imediata.</p>
-                            </div>
-                        </div>
-                        <div class="adm-toolbar" style="margin-bottom: 0;">
-                            <button type="button" class="adm-btn adm-btn--ghost" data-goto-tab="saques">💸 Revisar Fila de Saques</button>
-                            <button type="button" class="adm-btn adm-btn--ghost" data-goto-tab="depositos">💰 Aprovar Depósitos</button>
-                            <button type="button" class="adm-btn adm-btn--ghost" data-goto-tab="planos">➕ Ativar / Cancelar Plano</button>
-                            <button type="button" class="adm-btn adm-btn--ghost" data-goto-tab="ajustes">⚖️ Creditar / Debitar Saldo</button>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     ABA 2: USUÁRIOS
-                     ========================================================= -->
-                <section id="tab-usuarios" class="adm-tab-pane">
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Gerenciamento de Usuários e Saldos</h3>
-                                <p class="adm-panel__subtitle">Consulte saldos, comissões, histórico consolidado e detalhes individuais de cada conta.</p>
-                            </div>
-                        </div>
-
-                        <div class="adm-toolbar">
-                            <input type="text" id="buscaUsuarios" class="adm-input adm-input--grow" placeholder="Buscar por nome, e-mail, UID ou chave PIX...">
-                            <select id="filtroUsuariosTipo" class="adm-select">
-                                <option value="todos">Todos os usuários</option>
-                                <option value="com_plano">Com plano ativo</option>
-                                <option value="sem_plano">Sem plano ativo</option>
-                                <option value="com_saldo">Com saldo disponível</option>
-                                <option value="admin">Apenas Administradores</option>
-                            </select>
-                            <select id="ordemUsuarios" class="adm-select">
-                                <option value="saldo_desc">Maior Saldo</option>
-                                <option value="depositado_desc">Maior Total Depositado</option>
-                                <option value="sacado_desc">Maior Total Sacado</option>
-                                <option value="recentes">Cadastro Mais Recente</option>
-                                <option value="nome_asc">Nome (A-Z)</option>
-                            </select>
-                            <button type="button" id="btnLimparFiltrosUsuarios" class="adm-btn adm-btn--ghost">Limpar</button>
-                        </div>
-
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Usuário</th>
-                                        <th>E-mail / Chave PIX</th>
-                                        <th>Saldo Sacável</th>
-                                        <th>Comissão</th>
-                                        <th>Total Depositado</th>
-                                        <th>Total Sacado</th>
-                                        <th>Perfil</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaUsuariosAdmin">
-                                    <tr><td colspan="8" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="adm-pagination" id="paginacaoUsuarios"></div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     ABA 3: SAQUES
-                     ========================================================= -->
-                <section id="tab-saques" class="adm-tab-pane">
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Solicitações de Saque</h3>
-                                <p class="adm-panel__subtitle">Aprove pagamentos pendentes ou selecione registros finalizados para arquivar e manter a lista limpa.</p>
-                            </div>
-                            <button type="button" id="btnLimparSaquesConcluidos" class="adm-btn adm-btn--danger">
-                                🧹 Arquivar todos os pagos da lista
-                            </button>
-                        </div>
-
-                        <div class="adm-toolbar">
-                            <input type="text" id="buscaSaques" class="adm-input adm-input--grow" placeholder="Buscar por nome do usuário, e-mail, UID ou chave PIX...">
-                            <select id="filtroStatusSaques" class="adm-select">
-                                <option value="todos">Todos os status</option>
-                                <option value="pendentes_grupo">⏳ Pendentes / Verificar / Processando</option>
-                                <option value="pendente">Pendente</option>
-                                <option value="verificar">Verificar na Vizzion</option>
-                                <option value="processando">Processando</option>
-                                <option value="pago">✅ Pago</option>
-                            </select>
-                            <select id="ordemSaques" class="adm-select">
-                                <option value="data_desc">Mais recentes primeiro</option>
-                                <option value="data_asc">Mais antigos primeiro</option>
-                                <option value="valor_desc">Maior valor solicitado</option>
-                            </select>
-                            <button type="button" id="btnLimparFiltrosSaques" class="adm-btn adm-btn--ghost">Limpar</button>
-                        </div>
-
-                        <!-- Barra de ações em massa -->
-                        <div id="bulkBarSaques" class="adm-bulk-bar">
-                            <span><strong id="bulkCountSaques">0</strong> saque(s) selecionado(s)</span>
-                            <div style="display: flex; gap: 8px;">
-                                <button type="button" id="btnBulkDesmarcarSaques" class="adm-btn adm-btn--ghost">Desmarcar</button>
-                                <button type="button" id="btnBulkArquivarSaques" class="adm-btn adm-btn--danger">🗄️ Excluir / Arquivar Selecionados</button>
-                            </div>
-                        </div>
-
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 36px;"><input type="checkbox" id="checkAllSaques" class="adm-check" title="Selecionar página atual"></th>
-                                        <th>Data/Horário</th>
-                                        <th>Usuário</th>
-                                        <th>Chave PIX</th>
-                                        <th>Valores (Bruto / Taxa / Líquido)</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaSaquesAdmin">
-                                    <tr><td colspan="7" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="adm-pagination" id="paginacaoSaques"></div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     ABA 4: DEPÓSITOS
-                     ========================================================= -->
-                <section id="tab-depositos" class="adm-tab-pane">
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Histórico e Aprovação de Depósitos</h3>
-                                <p class="adm-panel__subtitle">Ao aprovar um depósito pendente, o plano correspondente é ativado automaticamente na carteira do cliente.</p>
-                            </div>
-                            <button type="button" id="btnLimparDepositosConcluidos" class="adm-btn adm-btn--danger">
-                                🧹 Arquivar aprovados/recusados da lista
-                            </button>
-                        </div>
-
-                        <div class="adm-toolbar">
-                            <input type="text" id="buscaDepositos" class="adm-input adm-input--grow" placeholder="Buscar por usuário, e-mail ou valor (ex: 100)...">
-                            <select id="filtroStatusDepositos" class="adm-select">
-                                <option value="todos">Todos os status</option>
-                                <option value="pendente">⏳ Pendente</option>
-                                <option value="aprovado">✅ Aprovado</option>
-                                <option value="recusado">❌ Recusado</option>
-                            </select>
-                            <select id="ordemDepositos" class="adm-select">
-                                <option value="data_desc">Mais recentes primeiro</option>
-                                <option value="data_asc">Mais antigos primeiro</option>
-                                <option value="valor_desc">Maior valor de plano</option>
-                            </select>
-                            <button type="button" id="btnLimparFiltrosDepositos" class="adm-btn adm-btn--ghost">Limpar</button>
-                        </div>
-
-                        <div id="bulkBarDepositos" class="adm-bulk-bar">
-                            <span><strong id="bulkCountDepositos">0</strong> depósito(s) selecionado(s)</span>
-                            <div style="display: flex; gap: 8px;">
-                                <button type="button" id="btnBulkDesmarcarDepositos" class="adm-btn adm-btn--ghost">Desmarcar</button>
-                                <button type="button" id="btnBulkArquivarDepositos" class="adm-btn adm-btn--danger">🗄️ Excluir / Arquivar Selecionados</button>
-                            </div>
-                        </div>
-
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 36px;"><input type="checkbox" id="checkAllDepositos" class="adm-check" title="Selecionar página atual"></th>
-                                        <th>Data/Horário</th>
-                                        <th>Usuário</th>
-                                        <th>Valor do Plano</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaDepositosAdmin">
-                                    <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="adm-pagination" id="paginacaoDepositos"></div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     ABA 5: PENDÊNCIAS DE PLANO
-                     ========================================================= -->
-                <section id="tab-pendencias" class="adm-tab-pane">
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Pendências de Plano (Conflito de Plano Ativo)</h3>
-                                <p class="adm-panel__subtitle">Pix confirmado, mas o usuário já tinha um plano ativo desse mesmo valor. Escolha criar o plano mesmo assim ou marcar como resolvido.</p>
-                            </div>
-                        </div>
-
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Data/Horário</th>
-                                        <th>Usuário</th>
-                                        <th>Valor</th>
-                                        <th>Observação</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaPendenciasPlano">
-                                    <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     ABA 6: PLANOS E CICLOS
-                     ========================================================= -->
-                <section id="tab-planos" class="adm-tab-pane">
-                    <!-- Operação Manual de Plano -->
-                    <div class="adm-panel" id="secaoGerenciarPlanos">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Gerenciar Planos Manualmente (Adicionar / Cancelar)</h3>
-                                <p class="adm-panel__subtitle">Ative um plano instantaneamente para o usuário (ignora o limite de planos repetidos) ou cancele um plano ativo.</p>
-                            </div>
-                        </div>
-
-                        <div class="adm-form-grid">
-                            <div class="adm-field">
-                                <label for="gpAcao">Tipo de Ação</label>
-                                <select id="gpAcao" class="adm-select">
-                                    <option value="adicionar">➕ Adicionar Plano (Ativar)</option>
-                                    <option value="remover">➖ Remover Plano Ativo (Cancelar)</option>
-                                </select>
-                            </div>
-                            <div class="adm-field">
-                                <label for="gpBusca">Filtrar Usuário</label>
-                                <input type="text" id="gpBusca" class="adm-input" placeholder="Digite nome ou e-mail...">
-                            </div>
-                            <div class="adm-field">
-                                <label for="gpUsuario">Selecionar Cliente</label>
-                                <select id="gpUsuario" class="adm-select">
-                                    <option value="">Carregando usuários...</option>
-                                </select>
-                            </div>
-                            <div class="adm-field">
-                                <label for="gpValor">Plano Desejado</label>
-                                <select id="gpValor" class="adm-select">
-                                    <option value="">Selecione o valor do plano...</option>
-                                    <option value="10">Ciclo Express - R$ 10,00 (Teto 140%)</option>
-                                    <option value="15">Ciclo Médio 15 - R$ 15,00 (Teto 200%)</option>
-                                    <option value="30">Banca Starter - R$ 30,00 (Teto 170%)</option>
-                                    <option value="50">Banca Bronze - R$ 50,00 (Teto 170%)</option>
-                                    <option value="60">Ciclo Médio 60 - R$ 60,00 (Teto 200%)</option>
-                                    <option value="100">Banca Prata - R$ 100,00 (Teto 160%)</option>
-                                    <option value="150">Ciclo Médio 150 - R$ 150,00 (Teto 180%)</option>
-                                    <option value="200">Ciclo Médio 200 - R$ 200,00 (Teto 190%)</option>
-                                    <option value="300">Banca Ouro - R$ 300,00 (Teto 160%)</option>
-                                    <option value="450">Ciclo Longo 450 - R$ 450,00 (Teto 210%)</option>
-                                    <option value="500">Banca Platinum - R$ 500,00 (Teto 160%)</option>
-                                    <option value="1000">Banca Master - R$ 1.000,00 (Teto 160%)</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button class="btn" id="btnGerenciarPlano" type="button" style="width: auto; padding: 11px 22px;">Executar Operação de Plano</button>
-                    </div>
-
-                    <!-- Lista de Planos Adquiridos -->
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Planos Adquiridos e Horários de Pagamento</h3>
-                                <p class="adm-panel__subtitle">Total de <strong id="totalPlanosAtivosAdmin">0</strong> planos ativos gerando rendimento neste momento.</p>
-                            </div>
-                        </div>
-
-                        <div class="adm-toolbar">
-                            <input type="text" id="buscaPlanos" class="adm-input adm-input--grow" placeholder="Buscar por nome do cliente, e-mail ou valor do plano...">
-                            <select id="filtroStatusPlanos" class="adm-select">
-                                <option value="todos">Todos os status</option>
-                                <option value="ativo">✅ Ativos</option>
-                                <option value="finalizado">🏁 Finalizados (Teto atingido)</option>
-                                <option value="cancelado_pelo_admin">❌ Cancelados pelo Admin</option>
-                            </select>
-                            <button type="button" id="btnLimparFiltrosPlanos" class="adm-btn adm-btn--ghost">Limpar</button>
-                        </div>
-
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Cliente</th>
-                                        <th>Plano / Diário</th>
-                                        <th>Horário que Adquiriu</th>
-                                        <th>Último Rendimento Pago</th>
-                                        <th>Já Creditado / Teto</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaPlanosAdmin">
-                                    <tr><td colspan="6" class="table-empty">Carregando planos...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="adm-pagination" id="paginacaoPlanos"></div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     ABA 7: AJUSTES DE SALDO E AUDITORIA
-                     ========================================================= -->
-                <section id="tab-ajustes" class="adm-tab-pane">
-                    <div class="adm-panel" id="secaoRendimentoManual">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Ajuste Manual de Saldo (Crédito / Débito)</h3>
-                                <p class="adm-panel__subtitle">Adicione rendimentos extras ou remova saldo da conta de qualquer usuário com registro de auditoria.</p>
-                            </div>
-                        </div>
-
-                        <div class="adm-form-grid">
-                            <div class="adm-field">
-                                <label for="rmTipoOperacao">Operação</label>
-                                <select id="rmTipoOperacao" class="adm-select">
-                                    <option value="credito">➕ Adicionar Saldo (Crédito)</option>
-                                    <option value="debito">➖ Remover Saldo (Débito)</option>
-                                </select>
-                            </div>
-                            <div class="adm-field">
-                                <label for="rmBusca">Filtrar Usuário</label>
-                                <input type="text" id="rmBusca" class="adm-input" placeholder="Buscar por nome ou e-mail...">
-                            </div>
-                            <div class="adm-field">
-                                <label for="rmUsuario">Selecionar Cliente</label>
-                                <select id="rmUsuario" class="adm-select">
-                                    <option value="">Carregando usuários...</option>
-                                </select>
-                            </div>
-                            <div class="adm-field">
-                                <label for="rmValor">Valor (R$)</label>
-                                <input type="number" id="rmValor" class="adm-input" min="0.01" step="0.01" inputmode="decimal" placeholder="Ex: 25.00">
-                            </div>
-                            <div class="adm-field" style="grid-column: 1 / -1;">
-                                <label for="rmMotivo">Motivo / Justificativa para Auditoria</label>
-                                <input type="text" id="rmMotivo" class="adm-input" maxlength="120" placeholder="Ex.: Bônus de meta, estorno, correção de erro...">
-                            </div>
-                        </div>
-                        <button class="btn" id="btnCreditarManual" type="button" style="width: auto; padding: 11px 22px;">Executar Ajuste de Saldo</button>
-                    </div>
-
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Histórico de Auditoria (Ajustes Manuais)</h3>
-                                <p class="adm-panel__subtitle">Registro completo de créditos e débitos manuais executados por administradores.</p>
-                            </div>
-                        </div>
-
-                        <div class="adm-toolbar">
-                            <input type="text" id="buscaAuditoria" class="adm-input adm-input--grow" placeholder="Buscar por usuário, motivo ou administrador...">
-                            <select id="filtroTipoAuditoria" class="adm-select">
-                                <option value="todos">Todos os tipos</option>
-                                <option value="rendimento_manual">➕ Apenas Créditos</option>
-                                <option value="remocao_manual">➖ Apenas Débitos</option>
-                            </select>
-                        </div>
-
-                        <div id="bulkBarAuditoria" class="adm-bulk-bar">
-                            <span><strong id="bulkCountAuditoria">0</strong> registro(s) selecionado(s)</span>
-                            <div style="display: flex; gap: 8px;">
-                                <button type="button" id="btnBulkDesmarcarAuditoria" class="adm-btn adm-btn--ghost">Desmarcar</button>
-                                <button type="button" id="btnBulkArquivarAuditoria" class="adm-btn adm-btn--danger">🗄️ Arquivar Selecionados</button>
-                            </div>
-                        </div>
-
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th style="width: 36px;"><input type="checkbox" id="checkAllAuditoria" class="adm-check"></th>
-                                        <th>Data/Horário</th>
-                                        <th>Usuário</th>
-                                        <th>Valor</th>
-                                        <th>Motivo</th>
-                                        <th>Executado por</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaCreditosManuais">
-                                    <tr><td colspan="7" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="adm-pagination" id="paginacaoAuditoria"></div>
-                    </div>
-                </section>
-
-                <!-- =========================================================
-                     ABA 8: ARQUIVO / LIXEIRA
-                     ========================================================= -->
-                <section id="tab-arquivo" class="adm-tab-pane">
-                    <div class="adm-panel">
-                        <div class="adm-panel__head">
-                            <div>
-                                <h3 class="adm-panel__title">Arquivo e Lixeira de Registros Ocultos</h3>
-                                <p class="adm-panel__subtitle">Itens que foram excluídos das listas principais para manter o painel limpo. Você pode consultá-los ou restaurá-los.</p>
-                            </div>
-                        </div>
-
-                        <div class="adm-toolbar">
-                            <input type="text" id="buscaArquivo" class="adm-input adm-input--grow" placeholder="Buscar no arquivo por usuário ou valor...">
-                            <select id="filtroColecaoArquivo" class="adm-select">
-                                <option value="todos">Todas as categorias</option>
-                                <option value="saques">💸 Saques Arquivados</option>
-                                <option value="depositos">💰 Depósitos Arquivados</option>
-                                <option value="auditoriaCreditos">⚖️ Ajustes Manuais Arquivados</option>
-                            </select>
-                        </div>
-
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Categoria</th>
-                                        <th>Data do Registro</th>
-                                        <th>Usuário</th>
-                                        <th>Valor / Detalhe</th>
-                                        <th>Status Original</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaArquivoAdmin">
-                                    <tr><td colspan="6" class="table-empty">Nenhum item arquivado.</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="adm-pagination" id="paginacaoArquivo"></div>
-                    </div>
-                </section>
-
-            </main>
+            <section class="table-section">
+                <div class="table-section__head">
+                    <h3>Todos os Depósitos</h3>
+                </div>
+                <p class="table-hint">Ao aprovar um depósito, o plano correspondente é ativado automaticamente na Carteira do usuário.</p>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data/Horário</th>
+                                <th>Usuário</th>
+                                <th>Valor do Plano</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaDepositosAdmin">
+                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
     </div>
 
