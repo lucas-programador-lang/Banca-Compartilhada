@@ -39,6 +39,37 @@
         </div>
 
         <div id="conteudoAdmin" style="display: none;">
+            <!-- ===== Abas do painel ===== -->
+            <nav class="admin-tabs" id="adminTabs" role="tablist" aria-label="Seções do painel">
+                <button type="button" class="admin-tab ativa" role="tab" aria-selected="true" data-aba="painel">Painel</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="indicacoes">Indicações</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="equipe">Equipe</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="recargas">Recargas</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="caixa">Caixa</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="comissoes">Comissões</button>
+                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="perfil">Perfil</button>
+            </nav>
+
+            <!-- Busca e período (valem para as abas de rede) -->
+            <div class="rede-filtros" id="redeFiltros" hidden>
+                <input type="search" id="redeBusca" class="rede-input" placeholder="Buscar por nome, e-mail ou ID..." autocomplete="off" aria-label="Buscar usuário">
+                <select id="redePeriodo" class="rede-input" aria-label="Período">
+                    <option value="tudo">Todo o período</option>
+                    <option value="hoje">Hoje</option>
+                    <option value="7d">Últimos 7 dias</option>
+                    <option value="30d">Últimos 30 dias</option>
+                    <option value="mes">Este mês</option>
+                    <option value="custom">Personalizado…</option>
+                </select>
+                <div class="rede-datas" id="redeDatas" hidden>
+                    <label>De <input type="date" id="redeDe" class="rede-input"></label>
+                    <label>Até <input type="date" id="redeAte" class="rede-input"></label>
+                </div>
+                <div class="rede-selecionado" id="redeSelecionado" hidden></div>
+            </div>
+
+            <div id="redePaineis">
+                <section class="admin-tabpanel" id="aba-painel" data-painel="painel">
             <div class="table-section" style="margin-bottom: var(--space-lg);">
                 <button class="btn" id="btnRodarRendimentos" type="button" style="width: auto; padding: 12px 24px;">Rodar cálculo de rendimentos agora</button>
                 <p class="table-hint" style="margin-top: 8px;">Só funciona de segunda a sexta (horário de Brasília). Sábado e domingo não rendem.</p>
@@ -261,6 +292,15 @@
                     </table>
                 </div>
             </section>
+                </section>
+
+                <section class="admin-tabpanel" id="aba-indicacoes" data-painel="indicacoes" hidden><div id="rede-indicacoes"></div></section>
+                <section class="admin-tabpanel" id="aba-equipe" data-painel="equipe" hidden><div id="rede-equipe"></div></section>
+                <section class="admin-tabpanel" id="aba-recargas" data-painel="recargas" hidden><div id="rede-recargas"></div></section>
+                <section class="admin-tabpanel" id="aba-caixa" data-painel="caixa" hidden><div id="rede-caixa"></div></section>
+                <section class="admin-tabpanel" id="aba-comissoes" data-painel="comissoes" hidden><div id="rede-comissoes"></div></section>
+                <section class="admin-tabpanel" id="aba-perfil" data-painel="perfil" hidden><div id="rede-perfil"></div></section>
+            </div>
         </div>
     </div>
 
