@@ -1082,6 +1082,19 @@ function iniciarFormularioGerenciarPlano() {
     btn.dataset.listenerAtivo = 'true';
 }
 
+/* Copia o título de cada coluna para cada célula (data-label).
+   O CSS usa isso para mostrar os rótulos quando a tabela vira cards no celular. */
+function aplicarRotulosMobile() {
+    document.querySelectorAll('.table-container table').forEach((tabela) => {
+        const titulos = [...tabela.querySelectorAll('thead th')].map(th => th.textContent.trim());
+        tabela.querySelectorAll('tbody tr').forEach((tr) => {
+            [...tr.children].forEach((td, i) => {
+                if (!td.classList.contains('table-empty')) td.dataset.label = titulos[i] || '';
+            });
+        });
+    });
+}
+
 function rerenderizarTudo() {
     atualizarOpcoesRendimentoManual();
     atualizarOpcoesGerenciarPlano();
@@ -1128,6 +1141,8 @@ function rerenderizarTudo() {
             estado.filtroUsuarios
         );
     }
+
+    aplicarRotulosMobile();
 }
 
 function iniciarBotaoRodarRendimentos() {
