@@ -1242,13 +1242,13 @@ function iniciarListenersAdmin() {
 
     const saquesRef = ref(db, 'saques');
     onValue(saquesRef, (snapshot) => {
-        estado.saques = snapshot.val();
+        estado.saques = snapshot.val() || {};
         rerenderizarTudo();
     });
 
     const depositosRef = ref(db, 'depositos');
     onValue(depositosRef, (snapshot) => {
-        estado.depositos = snapshot.val();
+        estado.depositos = snapshot.val() || {};
         rerenderizarTudo();
     });
 
