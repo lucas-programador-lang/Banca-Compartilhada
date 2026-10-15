@@ -1,5 +1,6 @@
 import { auth, db, mostrarToast } from './auth.js';
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { iniciarRede, atualizarRede } from './admin-rede.js';
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -1143,6 +1144,7 @@ function rerenderizarTudo() {
     }
 
     aplicarRotulosMobile();
+    atualizarRede();
 }
 
 function iniciarBotaoRodarRendimentos() {
@@ -1212,6 +1214,7 @@ function iniciarBotaoRodarRendimentos() {
 }
 
 function iniciarListenersAdmin() {
+    iniciarRede(() => estado);
     iniciarDelegacaoAcoesDepositos();
     iniciarDelegacaoAcoesSaques();
     iniciarDelegacaoPendenciasPlano();
