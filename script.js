@@ -350,6 +350,11 @@ function renderizarTabelaCarteira(planosObj) {
             ? formatadorDataHoraCurto.format(estado.dataAtivacao)
             : '—';
 
+        // 👈 DATA DE PREVISÃO DE TÉRMINO / EXPIRAÇÃO
+        const dataExpiracaoStr = plano.dataExpiracao
+            ? formatadorDataHoraCurto.format(new Date(plano.dataExpiracao))
+            : '—';
+
         const ultimoRend = plano.ultimoRendimentoEm ? new Date(plano.ultimoRendimentoEm) : null;
         const textoUltimoRend = (ultimoRend && !isNaN(ultimoRend.getTime()))
             ? `<div style="font-size: 0.75rem; opacity: 0.75; margin-top: 2px;">Últ. pago: ${formatadorDataHoraCurto.format(ultimoRend)}</div>`
@@ -361,6 +366,7 @@ function renderizarTabelaCarteira(planosObj) {
                 <td>${formatadorMoeda.format(valor)}</td>
                 <td>${formatadorMoeda.format(estado.rendimentoDiario)}</td>
                 <td>${formatadorMoeda.format(estado.rendimentoAcumulado)}</td>
+                <td><strong>${dataExpiracaoStr}</strong></td> <!-- 👈 EXIBE A EXPIRAÇÃO AQUI -->
                 <td><span class="${statusClasse}" style="font-weight: 600;">${statusTexto}</span></td>
             </tr>
         `;
