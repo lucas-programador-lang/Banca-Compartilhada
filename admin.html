@@ -3,309 +3,766 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Banca Compartilhada</title>
+    <title>Dashboard - Banca Compartilhada</title>
     
-    <!-- Ícone tradicional para computadores -->
+    <!-- Ícones do seu novo Logótipo -->
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-    
-    <!-- Ícone para dispositivos Apple (iPhones e iPads) -->
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-    
-    <!-- O "Bilhete de Identidade" para os telemóveis Android lerem as imagens 192x192 e 512x512 -->
-    <link rel="manifest" href="site.webmanifest">
-    
-    <!-- Estilos do site -->
+
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+    
+    <!-- O seu manifesto original (mantém-se igual) -->
+    <link rel="manifest" href="/manifest.json">
 </head>
-<body class="protected-page admin-page">
-    <div class="dashboard-container">
-        <header class="admin-header">
-            <div class="admin-header__title">
-                <div class="admin-header__icon" aria-hidden="true">⚙️</div>
-                <div>
-                    <h2>Painel Administrativo</h2>
-                    <p>Todos os saques, depósitos e saldos da plataforma, em tempo real.</p>
+<body class="protected-page">
+
+    <button class="mobile-menu-toggle" id="btnAbrirMenuMobile" aria-label="Abrir menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-layout">
+
+        <!-- Sidebar Esquerda -->
+        <aside class="sidebar" id="sidebarPrincipal">
+            <div class="sidebar-top">
+                <div class="sidebar-logo">
+                    <img src="logo.png" alt="Banca Compartilhada">
                 </div>
-            </div>
-            <a href="index.html" class="link-text admin-back">&larr; Voltar ao Painel</a>
-        </header>
+                <nav class="sidebar-nav">
+                    <a href="#" class="nav-item active" data-target="view-inicio">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                        Início
+                    </a>
+                    <a href="#" class="nav-item" data-target="view-investir">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                        Investir
+                    </a>
+                    <a href="#" class="nav-item" data-target="view-carteira">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        Carteira
+                    </a>
+                    <a href="#" class="nav-item" data-target="view-equipe">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        Equipe
+                    </a>
+                    <a href="#" class="nav-item" data-target="view-missoes">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V5z"/><path d="M12 8l1.5 3 3.3.5-2.4 2.3.6 3.3-3-1.6-3 1.6.6-3.3-2.4-2.3 3.3-.5z"/></svg>
+                        Missões
+                    </a>
+                    <a href="#" class="nav-item" data-target="view-extrato">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        Extrato
+                    </a>
+                    <!-- BOTÃO DE SUPORTE NO MENU -->
+                    <a href="#" class="nav-item" data-target="view-suporte">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                        Suporte
+                    </a>
+                    <a href="#" class="nav-item" data-target="view-perfil">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Perfil
+                    </a>
+                </nav>
 
-        <!-- Mensagem exibida caso o usuário logado não seja admin -->
-        <div id="acessoNegado" class="warning-banner" style="display: none;">
-            ⚠️ Você não tem permissão para acessar esta página.
-        </div>
+               <a
+                    href="https://github.com/lucas-programador-lang/Banca-Compartilhada/releases/latest/download/banca-compartilhada.apk"
+                    class="sidebar-download-btn"
+                    id="btnBaixarAppSidebar"
+                    download="banca-compartilhada.apk"
+                    rel="noopener"
+                >
+                    <img src="logo.png" alt="" class="sidebar-download-btn__logo">
+                    <span>Baixar o aplicativo</span>
+                </a>
 
-        <div id="conteudoAdmin" style="display: none;">
-            <!-- ===== Abas do painel ===== -->
-            <nav class="admin-tabs" id="adminTabs" role="tablist" aria-label="Seções do painel">
-                <button type="button" class="admin-tab ativa" role="tab" aria-selected="true" data-aba="painel">Painel</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="indicacoes">Indicações</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="equipe">Equipe</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="recargas">Recargas</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="caixa">Caixa</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="comissoes">Comissões</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="perfil">Perfil</button>
-            </nav>
-
-            <!-- Busca e período (valem para as abas de rede) -->
-            <div class="rede-filtros" id="redeFiltros" hidden>
-                <input type="search" id="redeBusca" class="rede-input" placeholder="Buscar por nome, e-mail ou ID..." autocomplete="off" aria-label="Buscar usuário">
-                <select id="redePeriodo" class="rede-input" aria-label="Período">
-                    <option value="tudo">Todo o período</option>
-                    <option value="hoje">Hoje</option>
-                    <option value="7d">Últimos 7 dias</option>
-                    <option value="30d">Últimos 30 dias</option>
-                    <option value="mes">Este mês</option>
-                    <option value="custom">Personalizado…</option>
-                </select>
-                <div class="rede-datas" id="redeDatas" hidden>
-                    <label>De <input type="date" id="redeDe" class="rede-input"></label>
-                    <label>Até <input type="date" id="redeAte" class="rede-input"></label>
-                </div>
-                <div class="rede-selecionado" id="redeSelecionado" hidden></div>
-            </div>
-
-            <div id="redePaineis">
-                <section class="admin-tabpanel" id="aba-painel" data-painel="painel">
-            <div class="table-section" style="margin-bottom: var(--space-lg);">
-                <button class="btn" id="btnRodarRendimentos" type="button" style="width: auto; padding: 12px 24px;">Rodar cálculo de rendimentos agora</button>
-                <p class="table-hint" style="margin-top: 8px;">Só funciona de segunda a sexta (horário de Brasília). Sábado e domingo não rendem.</p>
-                <p class="table-hint" style="margin-top: 8px;">Roda o mesmo cálculo do Cron Trigger diário na hora, e mostra abaixo quem foi creditado ou por que alguém ficou de fora (conta não encontrada, data de ativação inválida, etc.).</p>
-                <div id="resumoRendimentos" style="display: none; margin-top: var(--space-sm); font-size: 0.85rem; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: var(--space-sm);"></div>
+                <!-- Botão do Grupo Oficial do Telegram -->
+                <a
+                    href="https://t.me/bancacompartilhadajazzz"
+                    target="_blank"
+                    rel="noopener"
+                    class="sidebar-telegram-group-btn"
+                >
+                    <svg viewBox="0 0 240 240" width="22" height="22" style="flex-shrink: 0;">
+                        <defs>
+                            <linearGradient id="tgGroupGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+                                <stop offset="0" stop-color="#37BBFE"/>
+                                <stop offset="1" stop-color="#007DBB"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="120" cy="120" r="120" fill="url(#tgGroupGrad)"/>
+                        <path fill="#FFFFFF" d="M67.34 128.36l114.6-44.16c5.35-1.95 10.03 1.3 8.5 9l-19.73 92.99c-1.48 6.63-5.37 8.28-10.88 5.15l-30-22.12-14.48 13.94c-1.6 1.6-2.94 2.94-6.02 2.94l2.15-30.5 55.5-50.14c2.41-2.15-.53-3.35-3.74-1.2l-68.6 43.2-29.55-9.24c-6.42-2.01-6.55-6.42 1.34-9.5z"/>
+                    </svg>
+                    <span>Grupo Oficial (Telegram)</span>
+                </a>
             </div>
             
-            <div class="stats-grid">
-                <!-- FASE 1: NOVO CARD -->
-                <div class="stat-card">
-                    <h3>Total de Saques Pagos</h3>
-                    <p id="totalSaquesPagosGeral" style="color: var(--success); font-weight: bold;">R$ 0,00</p>
+            <!-- Rodapé da Sidebar com dados do usuário -->
+            <div class="sidebar-footer">
+                <div class="sidebar-user">
+                    <div class="user-avatar" id="userInitial">J</div>
+                    <div class="user-info">
+                        <span class="user-name" id="userNameDisplay">Carregando...</span>
+                        <span class="user-status">Conta Ativa</span>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Total de Saques Pendentes</h3>
-                    <p id="totalSaquesPendentes">0</p>
+                <button class="btn-sair" id="btnSair" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    Sair
+                </button>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+
+            <!-- ================= ABA INÍCIO ================= -->
+            <section id="view-inicio" class="view-section">
+
+                <!-- Card Principal com Saldo e Botões DEPOSITAR / SACAR -->
+                <div class="card balance-card">
+                    <div class="balance-card__label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                        Saldo Disponível
+                    </div>
+                    <div id="saldoDisponivel" class="balance-amount">R$ 0,00</div>
+
+                    <div class="action-row">
+                        <button class="btn" id="btnAbrirDeposito">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Depositar
+                        </button>
+                        <button class="btn btn-outline" id="btnAbrirSaqueModal">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                            Sacar
+                        </button>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Total de Depósitos Pendentes</h3>
-                    <p id="totalDepositosPendentes">0</p>
+
+                <!-- Estatísticas Rápidas -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Rendimento Acumulado</h3>
+                        <p id="rendimentoTotal">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Comissões (1º Nível - 10%)</h3>
+                        <p id="comissaoTotal">R$ 0,00</p>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Pendências de Plano</h3>
-                    <p id="totalPendenciasPlano">0</p>
+            </section>
+
+            <!-- ================= ABA INVESTIR ================= -->
+            <section id="view-investir" class="view-section" style="display: none;">
+                <h2>Planos de Banca Compartilhada</h2>
+                <p class="section-lead">Escolha abaixo o nível de aporte para iniciar a rentabilidade diária.</p>
+
+                <!-- Grid de Planos -->
+                <div class="grid-planos">
+
+                    <!-- Plano: R$ 10 (48h) -->
+                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                        <h3 class="plan-card__title">Ciclo Express Starter</h3>
+                        <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo Rápido (48 horas)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 10,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Retorno Final:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 14,00 (Capital + 40%)</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="10">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 15 (40 dias) - ILIMITADO -->
+                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                        <h3 class="plan-card__title">Ciclo Médio 15</h3>
+                        <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (40 dias)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 15,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Rendimento Diário:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 0,75 ao dia</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Retorno Final:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 30,00 (Capital + 100%)</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value plan-row__value--positive">Ilimitado</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="15">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 30 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Starter</h3>
+                        <span class="plan-badge">R$ 0,90 / dia útil (3% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 30,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">70% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="30">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 50 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Bronze</h3>
+                        <span class="plan-badge">R$ 1,50 / dia útil (3% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 50,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">70% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="50">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 60 (40 dias) - ILIMITADO -->
+                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                        <h3 class="plan-card__title">Ciclo Médio 60</h3>
+                        <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (40 dias)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 60,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Rendimento Diário:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 3,00 ao dia</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Retorno Final:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 120,00 (Capital + 100%)</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value plan-row__value--positive">Ilimitado</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="60">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 100 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Prata</h3>
+                        <span class="plan-badge">R$ 2,00 / dia útil (2% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 100,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="100">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 150 (40 dias) - ILIMITADO -->
+                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                        <h3 class="plan-card__title">Ciclo Médio 150</h3>
+                        <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (40 dias)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 150,00</strong>
+                        </div>
+                         <div class="plan-row">
+                            <span class="plan-row__label">Rendimento Diário:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 6,75 ao dia</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Retorno Final:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 270,00 (Capital + 80%)</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value plan-row__value--positive">Ilimitado</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="150">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 200 (40 dias) - ILIMITADO -->
+                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                        <h3 class="plan-card__title">Ciclo Médio 200</h3>
+                        <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (40 dias)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 200,00</strong>
+                        </div>
+                         <div class="plan-row">
+                            <span class="plan-row__label">Rendimento Diário:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 9,50 ao dia</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Retorno Final:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 380,00 (Capital + 90%)</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value plan-row__value--positive">Ilimitado</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="200">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 300 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Ouro</h3>
+                        <span class="plan-badge">R$ 6,00 / dia útil (2% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 300,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="300">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 450 (60 dias) - ILIMITADO -->
+                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                        <h3 class="plan-card__title">Ciclo Longo 450</h3>
+                        <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (60 dias)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 450,00</strong>
+                        </div>
+                         <div class="plan-row">
+                            <span class="plan-row__label">Rendimento Diário:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 15,75 ao dia</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Retorno Final:</span>
+                            <strong class="plan-row__value plan-row__value--positive">R$ 945,00 (Capital + 110%)</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value plan-row__value--positive">Ilimitado</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="450">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 500 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Platinum</h3>
+                        <span class="plan-badge">R$ 10,00 / dia útil (2% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 500,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="500">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 1.000 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Master</h3>
+                        <span class="plan-badge">R$ 20,00 / dia útil (2% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 1.000,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="1000">APLICAR AGORA</button>
+                    </div>
+
                 </div>
-                <div class="stat-card">
-                    <h3>Saldo Total dos Usuários</h3>
-                    <p id="totalSaldoUsuarios">R$ 0,00</p>
+
+                <input type="hidden" id="valorPlano" value="10">
+                <button id="btnDepositar" style="display: none;"></button>
+            </section>
+
+            <!-- ================= ABA CARTEIRA ================= -->
+            <section id="view-carteira" class="view-section" style="display: none;">
+                <h2>Minha Carteira de Planos</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Investido em Planos</h3>
+                        <p id="totalInvestidoPlanos">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Rendimento Total dos Planos</h3>
+                        <p id="totalRendimentoPlanos">R$ 0,00</p>
+                    </div>
                 </div>
-                <div class="stat-card">
-                    <h3>Usuários Cadastrados</h3>
-                    <p id="totalUsuariosCadastrados">0</p>
+
+                <div class="table-container">
+                    <h3>Planos Ativos e Rendimentos Diários</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data da Ativação</th>
+                                <th>Plano / Valor</th>
+                                <th>Rendimento por Dia Útil</th>
+                                <th>Rendimento Acumulado</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPlanosCarteira">
+                            <tr><td colspan="5" class="table-empty">Nenhum plano ativo no momento.</td></tr>
+                        </tbody>
+                    </table>
                 </div>
+            </section>
+
+            <!-- ================= ABA EQUIPE ================= -->
+            <section id="view-equipe" class="view-section" style="display: none;">
+                <h2>Minha Equipe</h2>
+                <p class="section-lead">Acompanhe aqui os indicados e comissões da sua rede.</p>
+
+                <!-- Link de Indicação -->
+                <div class="card referral-card">
+                    <h3>Seu Link de Indicação</h3>
+                    <p class="referral-card__hint">Compartilhe o link abaixo. Toda pessoa que se cadastrar através dele entra automaticamente na sua equipe, e você recebe 10% de comissão sobre os planos que ela ativar.</p>
+                    <div class="referral-link-row">
+                        <input type="text" id="linkIndicacao" readonly>
+                        <button class="btn" id="btnCopiarLinkIndicacao">Copiar Link</button>
+                    </div>
+                    <button class="btn btn-outline" id="btnCompartilharConvite" type="button" style="margin-top: var(--space-sm);">Compartilhar convite</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Comissões (1º Nível - 10%)</h3>
+                        <p id="comissaoTotalEquipe">R$ 0,00</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total de Indicados</h3>
+                        <p id="totalIndicados">0</p>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <h3>Membros da Rede</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data de Cadastro</th>
+                                <th>Nome</th>
+                                <th>E-mail</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaMembrosEquipe">
+                            <tr><td colspan="3" class="table-empty">Nenhum indicado cadastrado ainda.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ==================== MISSÕES DE INDICAÇÃO ==================== -->
+            <section id="view-missoes" class="view-section" style="display: none;">
+                <div id="missoesRaiz" class="missoes-area"></div>
+            </section>
+
+            <!-- ================= ABA EXTRATO ================= -->
+            <section id="view-extrato" class="view-section" style="display: none;">
+                <h2>Extrato de Recebimentos</h2>
+                <div class="table-container">
+                    <h3>Histórico Geral de Valores Recebidos</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data e Horário</th>
+                                <th>Mês / Ano</th>
+                                <th>Descrição / Origem</th>
+                                <th>Valor Recebido</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaExtratoGeral">
+                            <tr><td colspan="4" class="table-empty">Nenhum registro no extrato ainda.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ================= ABA SUPORTE (ESTILO CONCIERGE VIP) ================= -->
+            <section id="view-suporte" class="view-section" style="display: none;">
+                <div class="concierge-panel">
+                    
+                    <!-- Selo Superior -->
+                    <div class="concierge-badge">
+                        <span class="concierge-dot"></span>
+                        ATENDIMENTO VIP
+                    </div>
+
+                    <!-- Título e Subtítulo Centralizados -->
+                    <h2 class="concierge-title">Central de Atendimento</h2>
+                    <p class="concierge-subtitle">Gestão estratégica e suporte oficial personalizado via Telegram.</p>
+
+                    <!-- Grade com os 3 Cartões Verticais Lado a Lado -->
+                    <div class="concierge-cards-row">
+                        
+                        <!-- Card 1: Suporte Luna -->
+                        <a href="https://t.me/suporteeluna" target="_blank" rel="noopener" class="concierge-card">
+                            <div class="concierge-avatar-box">
+                                <img src="suporte-1.jpg" alt="Suporte Luna">
+                                <span class="concierge-status-dot" title="Online"></span>
+                            </div>
+                            <h3 class="concierge-name">Suporte Luna</h3>
+                            <span class="concierge-role">ATENDIMENTO GERAL</span>
+                            <div class="concierge-tg-btn">
+                                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#37BBFE" d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.07l-1.97 9.29c-.15.68-.55.85-1.11.53l-3.07-2.26-1.48 1.42c-.16.16-.3.3-.62.3l.22-3.12 5.68-5.13c.25-.22-.05-.34-.38-.12l-7.02 4.42-3.02-.95c-.66-.21-.67-.66.14-.98l11.75-4.53c.54-.2 1.01.12.83.99z"/></svg>
+                                <span>Chamar</span>
+                            </div>
+                        </a>
+
+                        <!-- Card 2: Suporte Equus 1 -->
+                        <a href="https://t.me/SuporteEquus" target="_blank" rel="noopener" class="concierge-card">
+                            <div class="concierge-avatar-box">
+                                <img src="suporte-2.jpg" alt="Suporte Equus 1">
+                                <span class="concierge-status-dot" title="Online"></span>
+                            </div>
+                            <h3 class="concierge-name">Suporte Equus 1</h3>
+                            <span class="concierge-role">FINANCEIRO & SAQUES</span>
+                            <div class="concierge-tg-btn">
+                                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#37BBFE" d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.07l-1.97 9.29c-.15.68-.55.85-1.11.53l-3.07-2.26-1.48 1.42c-.16.16-.3.3-.62.3l.22-3.12 5.68-5.13c.25-.22-.05-.34-.38-.12l-7.02 4.42-3.02-.95c-.66-.21-.67-.66.14-.98l11.75-4.53c.54-.2 1.01.12.83.99z"/></svg>
+                                <span>Chamar</span>
+                            </div>
+                        </a>
+
+                        <!-- Card 3: Suporte Equus 2 -->
+                        <a href="https://t.me/SuporteEquus2" target="_blank" rel="noopener" class="concierge-card">
+                            <div class="concierge-avatar-box">
+                                <img src="suporte-3.jpg" alt="Suporte Equus 2">
+                                <span class="concierge-status-dot" title="Online"></span>
+                            </div>
+                            <h3 class="concierge-name">Suporte Equus 2</h3>
+                            <span class="concierge-role">SUPORTE & EQUIPE</span>
+                            <div class="concierge-tg-btn">
+                                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#37BBFE" d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.56 8.07l-1.97 9.29c-.15.68-.55.85-1.11.53l-3.07-2.26-1.48 1.42c-.16.16-.3.3-.62.3l.22-3.12 5.68-5.13c.25-.22-.05-.34-.38-.12l-7.02 4.42-3.02-.95c-.66-.21-.67-.66.14-.98l11.75-4.53c.54-.2 1.01.12.83.99z"/></svg>
+                                <span>Chamar</span>
+                            </div>
+                        </a>
+
+                    </div>
+
+                    <!-- Linha divisória e Rodapé Interno -->
+                    <div class="concierge-footer">
+                        <span class="concierge-footer-line"></span>
+                        <span class="concierge-footer-text">OPERAÇÃO SEGURA • BANCA COMPARTILHADA</span>
+                        <span class="concierge-footer-line"></span>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- ================= ABA PERFIL ================= -->
+            <section id="view-perfil" class="view-section" style="display: none;">
+                <h2>Configurações de Perfil</h2>
+                <p class="section-lead">Gerencie suas informações de cadastro e dados para recebimento via PIX.</p>
+
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">Dados Pessoais</h3>
+                    <div class="input-group">
+                        <label>Nome Completo</label>
+                        <input type="text" id="perfilNome" placeholder="Digite seu nome completo" maxlength="80">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Chave PIX Padrão para Saques</h3>
+                    <p class="section-lead" style="margin-bottom: 15px;">Estes dados serão preenchidos automaticamente na solicitação de saque.</p>
+
+                    <div class="input-group">
+                        <label>Tipo de Chave PIX</label>
+                        <select id="perfilTipoPix">
+                            <option value="CPF">CPF</option>
+                            <option value="E-mail">E-mail</option>
+                            <option value="Telefone">Telefone</option>
+                            <option value="Chave Aleatória">Chave Aleatória</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Sua Chave PIX</label>
+                        <input type="text" id="perfilChavePix" placeholder="Digite sua chave PIX" maxlength="140">
+                    </div>
+
+                    <div class="input-group" id="perfilCpfGrupo" style="display: none;">
+                        <label>CPF do titular da chave PIX</label>
+                        <input type="text" id="perfilCpf" inputmode="numeric" placeholder="Somente números" maxlength="14">
+                        <p class="section-lead" style="margin-top: 6px; font-size: 0.8rem;">Necessário para receber saques automáticos quando a chave não é o CPF. Depois de salvo, não poderá ser alterado.</p>
+                    </div>
+
+                    <button class="btn" id="btnSalvarPerfil">Salvar Alterações</button>
+                </div>
+
+                <!-- Só aparece dentro do app Android, em celulares com digital, rosto ou senha de tela cadastrada -->
+                <div class="card" id="cardBloqueioBiometrico" style="display: none; margin-top: 20px;">
+                    <h3>Bloqueio do aplicativo</h3>
+                    <p class="section-lead" style="margin-bottom: 15px;">Peça a digital, o rosto ou a senha do celular sempre que abrir o app ou voltar para ele depois de 1 minuto.</p>
+                    <label for="chkBloqueioBiometrico" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                        <input type="checkbox" id="chkBloqueioBiometrico" style="width: 22px; height: 22px; flex-shrink: 0; padding: 0; accent-color: var(--primary);">
+                        <span>Bloquear o app com digital, rosto ou senha do celular</span>
+                    </label>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ================= MODAL DE DEPÓSITO ================= -->
+    <div id="modalDepositoSistema" class="modal-overlay">
+        <div class="card modal-card">
+
+            <div id="modalToast" class="modal-alert">
+                O valor mínimo para depósito é R$ 10,00!
             </div>
 
-            <!-- FASE 2: AJUSTE MANUAL DE SALDO -->
-            <section class="table-section" id="secaoRendimentoManual">
-                <div class="table-section__head">
-                    <h3>Ajuste Manual de Saldo</h3>
-                </div>
-                <p class="table-hint">Adicione rendimentos extras ou remova saldo da conta de qualquer usuário.</p>
-                
-                <div class="table-search">
-                    <select id="rmTipoOperacao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
-                        <option value="credito">➕ Adicionar Saldo (Crédito)</option>
-                        <option value="debito">➖ Remover Saldo (Débito)</option>
-                    </select>
-                </div>
-                <div class="table-search">
-                    <input type="text" id="rmBusca" placeholder="Buscar usuário por nome ou e-mail...">
-                </div>
-                <div class="table-search">
-                    <select id="rmUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
-                        <option value="">Carregando usuários...</option>
-                    </select>
-                </div>
-                <div class="table-search">
-                    <input type="number" id="rmValor" min="0.01" step="0.01" inputmode="decimal" placeholder="Valor (R$)">
-                </div>
-                <div class="table-search">
-                    <input type="text" id="rmMotivo" maxlength="120" placeholder="Motivo (ex.: bônus, correção de erro, etc.)">
-                </div>
-                <button class="btn" id="btnCreditarManual" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
+            <button id="fecharModalDeposito" class="modal-close" aria-label="Fechar">&times;</button>
 
-                <p class="table-hint">Últimos ajustes manuais (créditos e débitos):</p>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data/Horário</th>
-                                <th>Usuário</th>
-                                <th>Valor</th>
-                                <th>Motivo</th>
-                                <th>Executado por</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaCreditosManuais">
-                            <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <h3>Realizar Depósito</h3>
+            <p class="modal-lead">Selecione o plano desejado e gere o seu QR Code Pix.</p>
 
-            <!-- FASE 3: GERENCIAR PLANOS (NOVIDADE) -->
-            <section class="table-section" id="secaoGerenciarPlanos">
-                <div class="table-section__head">
-                    <h3>Gerenciar Planos (Adicionar / Remover)</h3>
-                </div>
-                <p class="table-hint">Ative um plano instantaneamente para o usuário (ignora o limite de planos repetidos) ou cancele um plano ativo.</p>
-                
-                <div class="table-search">
-                    <select id="gpAcao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
-                        <option value="adicionar">➕ Adicionar Plano (Ativar)</option>
-                        <option value="remover">➖ Remover Plano Ativo (Cancelar)</option>
-                    </select>
-                </div>
-                <div class="table-search">
-                    <input type="text" id="gpBusca" placeholder="Buscar usuário por nome ou e-mail...">
-                </div>
-                <div class="table-search">
-                    <select id="gpUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
-                        <option value="">Carregando usuários...</option>
-                    </select>
-                </div>
-                <div class="table-search">
-                    <select id="gpValor" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
-                        <option value="">Selecione o valor do plano...</option>
-                        <option value="10">Ciclo Express - R$ 10,00 (Teto 140%)</option>
-                        <option value="15">Ciclo Médio 15 - R$ 15,00 (Teto 200%)</option>
-                        <option value="30">Banca Starter - R$ 30,00 (Teto 170%)</option>
-                        <option value="50">Banca Bronze - R$ 50,00 (Teto 170%)</option>
-                        <option value="60">Ciclo Médio 60 - R$ 60,00 (Teto 200%)</option>
-                        <option value="100">Banca Prata - R$ 100,00 (Teto 160%)</option>
-                        <option value="150">Ciclo Médio 150 - R$ 150,00 (Teto 180%)</option>
-                        <option value="200">Ciclo Médio 200 - R$ 200,00 (Teto 190%)</option>
-                        <option value="300">Banca Ouro - R$ 300,00 (Teto 160%)</option>
-                        <option value="450">Ciclo Longo 450 - R$ 450,00 (Teto 210%)</option>
-                        <option value="500">Banca Platinum - R$ 500,00 (Teto 160%)</option>
-                        <option value="1000">Banca Master - R$ 1.000,00 (Teto 160%)</option>
-                    </select>
-                </div>
-                <button class="btn" id="btnGerenciarPlano" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
-            </section>
+            <div class="input-group">
+                <label>Valor do Plano / Depósito (R$)</label>
+                <select id="modalValorPlano">
+                    <option value="10">R$ 10,00 — Ciclo Express Starter (48h)</option>
+                    <option value="15">R$ 15,00 — Ciclo Médio 15 (40 dias)</option>
+                    <option value="30">R$ 30,00 — Banca Starter</option>
+                    <option value="50">R$ 50,00 — Banca Bronze</option>
+                    <option value="60">R$ 60,00 — Ciclo Médio 60 (40 dias)</option>
+                    <option value="100">R$ 100,00 — Banca Prata</option>
+                    <option value="150">R$ 150,00 — Ciclo Médio 150 (40 dias)</option>
+                    <option value="200">R$ 200,00 — Ciclo Médio 200 (40 dias)</option>
+                    <option value="300">R$ 300,00 — Banca Ouro</option>
+                    <option value="450">R$ 450,00 — Ciclo Longo 450 (60 dias)</option>
+                    <option value="500">R$ 500,00 — Banca Platinum</option>
+                    <option value="1000">R$ 1.000,00 — Banca Master</option>
+                </select>
+            </div>
 
-            <section class="table-section">
-                <div class="table-section__head">
-                    <h3>Usuários e Saldos</h3>
-                </div>
-                <p class="table-hint">Saldo sacável e comissão de indicação acumulada de cada cliente cadastrado.</p>
-                <div class="table-search">
-                    <input type="text" id="buscaUsuarios" placeholder="Buscar por nome ou e-mail...">
-                </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Usuário</th>
-                                <th>E-mail</th>
-                                <th>Saldo</th>
-                                <th>Comissão Acumulada</th>
-                                <th>Total Depositado</th>
-                                <th>Total Sacado</th>
-                                <th>Admin</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaUsuariosAdmin">
-                            <tr><td colspan="7" class="table-empty">Carregando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <div class="input-group">
+                <label>CPF (obrigatório para gerar o Pix)</label>
+                <input type="text" id="modalDepositoCpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
+            </div>
 
-            <section class="table-section">
-                <div class="table-section__head">
-                    <h3>Pendências de Plano</h3>
-                </div>
-                <p class="table-hint">Pix confirmado e dinheiro recebido, mas o usuário já tinha um plano ativo desse valor no momento da confirmação — precisa de uma decisão manual: criar o plano mesmo assim (ignora o limite) ou marcar como resolvido sem criar plano (ex.: reembolso feito fora do sistema).</p>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data/Horário</th>
-                                <th>Usuário</th>
-                                <th>Valor</th>
-                                <th>Observação</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaPendenciasPlano">
-                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <div class="input-group">
+                <label>Telefone (obrigatório para gerar o Pix)</label>
+                <input type="text" id="modalDepositoTelefone" placeholder="(11) 99999-9999" inputmode="tel" maxlength="20">
+            </div>
 
-            <section class="table-section">
-                <div class="table-section__head">
-                    <h3>Todos os Saques</h3>
-                </div>
-                <p class="table-hint">Ao marcar um saque como pago, o Extrato do usuário é atualizado automaticamente.</p>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data/Horário</th>
-                                <th>Usuário</th>
-                                <th>Chave PIX</th>
-                                <th>Valor Solicitado</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaSaquesAdmin">
-                            <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+            <p id="statusPagamentoPix" style="display: none; text-align: center; font-size: 13px; font-weight: 600; margin-top: 12px;">
+                ⏳ Aguardando confirmação do pagamento...
+            </p>
 
-            <section class="table-section">
-                <div class="table-section__head">
-                    <h3>Todos os Depósitos</h3>
+            <div id="areaQrCodePix" class="qr-area">
+                <div class="qr-area__hint">Escaneie o QR Code abaixo para pagar:</div>
+                <div class="qr-area__frame">
+                    <img id="imgQrCode" src="" alt="QR Code Pix">
                 </div>
-                <p class="table-hint">Ao aprovar um depósito, o plano correspondente é ativado automaticamente na Carteira do usuário.</p>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Data/Horário</th>
-                                <th>Usuário</th>
-                                <th>Valor do Plano</th>
-                                <th>Status</th>
-                                <th>Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaDepositosAdmin">
-                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
-                        </tbody>
-                    </table>
+                <div class="qr-area__code" id="txtChaveCopiaCola">
+                    00020126580014br.gov.bcb.pix...
                 </div>
-            </section>
-                </section>
+                <button class="btn btn-outline" id="btnCopiarPix" type="button">Copiar código Pix</button>
+            </div>
 
-                <section class="admin-tabpanel" id="aba-indicacoes" data-painel="indicacoes" hidden><div id="rede-indicacoes"></div></section>
-                <section class="admin-tabpanel" id="aba-equipe" data-painel="equipe" hidden><div id="rede-equipe"></div></section>
-                <section class="admin-tabpanel" id="aba-recargas" data-painel="recargas" hidden><div id="rede-recargas"></div></section>
-                <section class="admin-tabpanel" id="aba-caixa" data-painel="caixa" hidden><div id="rede-caixa"></div></section>
-                <section class="admin-tabpanel" id="aba-comissoes" data-painel="comissoes" hidden><div id="rede-comissoes"></div></section>
-                <section class="admin-tabpanel" id="aba-perfil" data-painel="perfil" hidden><div id="rede-perfil"></div></section>
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="btnCancelarModalDep">Cancelar</button>
+                <button class="btn" id="btnConfirmarModalDepositar">Gerar QR Code Pix</button>
             </div>
         </div>
     </div>
 
+    <!-- ================= MODAL DE SAQUE ================= -->
+    <div id="modalSaqueSistema" class="modal-overlay">
+        <div class="card modal-card modal-card--wide">
+            <button id="fecharModalSaque" class="modal-close" aria-label="Fechar">&times;</button>
+
+            <h3>Solicitar Saque</h3>
+            <p class="modal-lead modal-lead--warning">Liberado apenas aos Domingos</p>
+
+            <div class="modal-info-box">
+                <div class="modal-info-row">
+                    <span>Valor Mínimo:</span>
+                    <strong>R$ 32,50</strong>
+                </div>
+                <div class="modal-info-row">
+                    <span>Taxa de Saque:</span>
+                    <strong>14%</strong>
+                </div>
+            </div>
+
+            <div id="saqueChaveInfo" class="modal-info-box modal-info-box--key">
+                <span class="modal-info-row__label">Chave PIX de recebimento:</span>
+                <strong id="saqueChavePix">—</strong>
+            </div>
+
+            <div class="input-group">
+                <label>Valor do Saque (R$)</label>
+                <input type="number" id="modalValorSaque" placeholder="32.50" min="32.50" step="0.01">
+            </div>
+            
+            <div id="resumoValorLiquido" class="amount-note"></div>
+
+            <div class="modal-actions">
+                <button class="btn btn-outline" id="btnCancelarModalSaque">Cancelar</button>
+                <button class="btn" id="btnConfirmarModalSacar">Solicitar Saque</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Esconde o botão de download dentro do próprio app e no iPhone (o APK só funciona no Android) -->
+    <script>
+        (function () {
+            var btn = document.getElementById('btnBaixarAppSidebar');
+            if (!btn) return;
+            var dentroDoApp = typeof Android !== 'undefined';
+            var ios = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (dentroDoApp || ios) btn.style.display = 'none';
+        })();
+    </script>
+
     <!-- Scripts -->
     <script type="module" src="auth.js"></script>
-    <script type="module" src="admin.js"></script>
+    <script type="module" src="script.js"></script>
+    <script type="module" src="missoes.js"></script>
+     <script src="update-modal.js"></script>
 </body>
 </html>
