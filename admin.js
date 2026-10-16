@@ -1,6 +1,7 @@
 import { auth, db, mostrarToast } from './auth.js';
-import { ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { iniciarRede, atualizarRede } from './admin-rede.js';
+import { iniciarMissoesAdmin, atualizarMissoesAdmin } from './admin-missoes.js';
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -795,6 +796,9 @@ const estado = {
     saques: null,
     depositos: null,
     planos: null,
+    missoesConfig: null,
+    missoesColetas: null,
+    missoesErro: null,
     execucoesRendimentos: null,
     auditoria: null,
     filtroUsuarios: '',
@@ -1145,6 +1149,7 @@ function rerenderizarTudo() {
 
     aplicarRotulosMobile();
     atualizarRede();
+    atualizarMissoesAdmin();
 }
 
 function iniciarBotaoRodarRendimentos() {
@@ -1213,8 +1218,33 @@ function iniciarBotaoRodarRendimentos() {
     btn.dataset.listenerAtivo = 'true';
 }
 
+/* ---------- Missões de indicação (painel) ---------- */
+async function lerExtratoMissao(uid, extratoId) {
+    const snap = await get(ref(db, `extrato/${uid}/${extratoId}`));
+    return snap.val();
+}
+
+async function salvarConfigMissoes(missoes) {
+    const idToken = await auth.currentUser.getIdToken();
+    const resposta = await fetch(`${WORKER_BASE_URL}/api/admin/missoes/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${idToken}` },
+        body: JSON.stringify({ missoes }),
+    });
+    const dados = await resposta.json().catch(() => ({}));
+    if (!resposta.ok) throw new Error(dados.error || 'Erro ao salvar as missões.');
+    mostrarToast('✅ Missões salvas.', 'success');
+    return dados;
+}
+
 function iniciarListenersAdmin() {
     iniciarRede(() => estado);
+    iniciarMissoesAdmin({
+        obterEstado: () => estado,
+        lerExtrato: lerExtratoMissao,
+        salvarConfig: salvarConfigMissoes,
+        confirmar: confirmarAcao,
+    });
     iniciarDelegacaoAcoesDepositos();
     iniciarDelegacaoAcoesSaques();
     iniciarDelegacaoPendenciasPlano();
@@ -1261,6 +1291,26 @@ function iniciarListenersAdmin() {
         rerenderizarTudo();
     }, (error) => {
         console.error('Erro ao carregar planos no admin:', error);
+    });
+
+    onValue(ref(db, 'missoesConfig'), (snapshot) => {
+        estado.missoesConfig = snapshot.val() || {};
+        rerenderizarTudo();
+    }, (error) => {
+        console.error('Erro ao carregar a configuração das missões:', error);
+        estado.missoesConfig = {};
+        estado.missoesErro = 'sem permissão para ler missoesConfig (publique as rules novas)';
+        rerenderizarTudo();
+    });
+
+    onValue(ref(db, 'missoesColetas'), (snapshot) => {
+        estado.missoesColetas = snapshot.val() || {};
+        rerenderizarTudo();
+    }, (error) => {
+        console.error('Erro ao carregar as coletas de missões:', error);
+        estado.missoesColetas = {};
+        estado.missoesErro = 'sem permissão para ler missoesColetas (publique as rules novas)';
+        rerenderizarTudo();
     });
 
     const execucoesRef = ref(db, 'controle/execucoesRendimentos');
