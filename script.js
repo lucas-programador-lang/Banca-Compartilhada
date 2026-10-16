@@ -7,6 +7,7 @@ const CONFIG = {
     DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo (Padrão)
     TAXA_SAQUE_PERCENTUAL: 0.14,
     VALORES_PLANOS_PERMITIDOS: [10, 15, 30, 50, 60, 100, 150, 200, 300, 450, 500, 1000],
+    PLANOS_DE_CICLO: [10, 15, 60, 150, 200, 450],
     WORKER_BASE_URL: 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev',
 };
 
@@ -243,6 +244,67 @@ function calcularEstadoPlano(plano) {
     };
 }
 
+/* ==========================================================================
+   Sincronização Automática: Da Carteira -> Para o Saldo Disponível
+   ========================================================================== */
+let sincronizandoRendimentos = false;
+let ultimaSincronizacaoMs = 0;
+
+function precisaSincronizarSaldo(planosObj) {
+    if (!planosObj) return false;
+    const diaSemana = obterDiaSemanaBrasilia();
+    if (diaSemana === 0 || diaSemana === 6) return false; // Sábado e domingo não creditam
+
+    for (const plano of Object.values(planosObj)) {
+        if (!plano || plano.status === 'finalizado' || plano.status === 'cancelado_pelo_admin') continue;
+
+        const valor = parseFloat(plano.valor || 0);
+        const jaCreditado = Math.round((parseFloat(plano.valorCreditado || 0)) * 100) / 100;
+        const estado = calcularEstadoPlano(plano);
+        const alvoAcumulado = Math.round(estado.rendimentoAcumulado * 100) / 100;
+
+        const ehPlanoDeCiclo = CONFIG.PLANOS_DE_CICLO.includes(valor);
+
+        if (ehPlanoDeCiclo) {
+            // Plano de ciclo só precisa cair no saldo disponível quando atingir 100% do ciclo
+            if (estado.finalizado && plano.status !== 'finalizado') {
+                return true;
+            }
+        } else {
+            // Planos Banca (30, 50, 100, 300, 500, 1000): se na Carteira já rendeu mais do que foi creditado no Saldo Disponível, sincroniza!
+            if (alvoAcumulado - jaCreditado >= 0.01) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+async function sincronizarRendimentosComSaldoDisponivel(planosObj) {
+    if (sincronizandoRendimentos) return;
+    if (Date.now() - ultimaSincronizacaoMs < 15000) return; // Evita chamadas repetidas em menos de 15s
+    if (!auth.currentUser) return;
+    if (!precisaSincronizarSaldo(planosObj)) return;
+
+    sincronizandoRendimentos = true;
+    ultimaSincronizacaoMs = Date.now();
+
+    try {
+        const idToken = await auth.currentUser.getIdToken();
+        await fetch(`${CONFIG.WORKER_BASE_URL}/api/rendimentos/sincronizar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`,
+            },
+        });
+    } catch (erro) {
+        console.warn('Não foi possível sincronizar rendimentos em segundo plano:', erro);
+    } finally {
+        sincronizandoRendimentos = false;
+    }
+}
+
 function renderizarTabelaCarteira(planosObj) {
     const tbody = getEl('tabelaPlanosCarteira');
     const elTotalInvestido = getEl('totalInvestidoPlanos');
@@ -284,7 +346,6 @@ function renderizarTabelaCarteira(planosObj) {
             statusClasse = 'plan-row__value';
         }
 
-        // Mostra Data + Hora exata da ativação e, se já rendeu, mostra embaixo a hora do último pagamento
         const dataHoraAtivacao = !isNaN(estado.dataAtivacao.getTime())
             ? formatadorDataHoraCurto.format(estado.dataAtivacao)
             : '—';
@@ -315,15 +376,16 @@ function inicializarCarteiraUsuario(userId) {
 
     const planosRef = ref(db, 'planos/' + userId);
     onValue(planosRef, function(snapshot) {
-        renderizarTabelaCarteira(snapshot.val());
-        atualizarDisponibilidadePlanos(snapshot.val());
+        const planosVal = snapshot.val();
+        renderizarTabelaCarteira(planosVal);
+        atualizarDisponibilidadePlanos(planosVal);
+        sincronizarRendimentosComSaldoDisponivel(planosVal);
     });
 }
 
 function atualizarDisponibilidadePlanos(planosObj) {
     const planos = planosObj ? Object.values(planosObj) : [];
     
-    // Filtra apenas planos realmente ativos (ignora finalizados e cancelados pelo admin)
     const ativos = planos.filter(function(p) {
         return p.status !== 'finalizado' && p.status !== 'cancelado_pelo_admin';
     });
