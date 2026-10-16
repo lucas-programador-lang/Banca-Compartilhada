@@ -3365,3 +3365,224 @@ tbody tr:last-child td {
     .rede-nivel__meta { font-size: 0.74rem; }
     .rede-input { font-size: 16px; }
 }
+
+/* ==========================================================================
+   MISSÕES DE INDICAÇÃO (usuário) — azul-marinho, branco e dourado
+   Tudo escopado em .missoes-area: não altera o resto do site.
+   ========================================================================== */
+.missoes-area {
+    --m-navy: #0a1a3d;
+    --m-navy-2: #11295a;
+    --m-navy-3: #1b3f86;
+    --m-gold: #f3c969;
+    --m-gold-2: #d4a23a;
+    --m-creme: #fff3c4;
+    --m-borda: rgba(243, 201, 105, 0.28);
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: clamp(16px, 3vw, 30px);
+    color: #fff;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(243, 201, 105, 0.4);
+    background:
+        radial-gradient(circle at 90% -10%, rgba(243, 201, 105, 0.16), transparent 45%),
+        radial-gradient(circle at 0% 110%, rgba(61, 111, 214, 0.22), transparent 50%),
+        linear-gradient(165deg, #0d2250, #0a1735 75%);
+    box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.missoes-cabecalho { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+.missoes-selo { flex: none; width: 58px; height: 58px; filter: drop-shadow(0 6px 14px rgba(243, 201, 105, 0.35)); }
+.missoes-selo svg { width: 100%; height: 100%; }
+.missoes-titulo {
+    margin: 0 0 4px;
+    text-align: left;
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 1rem + 1.6vw, 2rem);
+    letter-spacing: 0.04em;
+    color: var(--m-gold);
+}
+.missoes-titulo::after { display: none; }
+.missoes-cabecalho p { margin: 0; color: #c8d4f0; font-size: 0.92rem; }
+
+/* resumo */
+.missoes-resumo {
+    display: grid;
+    grid-template-columns: minmax(150px, 210px) 1fr;
+    gap: 18px;
+    align-items: center;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--m-borda);
+}
+.missoes-contador { display: flex; flex-direction: column; gap: 2px; }
+.missoes-contador span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #aebce0; }
+.missoes-contador strong { font-family: var(--font-display); font-size: 2.8rem; line-height: 1; color: #fff; }
+.missoes-contador small { color: #aebce0; font-size: 0.78rem; }
+.missoes-proxima p { margin: 0 0 10px; font-size: 0.95rem; line-height: 1.45; color: #fff; }
+.missoes-regra { margin: 0 0 20px; padding: 0 4px; font-size: 0.8rem; line-height: 1.5; color: #aebce0; }
+.missoes-regra strong { color: var(--m-gold); }
+
+/* barras */
+.missao-barra { height: 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.missao-barra span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--m-gold-2), var(--m-gold) 60%, var(--m-creme)); transition: width 0.5s ease; }
+.missao-barra--grande { height: 14px; }
+
+/* grade e cartões */
+.missoes-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+.missao {
+    position: relative;
+    display: flex; flex-direction: column; gap: 12px;
+    padding: 18px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    transition: transform var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+}
+.missao--bloqueada { opacity: 0.82; }
+.missao--disponivel {
+    border-color: var(--m-gold);
+    background: linear-gradient(180deg, rgba(243, 201, 105, 0.16), rgba(243, 201, 105, 0.04));
+    box-shadow: 0 0 0 1px rgba(243, 201, 105, 0.35), 0 12px 30px rgba(243, 201, 105, 0.14);
+}
+.missao--coletada { border-color: rgba(255, 255, 255, 0.35); }
+
+.missao-topo { display: flex; align-items: center; gap: 12px; }
+.missao-escudo { flex: none; width: 54px; height: 54px; filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.4)); }
+.missao-meta { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.missao-rotulo { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #aebce0; }
+.missao-alvo { font-size: 1.02rem; color: #fff; }
+.missao-chip { flex: none; padding: 4px 10px; border-radius: 999px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+.missao-chip--bloqueada { background: rgba(255, 255, 255, 0.1); color: #c8d4f0; }
+.missao-chip--disponivel { background: linear-gradient(135deg, var(--m-gold-2), var(--m-gold)); color: #0b1f4a; }
+.missao-chip--processando { background: rgba(243, 201, 105, 0.2); color: var(--m-gold); }
+.missao-chip--coletada { background: #fff; color: #0b1f4a; }
+
+.missao-premio {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+    padding: 10px 14px; border-radius: var(--radius-sm);
+    background: rgba(10, 26, 61, 0.7); border: 1px solid var(--m-borda);
+}
+.missao-premio span { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #aebce0; }
+.missao-premio strong { font-family: var(--font-display); font-size: 1.6rem; color: var(--m-gold); font-variant-numeric: tabular-nums; }
+.missao-contagem { display: flex; justify-content: space-between; margin-top: -4px; font-size: 0.78rem; color: #c8d4f0; font-variant-numeric: tabular-nums; }
+
+.missao-btn {
+    width: 100%; padding: 14px 12px; border: 0; border-radius: var(--radius-sm);
+    font-size: 0.86rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.1); color: #8f9fc6; cursor: not-allowed;
+}
+.missao-btn--pronta {
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--m-gold-2), var(--m-gold) 55%, var(--m-creme));
+    color: #0b1f4a;
+    box-shadow: 0 10px 24px rgba(243, 201, 105, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    animation: missaoPulso 2.2s ease-in-out infinite;
+}
+.missao-btn--pronta:hover:not(:disabled) { filter: brightness(1.06); transform: translateY(-1px); }
+.missao-btn--pronta:disabled { animation: none; cursor: wait; opacity: 0.8; }
+.missao-btn--coletada { background: rgba(255, 255, 255, 0.92); color: #0b1f4a; }
+.missao-nota { margin: -2px 0 0; text-align: center; font-size: 0.76rem; color: #aebce0; }
+
+@keyframes missaoPulso {
+    0%, 100% { box-shadow: 0 10px 24px rgba(243, 201, 105, 0.3), 0 0 0 0 rgba(243, 201, 105, 0.45); }
+    50% { box-shadow: 0 10px 24px rgba(243, 201, 105, 0.3), 0 0 0 8px rgba(243, 201, 105, 0); }
+}
+
+/* histórico */
+.missoes-historico { margin-top: 26px; }
+.missoes-historico h3 { margin: 0 0 12px; font-family: var(--font-display); font-size: 1.05rem; color: var(--m-gold); }
+.missoes-historico ul { list-style: none; margin: 0; padding: 0; border: 1px solid var(--m-borda); border-radius: var(--radius-md); overflow: hidden; }
+.missoes-historico li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: rgba(255, 255, 255, 0.04); }
+.missoes-historico li + li { border-top: 1px solid rgba(255, 255, 255, 0.08); }
+.missoes-historico li span { display: flex; flex-direction: column; gap: 2px; }
+.missoes-historico li small { color: #aebce0; font-size: 0.76rem; }
+.missoes-historico li strong { color: var(--m-gold); font-variant-numeric: tabular-nums; }
+.missoes-vazio, .missoes-aviso { padding: 22px 16px; text-align: center; color: #c8d4f0; font-size: 0.9rem; border: 1px dashed var(--m-borda); border-radius: var(--radius-md); }
+.missoes-aviso .missao-btn { width: auto; margin-top: 12px; padding: 12px 22px; }
+.missoes-mais {
+    width: 100%; margin-top: 10px; padding: 12px; border-radius: var(--radius-sm);
+    background: transparent; color: var(--m-gold); border: 1px solid var(--m-borda); font-weight: 700; cursor: pointer;
+}
+.missoes-mais:hover { background: rgba(243, 201, 105, 0.08); }
+
+/* bolinha no menu lateral quando há recompensa pronta */
+.nav-item .missoes-ponto {
+    margin-left: auto; flex: none; width: 9px; height: 9px; border-radius: 50%;
+    background: #f3c969; box-shadow: 0 0 0 3px rgba(243, 201, 105, 0.25), 0 0 10px rgba(243, 201, 105, 0.9);
+}
+
+@media (max-width: 600px) {
+    .missoes-area { padding: 14px; border-radius: var(--radius-md); }
+    .missoes-cabecalho { gap: 12px; margin-bottom: 16px; }
+    .missoes-selo { width: 46px; height: 46px; }
+    .missoes-cabecalho p { font-size: 0.82rem; }
+    .missoes-resumo { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+    .missoes-contador { flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 4px 10px; }
+    .missoes-contador strong { font-size: 2.2rem; }
+    .missoes-contador small { flex-basis: 100%; }
+    .missoes-grade { grid-template-columns: 1fr; }
+    .missao { padding: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .missao-btn--pronta { animation: none; }
+    .missao-barra span { transition: none; }
+}
+
+/* ==========================================================================
+   ADMIN — Missões (abas internas, chips, formulário de configuração)
+   ========================================================================== */
+.admin-subtabs {
+    display: flex; gap: 4px; margin-bottom: var(--space-md); padding: 4px;
+    overflow-x: auto; scrollbar-width: none;
+    background: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: 999px;
+}
+.admin-subtabs::-webkit-scrollbar { display: none; }
+.admin-subtab {
+    flex: 1 0 auto; padding: 10px 16px; border: 0; border-radius: 999px;
+    background: transparent; color: var(--text-muted); font-weight: 600; font-size: 0.84rem; white-space: nowrap; cursor: pointer;
+}
+.admin-subtab:hover { color: var(--text-main); }
+.admin-subtab.ativa { background: var(--card-bg-hover); color: var(--primary-hover); box-shadow: inset 0 0 0 1px var(--border-color-strong); }
+
+.madm-filtros { grid-template-columns: minmax(0, 1fr) 260px; }
+.madm-chip { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.66rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+.madm-chip--bloqueada { background: rgba(255, 255, 255, 0.08); color: var(--text-muted); }
+.madm-chip--disponivel { background: var(--warning-soft); color: var(--warning); }
+.madm-chip--processando { background: var(--primary-soft); color: var(--primary-hover); }
+.madm-chip--coletada { background: var(--success-soft); color: var(--success-hover); }
+
+.madm-detalhe { padding: 0 16px 8px; }
+.madm-detalhe h4 { margin: 14px 0 6px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+.madm-detalhe .rede-sublista { margin: 0 0 4px; }
+.madm-detalhe .rede-sublista li > span:last-child { text-align: right; }
+.madm-detalhe .rede-mais { margin-top: 6px; }
+
+/* formulário de configuração */
+.madm-cfg { display: flex; flex-direction: column; gap: 10px; margin-bottom: var(--space-md); }
+.madm-cfg-linha {
+    display: grid; grid-template-columns: 34px minmax(0, 1fr) minmax(0, 1fr) auto 38px; gap: 10px 14px; align-items: end;
+    padding: 14px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md);
+}
+.madm-cfg-linha label { display: flex; flex-direction: column; gap: 5px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+.madm-cfg-linha label small { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.madm-cfg-num { align-self: center; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--primary-soft); color: var(--primary-hover); font-weight: 700; font-size: 0.85rem; }
+.madm-cfg-linha .madm-cfg-ativa { flex-direction: row; align-items: center; gap: 8px; padding-bottom: 12px; color: var(--text-main); text-transform: none; letter-spacing: 0; font-size: 0.85rem; font-weight: 500; }
+.madm-cfg-x { height: 42px; border: 1px solid rgba(236, 91, 96, 0.4); border-radius: var(--radius-sm); background: transparent; color: var(--danger); font-size: 1.2rem; cursor: pointer; }
+.madm-cfg-x:hover { background: var(--danger-soft); }
+.madm-cfg-acoes { display: grid; grid-template-columns: repeat(3, auto); gap: 10px; justify-content: start; align-items: center; }
+.madm-cfg-acoes .rede-mais { width: auto; margin: 0; padding: 12px 18px; }
+.madm-cfg-acoes .rede-mais:disabled { opacity: 0.5; cursor: not-allowed; }
+.madm-cfg-salvar { width: auto; margin: 0; padding: 12px 26px; }
+
+@media (max-width: 600px) {
+    .madm-filtros { grid-template-columns: 1fr; }
+    .madm-cfg-linha { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .madm-cfg-num { display: none; }
+    .madm-cfg-linha .madm-cfg-ativa { grid-column: 1; padding-bottom: 0; }
+    .madm-cfg-x { grid-column: 2; justify-self: end; width: 44px; }
+    .madm-cfg-acoes { grid-template-columns: 1fr; }
+    .madm-cfg-acoes .rede-mais, .madm-cfg-salvar { width: 100%; }
+}
