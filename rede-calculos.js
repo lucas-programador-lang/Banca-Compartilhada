@@ -339,7 +339,7 @@ export function agregarPlanos(planos, periodo, usuariosMap) {
 /* ==========================================================================
    Comissões (regra do worker: 10% do valor do plano, só para o indicador direto)
    - ganha:      10% dos planos ativados pelos indicados DIRETOS, no período
-   - recebida:   o que já saiu em saques  = creditada − saldo de comissão
+   - recebida:   o que já saiu em saques  = creditada + bônus de missões − saldo de comissão
    - pendente:   o que ainda está no saldo de comissão (não sacado)
    - aguardando: 10% de depósitos pagos cujo plano ficou travado pelo limite;
                  a comissão só sai se o admin escolher "criar plano mesmo assim"
@@ -362,12 +362,15 @@ export function calcularComissoes(rede, planosPeriodo, planosTodos, depPeriodo, 
         const ganhaTotal = Math.round(baseTodos * COMISSAO_PERCENTUAL);
         const aguardando = Math.round(semPlano * COMISSAO_PERCENTUAL);
         const creditada = paraCentavos(fin.comissao);
+        // bônus das missões entra no mesmo saldo de comissão, mas NÃO é comissão de
+        // indicação: por isso fica fora da conferência (creditada x ganhaTotal)
+        const bonus = paraCentavos(fin.bonusMissoes);
         const pendente = Math.max(paraCentavos(fin.saldoComissao), 0);
-        const recebida = Math.max(creditada - pendente, 0);
+        const recebida = Math.max(creditada + bonus - pendente, 0);
         const divergencia = creditada - ganhaTotal;
         const divergente = Math.abs(divergencia) >= 1;
 
-        linhas.set(uid, { ganha, ganhaTotal, creditada, recebida, pendente, aguardando, divergencia, divergente });
+        linhas.set(uid, { ganha, ganhaTotal, creditada, bonus, recebida, pendente, aguardando, divergencia, divergente });
         tot.ganha += ganha;
         tot.creditada += creditada;
         tot.recebida += recebida;
