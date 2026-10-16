@@ -118,8 +118,9 @@ function definirAba(aba) {
         b.setAttribute('aria-selected', ativa ? 'true' : 'false');
     });
     document.querySelectorAll('[data-painel]').forEach((p) => { p.hidden = p.dataset.painel !== aba; });
-    $('redeFiltros').hidden = aba === 'painel';
-    if (aba !== 'painel') renderizar();
+    $('redeFiltros').hidden = !ABAS_REDE.includes(aba);
+    document.dispatchEvent(new CustomEvent('admin-aba', { detail: aba }));   // outras abas (ex.: Missões) escutam
+    if (ABAS_REDE.includes(aba)) renderizar();
 }
 
 /* ==========================================================================
@@ -524,7 +525,7 @@ function renderComissoes(ctx) {
     return resumo + travada
         + `<details class="rede-aviso rede-aviso--info"><summary>Como é calculado</summary>
             <ul><li><b>Ganhou:</b> ${pct}% do valor de cada plano ativado pelos indicados diretos (1º nível), pela data de ativação. É o momento em que o sistema credita; vale também para planos criados pelo admin, e cancelar o plano depois não devolve a comissão.</li>
-            <li><b>Já recebeu:</b> a parte da comissão que já saiu em saques (creditado − saldo de comissão). Total de sempre.</li>
+            <li><b>Já recebeu:</b> a parte da comissão (e dos bônus de missão) que já saiu em saques. Total de sempre.</li>
             <li><b>Pendente:</b> a comissão que ainda está no saldo, sem sacar. Total de sempre.</li>
             <li><b>Travada:</b> ${pct}% de depósitos pagos cujo plano foi bloqueado pelo limite do mesmo valor.</li>
             <li><b>Conferir:</b> aparece quando o creditado pelo sistema difere do cálculo pelos planos de todo o histórico.</li></ul></details>`
@@ -589,7 +590,7 @@ function renderPerfil(ctx) {
             : '<p class="rede-vazio">Nenhuma recarga no período.</p>');
 
     // Comissões
-    const secCom = `<div class="rede-stats rede-stats--bloco">${stat('Ganhou', brl(cm.ganha), 'rede-stat--destaque')}${stat('Já recebeu', brl(cm.recebida))}${stat('Pendente', brl(cm.pendente), cm.pendente ? 'rede-stat--aviso' : '')}${cm.aguardando ? stat('Travada', brl(cm.aguardando), 'rede-stat--aviso') : ''}${stat('Creditado (total)', brl(cm.creditada))}</div>`
+    const secCom = `<div class="rede-stats rede-stats--bloco">${stat('Ganhou', brl(cm.ganha), 'rede-stat--destaque')}${stat('Já recebeu', brl(cm.recebida))}${stat('Pendente', brl(cm.pendente), cm.pendente ? 'rede-stat--aviso' : '')}${cm.aguardando ? stat('Travada', brl(cm.aguardando), 'rede-stat--aviso') : ''}${stat('Creditado (total)', brl(cm.creditada))}${cm.bonus ? stat('Bônus de missões', brl(cm.bonus)) : ''}</div>`
         + (cm.divergente ? `<div class="rede-item__alerta">Conferir: o sistema creditou ${brl(cm.creditada)} e o cálculo pelos planos dos indicados dá ${brl(cm.ganhaTotal)} (diferença ${brl(cm.divergencia)}).</div>` : '');
 
     return cabecalho
