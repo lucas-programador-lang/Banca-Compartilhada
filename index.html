@@ -49,6 +49,10 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                         Equipe
                     </a>
+                    <a href="#" class="nav-item" data-target="view-missoes">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l8 3v6c0 5-3.4 9-8 11-4.6-2-8-6-8-11V5z"/><path d="M12 8l1.5 3 3.3.5-2.4 2.3.6 3.3-3-1.6-3 1.6.6-3.3-2.4-2.3 3.3-.5z"/></svg>
+                        Missões
+                    </a>
                     <a href="#" class="nav-item" data-target="view-extrato">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                         Extrato
@@ -490,6 +494,11 @@
                 </div>
             </section>
 
+            <!-- ==================== MISSÕES DE INDICAÇÃO ==================== -->
+            <section id="view-missoes" class="view-section" style="display: none;">
+                <div id="missoesRaiz" class="missoes-area"></div>
+            </section>
+
             <!-- ================= ABA EXTRATO ================= -->
             <section id="view-extrato" class="view-section" style="display: none;">
                 <h2>Extrato de Recebimentos</h2>
@@ -753,6 +762,7 @@
     <!-- Scripts -->
     <script type="module" src="auth.js"></script>
     <script type="module" src="script.js"></script>
+    <script type="module" src="missoes.js"></script>
      <script src="update-modal.js"></script>
 </body>
 </html>
