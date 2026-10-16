@@ -5,7 +5,7 @@
    ========================================================================== */
 import {
     construirRede, niveis, cadeiaDeIndicadores, buscar,
-    agregarDepositos, recargasDoUsuario, agregarArvore, caixaPorEquipe, calcularComissoes,
+    agregarDepositos, agregarPlanos, recargasDoUsuario, agregarArvore, caixaPorEquipe, calcularComissoes,
     dentroDoPeriodo, PERIODO_TUDO, COMISSAO_PERCENTUAL,
 } from './rede-calculos.js';
 
@@ -164,7 +164,10 @@ function montarContexto(e) {
     const dep = agregarDepositos(e.depositos || {}, periodo, rede.por);
     const depTodos = periodo.tudo ? dep : agregarDepositos(e.depositos || {}, PERIODO_TUDO, rede.por);
     const arvore = agregarArvore(rede, dep.porUsuario);
-    return { rede, periodo, dep, depTodos, arvore, depositos: e.depositos || {}, financeiro: e.financeiro || {} };
+    const planosPer = agregarPlanos(e.planos || {}, periodo, rede.por);
+    const planosTodos = periodo.tudo ? planosPer : agregarPlanos(e.planos || {}, PERIODO_TUDO, rede.por);
+    const comissoes = calcularComissoes(rede, planosPer, planosTodos, dep, e.financeiro || {});
+    return { rede, periodo, dep, depTodos, arvore, comissoes, depositos: e.depositos || {}, financeiro: e.financeiro || {} };
 }
 
 function renderizar() {
@@ -173,7 +176,7 @@ function renderizar() {
     if (!alvo) return;
 
     const e = obterEstado();
-    if (e.usuarios === null || e.depositos === null) {
+    if (e.usuarios === null || e.depositos === null || e.planos === null) {
         alvo.innerHTML = '<p class="rede-vazio">Carregando dados...</p>';
         return;
     }
@@ -440,7 +443,7 @@ function renderRecargas(ctx) {
             + (pend ? stat('Pendente', brl(pend), 'rede-stat--aviso') : ''));
     });
     return resumo
-        + '<p class="rede-nota">Valores confirmados. "Equipe" soma todos os níveis abaixo do usuário. Uma mesma recarga aparece na equipe de cada pessoa acima de quem recarregou, por isso não some as linhas entre si (veja a aba Caixa).</p>'
+        + '<p class="rede-nota">Valores confirmados (pagos e ainda no caixa; reembolsos marcados como resolvidos ficam de fora). "Equipe" soma todos os níveis abaixo do usuário. Uma mesma recarga aparece na equipe de cada pessoa acima de quem recarregou, por isso não some as linhas entre si (veja a aba Caixa).</p>'
         + paginar('recargas', itens, ui.busca ? 'Ninguém encontrado.' : 'Nenhuma recarga neste período.');
 }
 
@@ -488,38 +491,43 @@ function renderCaixa(ctx) {
    Aba: Comissões
    ========================================================================== */
 function renderComissoes(ctx) {
-    const { rede, dep, depTodos, financeiro } = ctx;
-    const cm = calcularComissoes(rede, dep, depTodos, financeiro);
+    const { rede, periodo } = ctx;
+    const cm = ctx.comissoes;
     const pct = Math.round(COMISSAO_PERCENTUAL * 100);
     const resumo = cartoes([
-        cartao('Ganhou (período)', brl(cm.total.ganha)),
+        cartao(periodo.tudo ? 'Ganhou (total)' : 'Ganhou (período)', brl(cm.total.ganha)),
         cartao('Já recebeu (total)', brl(cm.total.recebida)),
-        cartao('Pendente', brl(cm.total.pendente)),
+        cartao('Pendente (total)', brl(cm.total.pendente)),
         cartao('Para conferir', cm.total.divergentes, cm.total.divergentes ? 'rede-card--alerta' : ''),
     ]);
+    const travada = cm.total.aguardando
+        ? `<p class="rede-nota">${brl(cm.total.aguardando)} de comissão está travada em depósitos pagos cujo plano foi bloqueado pelo limite. Só é paga se você usar "Criar plano mesmo assim" em Pendências de Plano.</p>` : '';
+
     let uids = ui.busca ? buscar(rede, ui.busca) : [...rede.por.keys()].filter((uid) => {
         const l = cm.linhas.get(uid);
-        return l.ganha > 0 || l.recebida > 0 || l.pendente > 0;
+        return l.ganha > 0 || l.creditada > 0 || l.pendente > 0 || l.aguardando > 0;
     });
     uids = uids.sort((a, b) => cm.linhas.get(b).ganha - cm.linhas.get(a).ganha
-        || cm.linhas.get(b).recebida - cm.linhas.get(a).recebida);
+        || cm.linhas.get(b).creditada - cm.linhas.get(a).creditada);
     const itens = uids.map((uid) => {
         const l = cm.linhas.get(uid);
         const alerta = l.divergente
-            ? `<div class="rede-item__alerta">Conferir: o sistema creditou ${brl(l.recebida)} e o cálculo pelas recargas dá ${brl(l.ganhaTotal)} (diferença ${brl(l.divergencia)}).</div>` : '';
+            ? `<div class="rede-item__alerta">Conferir: o sistema creditou ${brl(l.creditada)} e o cálculo pelos planos dos indicados dá ${brl(l.ganhaTotal)} (diferença ${brl(l.divergencia)}).</div>` : '';
         return `<div class="rede-item rede-item--coluna">
             <div class="rede-item--linha">${principal(ctx, uid)}<div class="rede-stats">
                 ${stat('Ganhou', brl(l.ganha), 'rede-stat--destaque')}
                 ${stat('Já recebeu', brl(l.recebida))}
                 ${stat('Pendente', brl(l.pendente), l.pendente ? 'rede-stat--aviso' : '')}
+                ${l.aguardando ? stat('Travada', brl(l.aguardando), 'rede-stat--aviso') : ''}
             </div></div>${alerta}</div>`;
     });
-    return resumo
+    return resumo + travada
         + `<details class="rede-aviso rede-aviso--info"><summary>Como é calculado</summary>
-            <ul><li><b>Ganhou:</b> ${pct}% das recargas confirmadas dos indicados diretos (1º nível), dentro do período.</li>
-            <li><b>Já recebeu:</b> o que o sistema já creditou na conta (acumulado de sempre; não muda com o filtro de período).</li>
-            <li><b>Pendente:</b> ${pct}% das recargas dos indicados diretos que ainda aguardam confirmação.</li>
-            <li><b>Conferir:</b> aparece quando o creditado difere do cálculo pelas recargas de todo o histórico.</li></ul></details>`
+            <ul><li><b>Ganhou:</b> ${pct}% do valor de cada plano ativado pelos indicados diretos (1º nível), pela data de ativação. É o momento em que o sistema credita; vale também para planos criados pelo admin, e cancelar o plano depois não devolve a comissão.</li>
+            <li><b>Já recebeu:</b> a parte da comissão que já saiu em saques (creditado − saldo de comissão). Total de sempre.</li>
+            <li><b>Pendente:</b> a comissão que ainda está no saldo, sem sacar. Total de sempre.</li>
+            <li><b>Travada:</b> ${pct}% de depósitos pagos cujo plano foi bloqueado pelo limite do mesmo valor.</li>
+            <li><b>Conferir:</b> aparece quando o creditado pelo sistema difere do cálculo pelos planos de todo o histórico.</li></ul></details>`
         + paginar('comissoes', itens, ui.busca ? 'Ninguém encontrado.' : 'Nenhuma comissão neste período.');
 }
 
@@ -528,12 +536,12 @@ function renderComissoes(ctx) {
    ========================================================================== */
 function renderPerfil(ctx) {
     if (ui.busca || !ui.selecionado) return seletor(ctx, 'Escolha o usuário');
-    const { rede, periodo, arvore, dep, depTodos, financeiro, depositos } = ctx;
+    const { rede, periodo, arvore, dep, depositos } = ctx;
     const uid = ui.selecionado;
     const u = rede.por.get(uid);
     const a = arvore.get(uid);
     const lv = niveis(rede, uid);
-    const cm = calcularComissoes(rede, dep, depTodos, financeiro).linhas.get(uid);
+    const cm = ctx.comissoes.linhas.get(uid);
     const cadeia = cadeiaDeIndicadores(rede, uid);
     const diretos = rede.filhos.get(uid) || [];
     const diretosPeriodo = diretos.filter((f) => dentroDoPeriodo(rede.por.get(f).cadastro, periodo));
@@ -576,13 +584,13 @@ function renderPerfil(ctx) {
             ${stat('Próprias confirmadas', brl(proprias.conf))}${stat('Próprias pendentes', brl(proprias.pend), proprias.pend ? 'rede-stat--aviso' : '')}
             ${stat('Equipe confirmadas', brl(a.confEquipe))}${stat('Equipe pendentes', brl(a.pendEquipe), a.pendEquipe ? 'rede-stat--aviso' : '')}</div>`
         + (recentes.length
-            ? `<ul class="rede-sublista">${recentes.slice(0, limR).map((r) => `<li><span>${brl(r.cent)} <small>${r.confirmada ? 'confirmada' : 'pendente'}</small></span><small>${diaHora(r.ms)}</small></li>`).join('')}</ul>`
+            ? `<ul class="rede-sublista">${recentes.slice(0, limR).map((r) => `<li><span>${brl(r.cent)} <small>${r.semPlano ? 'paga, plano travado' : (r.confirmada ? 'confirmada' : 'pendente')}</small></span><small>${diaHora(r.ms)}</small></li>`).join('')}</ul>`
               + (recentes.length > limR ? `<button type="button" class="rede-mais rede-mais--pequeno" data-acao="mais" data-chave="${esc('i-perfil-rec-' + uid)}">Mostrar mais (${recentes.length - limR} restantes)</button>` : '')
             : '<p class="rede-vazio">Nenhuma recarga no período.</p>');
 
     // Comissões
-    const secCom = `<div class="rede-stats rede-stats--bloco">${stat('Ganhou', brl(cm.ganha), 'rede-stat--destaque')}${stat('Já recebeu', brl(cm.recebida))}${stat('Pendente', brl(cm.pendente), cm.pendente ? 'rede-stat--aviso' : '')}${stat('Saldo de comissão', brl(cm.saldo))}</div>`
-        + (cm.divergente ? `<div class="rede-item__alerta">Conferir: o sistema creditou ${brl(cm.recebida)} e o cálculo pelas recargas dá ${brl(cm.ganhaTotal)} (diferença ${brl(cm.divergencia)}).</div>` : '');
+    const secCom = `<div class="rede-stats rede-stats--bloco">${stat('Ganhou', brl(cm.ganha), 'rede-stat--destaque')}${stat('Já recebeu', brl(cm.recebida))}${stat('Pendente', brl(cm.pendente), cm.pendente ? 'rede-stat--aviso' : '')}${cm.aguardando ? stat('Travada', brl(cm.aguardando), 'rede-stat--aviso') : ''}${stat('Creditado (total)', brl(cm.creditada))}</div>`
+        + (cm.divergente ? `<div class="rede-item__alerta">Conferir: o sistema creditou ${brl(cm.creditada)} e o cálculo pelos planos dos indicados dá ${brl(cm.ganhaTotal)} (diferença ${brl(cm.divergencia)}).</div>` : '');
 
     return cabecalho
         + cartoes([
