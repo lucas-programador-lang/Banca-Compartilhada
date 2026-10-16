@@ -7,7 +7,13 @@
 
 /* ---- Regras de negócio (ajuste aqui se o servidor mudar) ---- */
 export const COMISSAO_PERCENTUAL = 0.10;      // 10% sobre recargas do 1º nível
-export const STATUS_CONFIRMADA = ['aprovado', 'aprovado_sem_plano', 'resolvido_sem_plano'];
+// Recarga confirmada = dinheiro recebido e ainda no caixa.
+//  - 'aprovado': pago e plano criado.
+//  - 'aprovado_sem_plano': pago, mas o plano ficou travado pelo limite (aguarda decisão do admin).
+//  - 'resolvido_sem_plano' fica de FORA: o admin marcou como resolvido sem plano
+//    (ex.: reembolso feito fora do sistema), então o dinheiro não está mais no caixa.
+export const STATUS_CONFIRMADA = ['aprovado', 'aprovado_sem_plano'];
+export const STATUS_SEM_PLANO = 'aprovado_sem_plano';
 export const STATUS_PENDENTE = ['pendente'];
 export const MAX_NIVEIS = 30;                 // trava de segurança
 export const PERIODO_TUDO = { tudo: true, inicio: null, fim: null };
@@ -192,14 +198,14 @@ export function buscar(rede, termo, limite = Infinity) {
    ========================================================================== */
 export function agregarDepositos(depositos, periodo, usuariosMap) {
     const porUsuario = new Map();
-    const total = { conf: 0, confQtd: 0, pend: 0, pendQtd: 0 };
-    const semConta = { conf: 0, confQtd: 0, pend: 0, pendQtd: 0 };
+    const total = { conf: 0, confQtd: 0, pend: 0, pendQtd: 0, semPlano: 0 };
+    const semConta = { conf: 0, confQtd: 0, pend: 0, pendQtd: 0, semPlano: 0 };
 
     for (const [uid, registros] of Object.entries(depositos || {})) {
         if (!registros || typeof registros !== 'object') continue;
         const existe = usuariosMap ? usuariosMap.has(uid) : true;
         const alvo = existe
-            ? (porUsuario.get(uid) || porUsuario.set(uid, { conf: 0, confQtd: 0, pend: 0, pendQtd: 0 }).get(uid))
+            ? (porUsuario.get(uid) || porUsuario.set(uid, { conf: 0, confQtd: 0, pend: 0, pendQtd: 0, semPlano: 0 }).get(uid))
             : semConta;
 
         for (const d of Object.values(registros)) {
@@ -213,6 +219,7 @@ export function agregarDepositos(depositos, periodo, usuariosMap) {
                 if (!dentroDoPeriodo(ms, periodo)) continue;
                 alvo.conf += cent; alvo.confQtd++;
                 total.conf += cent; total.confQtd++;
+                if (status === STATUS_SEM_PLANO) { alvo.semPlano += cent; total.semPlano += cent; }
             } else if (STATUS_PENDENTE.includes(status)) {
                 const ms = paraMs(d.dataSolicitacao);
                 if (!dentroDoPeriodo(ms, periodo)) continue;
@@ -239,7 +246,7 @@ export function recargasDoUsuario(depositos, uid, periodo) {
             ? (paraMs(d.dataAprovacao) ?? paraMs(d.dataSolicitacao))
             : paraMs(d.dataSolicitacao);
         if (!dentroDoPeriodo(ms, periodo)) continue;
-        lista.push({ id, cent, status, confirmada, ms });
+        lista.push({ id, cent, status, confirmada, semPlano: status === STATUS_SEM_PLANO, ms });
     }
     lista.sort((a, b) => (b.ms ?? 0) - (a.ms ?? 0));
     return lista;
@@ -304,38 +311,68 @@ export function caixaPorEquipe(rede, arvore, dep) {
 }
 
 /* ==========================================================================
-   Comissões
-   - ganha:    10% das recargas CONFIRMADAS dos indicados DIRETOS (no período)
-   - pendente: 10% das recargas ainda PENDENTES dos indicados diretos (no período)
-   - recebida: o que o sistema já creditou (financeiro/{uid}/comissao) — é um
-               acumulado sem datas, então NÃO muda com o filtro de período
-   - divergência: recebida − ganha(todo o histórico). Diferente de zero = conferir.
+   Planos ativados (base da comissão)
+   O worker credita a comissão no momento em que o PLANO é criado: pelo Pix
+   pago, pela aprovação manual, pela resolução de pendência ("criar plano") e
+   pelo "Gerenciar planos" do admin. Cancelar o plano depois NÃO devolve a
+   comissão. Por isso a base é o valor de todos os planos, em qualquer status,
+   na data de ativação.
    ========================================================================== */
-export function calcularComissoes(rede, depPeriodo, depTodos, financeiro) {
+export function agregarPlanos(planos, periodo, usuariosMap) {
+    const porUsuario = new Map();
+    for (const [uid, registros] of Object.entries(planos || {})) {
+        if (!registros || typeof registros !== 'object') continue;
+        if (usuariosMap && !usuariosMap.has(uid)) continue;
+        for (const p of Object.values(registros)) {
+            if (!p || typeof p !== 'object') continue;
+            const cent = paraCentavos(p.valor);
+            if (cent <= 0) continue;
+            if (!dentroDoPeriodo(paraMs(p.dataAtivacao), periodo)) continue;
+            const a = porUsuario.get(uid) || porUsuario.set(uid, { valor: 0, qtd: 0 }).get(uid);
+            a.valor += cent;
+            a.qtd++;
+        }
+    }
+    return porUsuario;
+}
+
+/* ==========================================================================
+   Comissões (regra do worker: 10% do valor do plano, só para o indicador direto)
+   - ganha:      10% dos planos ativados pelos indicados DIRETOS, no período
+   - recebida:   o que já saiu em saques  = creditada − saldo de comissão
+   - pendente:   o que ainda está no saldo de comissão (não sacado)
+   - aguardando: 10% de depósitos pagos cujo plano ficou travado pelo limite;
+                 a comissão só sai se o admin escolher "criar plano mesmo assim"
+   - creditada:  financeiro/{uid}/comissao (acumulado de sempre, sem datas)
+   - divergência: creditada − ganha(todo o histórico). Diferente de zero = conferir.
+   ========================================================================== */
+export function calcularComissoes(rede, planosPeriodo, planosTodos, depPeriodo, financeiro) {
     const linhas = new Map();
-    const tot = { ganha: 0, recebida: 0, pendente: 0, divergentes: 0 };
+    const tot = { ganha: 0, creditada: 0, recebida: 0, pendente: 0, aguardando: 0, divergentes: 0 };
 
     for (const uid of rede.por.keys()) {
-        let confPer = 0, pendPer = 0, confTodos = 0;
+        let basePer = 0, baseTodos = 0, semPlano = 0;
         for (const f of rede.filhos.get(uid)) {
-            const per = depPeriodo.porUsuario.get(f);
-            if (per) { confPer += per.conf; pendPer += per.pend; }
-            const todos = depTodos.porUsuario.get(f);
-            if (todos) confTodos += todos.conf;
+            basePer += planosPeriodo.get(f)?.valor || 0;
+            baseTodos += planosTodos.get(f)?.valor || 0;
+            semPlano += depPeriodo.porUsuario.get(f)?.semPlano || 0;
         }
         const fin = (financeiro || {})[uid] || {};
-        const ganha = Math.round(confPer * COMISSAO_PERCENTUAL);
-        const pendente = Math.round(pendPer * COMISSAO_PERCENTUAL);
-        const ganhaTotal = Math.round(confTodos * COMISSAO_PERCENTUAL);
-        const recebida = paraCentavos(fin.comissao);
-        const saldo = paraCentavos(fin.saldoComissao);
-        const divergencia = recebida - ganhaTotal;
+        const ganha = Math.round(basePer * COMISSAO_PERCENTUAL);
+        const ganhaTotal = Math.round(baseTodos * COMISSAO_PERCENTUAL);
+        const aguardando = Math.round(semPlano * COMISSAO_PERCENTUAL);
+        const creditada = paraCentavos(fin.comissao);
+        const pendente = Math.max(paraCentavos(fin.saldoComissao), 0);
+        const recebida = Math.max(creditada - pendente, 0);
+        const divergencia = creditada - ganhaTotal;
         const divergente = Math.abs(divergencia) >= 1;
 
-        linhas.set(uid, { ganha, pendente, recebida, saldo, ganhaTotal, divergencia, divergente });
+        linhas.set(uid, { ganha, ganhaTotal, creditada, recebida, pendente, aguardando, divergencia, divergente });
         tot.ganha += ganha;
+        tot.creditada += creditada;
         tot.recebida += recebida;
         tot.pendente += pendente;
+        tot.aguardando += aguardando;
         if (divergente) tot.divergentes++;
     }
     return { linhas, total: tot };
