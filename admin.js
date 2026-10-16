@@ -164,7 +164,6 @@ function confirmarAcao({
                 e.preventDefault();
                 fechar(false);
             } else if (e.key === 'Tab') {
-                // mantém o foco dentro do modal
                 e.preventDefault();
                 (document.activeElement === btnCancelar ? btnConfirmar : btnCancelar).focus();
             }
@@ -178,7 +177,6 @@ function confirmarAcao({
         document.addEventListener('keydown', aoTeclar, true);
 
         document.body.appendChild(overlay);
-        // operação perigosa: foco no Cancelar; as demais: foco no Confirmar
         (perigo ? btnCancelar : btnConfirmar).focus();
     });
 }
@@ -346,7 +344,6 @@ function garantirSecaoPlanosNoHTML() {
     const conteudoAdmin = document.getElementById('conteudoAdmin');
     if (!conteudoAdmin) return;
 
-    // Pega as mesmas classes da tabela de Depósitos para ficar igual ao seu CSS
     const tabelaRef = document.getElementById('tabelaDepositosAdmin')?.closest('table');
     const wrapperRef = tabelaRef?.parentElement;
     const classeTabela = tabelaRef?.className || 'table';
@@ -371,19 +368,19 @@ function garantirSecaoPlanosNoHTML() {
                         <th>CLIENTE</th>
                         <th>PLANO / DIÁRIO</th>
                         <th>HORÁRIO QUE ADQUIRIU</th>
+                        <th>TÉRMINO PREVISTO</th>
                         <th>ÚLTIMO RENDIMENTO PAGO</th>
                         <th>JÁ CREDITADO / TETO</th>
                         <th>STATUS</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaPlanosAdmin">
-                    <tr><td colspan="6" class="table-empty">Carregando planos...</td></tr>
+                    <tr><td colspan="7" class="table-empty">Carregando planos...</td></tr>
                 </tbody>
             </table>
         </div>
     `;
 
-    // Insere logo acima do bloco de "Todos os Depósitos"
     const blocoDepositos = wrapperRef?.parentElement || wrapperRef;
     if (blocoDepositos && blocoDepositos.parentNode) {
         blocoDepositos.parentNode.insertBefore(secao, blocoDepositos);
@@ -451,7 +448,7 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
     if (elTotalAtivos) elTotalAtivos.textContent = ativosCount;
 
     if (!todosPlanos.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhum plano adquirido ainda.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="table-empty">Nenhum plano adquirido ainda.</td></tr>';
         return;
     }
 
@@ -464,6 +461,8 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
         const jaCreditado = parseFloat(plano.valorCreditado || 0);
 
         const horarioAdquiriu = formatarDataHora(plano.dataAtivacao);
+        const terminoPrevisto = formatarDataHora(plano.dataExpiracao); // 👈 EXIBE DATA DE TÉRMINO PREVISTO
+        
         const horarioUltimoPagamento = plano.ultimoRendimentoEm
             ? `<span style="color: var(--success); font-weight: 600;">${formatarDataHora(plano.ultimoRendimentoEm)}</span>`
             : (jaCreditado > 0
@@ -478,6 +477,7 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
                     <small style="color: var(--success); font-size: 0.82em;">+${formatadorMoeda.format(valorDiario)}/dia (${(percDiario * 100).toFixed(1)}%)</small>
                 </td>
                 <td>${horarioAdquiriu}</td>
+                <td><strong style="color: var(--adm-primary, #10b981);">${terminoPrevisto}</strong></td>
                 <td>${horarioUltimoPagamento}</td>
                 <td>
                     <strong>${formatadorMoeda.format(jaCreditado)}</strong>
@@ -1087,8 +1087,6 @@ function iniciarFormularioGerenciarPlano() {
     btn.dataset.listenerAtivo = 'true';
 }
 
-/* Copia o título de cada coluna para cada célula (data-label).
-   O CSS usa isso para mostrar os rótulos quando a tabela vira cards no celular. */
 function aplicarRotulosMobile() {
     document.querySelectorAll('.table-container table').forEach((tabela) => {
         const titulos = [...tabela.querySelectorAll('thead th')].map(th => th.textContent.trim());
@@ -1218,7 +1216,6 @@ function iniciarBotaoRodarRendimentos() {
     btn.dataset.listenerAtivo = 'true';
 }
 
-/* ---------- Missões de indicação (painel) ---------- */
 async function lerExtratoMissao(uid, extratoId) {
     const snap = await get(ref(db, `extrato/${uid}/${extratoId}`));
     return snap.val();
@@ -1299,7 +1296,7 @@ function iniciarListenersAdmin() {
     }, (error) => {
         console.error('Erro ao carregar a configuração das missões:', error);
         estado.missoesConfig = {};
-        estado.missoesErro = 'sem permissão para ler missoesConfig (publique as rules novas)';
+        estado.missoesErro = 'sem permissão para ler missoesConfig';
         rerenderizarTudo();
     });
 
@@ -1309,7 +1306,7 @@ function iniciarListenersAdmin() {
     }, (error) => {
         console.error('Erro ao carregar as coletas de missões:', error);
         estado.missoesColetas = {};
-        estado.missoesErro = 'sem permissão para ler missoesColetas (publique as rules novas)';
+        estado.missoesErro = 'sem permissão para ler missoesColetas';
         rerenderizarTudo();
     });
 
