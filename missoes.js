@@ -85,86 +85,64 @@ async function coletar(missaoId) {
 }
 
 /* ---------- visual ---------- */
-const MEDALHAS = [
-    { nome: 'bronze', a: '#e0a66b', b: '#8a5a2b' },
-    { nome: 'prata', a: '#f2f5fb', b: '#8f9bb3' },
-    { nome: 'ouro', a: '#ffe08a', b: '#c8922a' },
-    { nome: 'platina', a: '#dfeaff', b: '#6f8fd1' },
-    { nome: 'diamante', a: '#b9f1ff', b: '#3d9fd6' },
-    { nome: 'mestre', a: '#fff6d6', b: '#e0a92c' },
-];
-
-function definicoesSvg() {
-    return `<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
-        ${MEDALHAS.map((m) => `<linearGradient id="missaoGrad-${m.nome}" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="${m.a}"/><stop offset="1" stop-color="${m.b}"/></linearGradient>`).join('')}
-        <linearGradient id="missaoGrad-bloqueada" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#5b6b8f"/><stop offset="1" stop-color="#2c3a5c"/></linearGradient>
-    </defs></svg>`;
-}
-
-function escudo(indice, estadoMissao) {
-    const bloqueada = estadoMissao === 'bloqueada';
-    const medalha = MEDALHAS[indice % MEDALHAS.length];
-    const fill = bloqueada ? 'url(#missaoGrad-bloqueada)' : `url(#missaoGrad-${medalha.nome})`;
-    const centro = bloqueada
-        ? '<path d="M9.5 13v-2a2.5 2.5 0 0 1 5 0v2M8.5 13h7v5h-7z" fill="none" stroke="#c9d3ea" stroke-width="1.4" stroke-linejoin="round"/>'
-        : estadoMissao === 'coletada'
-            ? '<path d="M8.2 12.6l2.6 2.6 5-5.4" fill="none" stroke="#0b1f4a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'
-            : '<path d="M12 7.2l1.5 3.1 3.4.5-2.45 2.4.58 3.4L12 14.9l-3.03 1.7.58-3.4L7.1 10.8l3.4-.5z" fill="#0b1f4a"/>';
-    return `<svg class="missao-escudo" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 1.6l8.4 3v6.2c0 5.1-3.5 9.2-8.4 11.6C7.1 20 3.6 15.9 3.6 10.8V4.6z" fill="${fill}" stroke="${bloqueada ? '#7585a9' : '#fff3c4'}" stroke-width="0.9"/>
-        <path d="M12 3.6l6.4 2.3v4.9c0 3.9-2.6 7.2-6.4 9.2-3.8-2-6.4-5.3-6.4-9.2V5.9z" fill="none" stroke="rgba(255,255,255,.35)" stroke-width=".6"/>
-        ${centro}
-    </svg>`;
-}
+const ICONE_CHECK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 12.8l4.2 4.2 8.8-9.4" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICONE_CADEADO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7.5 11V8.5a4.5 4.5 0 0 1 9 0V11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><rect x="5" y="11" width="14" height="10" rx="2.4" fill="currentColor"/></svg>';
 
 const ROTULO_ESTADO = {
     bloqueada: 'Bloqueada',
     disponivel: 'Disponível',
     processando: 'Processando',
-    coletada: 'Recompensa coletada',
+    coletada: 'Coletada',
 };
 
-function cartaoMissao(m, indice, n) {
+function textoTrava(m, indice, missoes, n) {
+    const anteriorAtingida = indice === 0 || missoes[indice - 1].meta <= n;
+    if (!anteriorAtingida) return 'Complete a meta anterior para desbloquear';
+    const faltam = m.meta - n;
+    return `Faltam ${faltam} indicado${faltam === 1 ? '' : 's'} ativo${faltam === 1 ? '' : 's'} para desbloquear`;
+}
+
+function cartaoMissao(m, indice, missoes, n) {
     const progresso = Math.min(n, m.meta);
     const pct = Math.max(0, Math.min(100, (progresso / m.meta) * 100));
+    const bloqueada = m.estado === 'bloqueada';
     const emCurso = estado.coletando.has(m.id);
+    const anteriorAtingida = indice === 0 || missoes[indice - 1].meta <= n;
 
-    let botao;
+    let acao;
     if (m.estado === 'coletada') {
-        botao = '<button type="button" class="missao-btn missao-btn--coletada" disabled>✔ RECOMPENSA COLETADA</button>';
+        acao = '<button type="button" class="m-btn m-btn--coletada" disabled>✔ RECOMPENSA COLETADA</button>';
     } else if (m.estado === 'disponivel') {
-        botao = `<button type="button" class="missao-btn missao-btn--pronta" data-coletar="${esc(m.id)}" ${emCurso ? 'disabled' : ''}>${emCurso ? 'PROCESSANDO...' : 'COLETAR RECOMPENSA'}</button>`;
+        acao = `<button type="button" class="m-btn m-btn--pronta" data-coletar="${esc(m.id)}" ${emCurso ? 'disabled' : ''}>${emCurso ? 'PROCESSANDO...' : 'COLETAR RECOMPENSA'}</button>`;
     } else if (m.estado === 'processando') {
-        botao = '<button type="button" class="missao-btn" disabled>PROCESSANDO...</button>';
+        acao = '<button type="button" class="m-btn" disabled>PROCESSANDO...</button>';
     } else {
-        botao = '<button type="button" class="missao-btn" disabled>🔒 COLETAR RECOMPENSA</button>';
+        acao = '<button type="button" class="m-btn" disabled>COLETAR RECOMPENSA</button>';
     }
 
-    const rodape = m.estado === 'coletada' && m.coletadaEm
-        ? `<p class="missao-nota">Coletada em ${esc(dataHora(m.coletadaEm))}</p>`
-        : m.estado === 'bloqueada'
-            ? `<p class="missao-nota">Faltam ${m.meta - n} indicado${m.meta - n === 1 ? '' : 's'} ativo${m.meta - n === 1 ? '' : 's'}</p>`
-            : '';
+    const medalha = bloqueada ? 'missoes-cavalo-bloqueado.png' : 'missoes-cavalo-ouro.png';
+    const trava = bloqueada
+        ? `<p class="m-trava">${ICONE_CADEADO}<span>${esc(textoTrava(m, indice, missoes, n))}</span></p>`
+        : (m.estado === 'coletada' && m.coletadaEm ? `<p class="m-nota">Coletada em ${esc(dataHora(m.coletadaEm))}</p>` : '');
 
-    return `<article class="missao missao--${esc(m.estado)}" data-missao="${esc(m.id)}">
-        <div class="missao-topo">
-            ${escudo(indice, m.estado)}
-            <div class="missao-meta">
-                <span class="missao-rotulo">Missão ${indice + 1}</span>
-                <strong class="missao-alvo">${m.meta} indicados ativos</strong>
+    const itemClasse = `m-item m-item--${esc(m.estado)}${bloqueada && !anteriorAtingida ? ' m-item--distante' : ''}`;
+    return `<li class="${itemClasse}" data-missao="${esc(m.id)}">
+        <span class="m-no" aria-hidden="true">${bloqueada ? ICONE_CADEADO : ICONE_CHECK}</span>
+        <article class="m-card">
+            <img class="m-medalha" src="${medalha}" alt="" width="88" height="88" loading="lazy">
+            <div class="m-info">
+                <h3 class="m-meta">${m.meta} INDICADOS ATIVOS</h3>
+                <p class="m-sub">Indicações com plano ativo</p>
+                <div class="m-progresso">
+                    <div class="m-barra${bloqueada ? ' m-barra--apagada' : ''}" role="progressbar" aria-valuemin="0" aria-valuemax="${m.meta}" aria-valuenow="${progresso}"><span style="width:${pct.toFixed(1)}%"></span></div>
+                    <span class="m-n">${progresso} / ${m.meta}</span>
+                </div>
+                ${trava}
             </div>
-            <span class="missao-chip missao-chip--${esc(m.estado)}">${ROTULO_ESTADO[m.estado] || ''}</span>
-        </div>
-        <div class="missao-premio"><span>Recompensa</span><strong>${brl(m.recompensa)}</strong></div>
-        <div class="missao-barra" role="progressbar" aria-valuemin="0" aria-valuemax="${m.meta}" aria-valuenow="${progresso}">
-            <span style="width:${pct.toFixed(1)}%"></span>
-        </div>
-        <div class="missao-contagem"><span>${progresso} / ${m.meta}</span><span>${Math.round(pct)}%</span></div>
-        ${botao}
-        ${rodape}
-    </article>`;
+            <div class="m-premio"><span>RECOMPENSA</span><strong>${brl(m.recompensa)}</strong></div>
+            <div class="m-acao">${acao}</div>
+        </article>
+    </li>`;
 }
 
 function resumoProximaMissao(d) {
@@ -172,11 +150,11 @@ function resumoProximaMissao(d) {
     if (!d.missoes.length) return { texto: 'Nenhuma missão disponível no momento.', pct: 0 };
     if (!pendentes.length) return { texto: 'Parabéns! Você concluiu todas as missões.', pct: 100 };
     const pronta = pendentes.find((m) => m.estado === 'disponivel');
-    if (pronta) return { texto: `Você tem uma recompensa de ${brl(pronta.recompensa)} pronta para coletar!`, pct: 100 };
+    if (pronta) return { texto: `Você tem ${brl(pronta.recompensa)} prontos para coletar!`, pct: 100 };
     const proxima = pendentes[0];
     const faltam = proxima.meta - d.indicadosAtivos;
     return {
-        texto: `Faltam ${faltam} indicado${faltam === 1 ? '' : 's'} ativo${faltam === 1 ? '' : 's'} para a próxima recompensa de ${brl(proxima.recompensa)}.`,
+        texto: `Faltam ${faltam} indicado${faltam === 1 ? '' : 's'} ativo${faltam === 1 ? '' : 's'} para ${brl(proxima.recompensa)}.`,
         pct: Math.min(100, (d.indicadosAtivos / proxima.meta) * 100),
     };
 }
@@ -186,9 +164,9 @@ function renderizar() {
     const d = estado.dados;
 
     if (!d) {
-        raiz.innerHTML = cabecalho() + (estado.erro
-            ? `<div class="missoes-aviso"><p>${esc(estado.erro)}</p><button type="button" class="missao-btn missao-btn--pronta" data-recarregar>Tentar de novo</button></div>`
-            : '<p class="missoes-aviso">Carregando suas missões...</p>');
+        raiz.innerHTML = cabecalho(50) + (estado.erro
+            ? `<div class="m-aviso"><p>${esc(estado.erro)}</p><button type="button" class="m-btn m-btn--pronta" data-recarregar>Tentar de novo</button></div>`
+            : '<p class="m-aviso">Carregando suas missões...</p>');
         atualizarPonto();
         return;
     }
@@ -198,42 +176,30 @@ function renderizar() {
     const visiveis = historico.slice(0, estado.historicoVisivel);
     const resta = historico.length - visiveis.length;
 
-    raiz.innerHTML = `${definicoesSvg()}
-        ${cabecalho()}
-        <section class="missoes-resumo">
-            <div class="missoes-contador">
-                <span>Indicados ativos</span>
-                <strong>${d.indicadosAtivos}</strong>
-                <small>de ${d.totalIndicados} indicado${d.totalIndicados === 1 ? '' : 's'} no total</small>
-            </div>
-            <div class="missoes-proxima">
-                <p>${esc(prox.texto)}</p>
-                <div class="missao-barra missao-barra--grande"><span style="width:${prox.pct.toFixed(1)}%"></span></div>
-            </div>
+    raiz.innerHTML = `${cabecalho(d.valorMinimoPlano)}
+        <section class="m-resumo">
+            <div class="m-contador"><span>Indicados ativos</span><strong>${d.indicadosAtivos}</strong><small>de ${d.totalIndicados} indicado${d.totalIndicados === 1 ? '' : 's'}</small></div>
+            <div class="m-proxima"><p>${esc(prox.texto)}</p><div class="m-barra m-barra--grande"><span style="width:${prox.pct.toFixed(1)}%"></span></div></div>
         </section>
-        <p class="missoes-regra">Conta apenas quem você indicou e que tem um <strong>plano ativo de ${brl(d.valorMinimoPlano)} ou mais</strong>. Cada indicado conta uma única vez. A recompensa vai para o seu saldo de comissão.</p>
-        <section class="missoes-grade">
-            ${d.missoes.map((m, i) => cartaoMissao(m, i, d.indicadosAtivos)).join('') || '<p class="missoes-aviso">Nenhuma missão disponível no momento.</p>'}
-        </section>
-        <section class="missoes-historico">
+        <ol class="m-linha">
+            ${d.missoes.map((m, i) => cartaoMissao(m, i, d.missoes, d.indicadosAtivos)).join('') || '<li class="m-aviso">Nenhuma missão disponível no momento.</li>'}
+        </ol>
+        <p class="m-regra">Cada indicado conta uma única vez. A recompensa é creditada no seu saldo de comissão.</p>
+        <section class="m-hist">
             <h3>Histórico de recompensas</h3>
             ${visiveis.length
                 ? `<ul>${visiveis.map((h) => `<li><span><b>${esc(h.meta)} indicados ativos</b><small>${esc(dataHora(h.data))}</small></span><strong>${brl(h.recompensa)}</strong></li>`).join('')}</ul>`
-                : '<p class="missoes-vazio">Você ainda não coletou nenhuma recompensa.</p>'}
-            ${resta > 0 ? `<button type="button" class="missoes-mais" data-mais-historico>Mostrar mais (${resta} restantes)</button>` : ''}
+                : '<p class="m-vazio">Você ainda não coletou nenhuma recompensa.</p>'}
+            ${resta > 0 ? `<button type="button" class="m-mais" data-mais-historico>Mostrar mais (${resta} restantes)</button>` : ''}
         </section>`;
     atualizarPonto();
 }
 
-function cabecalho() {
-    return `<header class="missoes-cabecalho">
-        <span class="missoes-selo" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 1.6l8.4 3v6.2c0 5.1-3.5 9.2-8.4 11.6C7.1 20 3.6 15.9 3.6 10.8V4.6z" fill="#f3c969" stroke="#fff3c4" stroke-width=".8"/><path d="M12 7.2l1.5 3.1 3.4.5-2.45 2.4.58 3.4L12 14.9l-3.03 1.7.58-3.4L7.1 10.8l3.4-.5z" fill="#0b1f4a"/></svg>
-        </span>
-        <div>
-            <h2 class="missoes-titulo">MISSÕES DE INDICAÇÃO</h2>
-            <p>Indique, acompanhe sua evolução e colete recompensas a cada meta.</p>
-        </div>
+function cabecalho(valorMinimo) {
+    return `<header class="m-cab">
+        <img class="m-brasao" src="missoes-brasao.png" alt="" width="150" height="120">
+        <h2 class="m-titulo"><span class="m-t1">MISSÕES DE</span><span class="m-t2">INDICAÇÃO</span></h2>
+        <p class="m-pill"><span class="m-estrela" aria-hidden="true">✦</span>Só contam planos ativos a partir de ${brl(valorMinimo)}</p>
     </header>`;
 }
 
