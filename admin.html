@@ -106,6 +106,37 @@
                 </div>
             </div>
 
+            <!-- SEÇÃO DE PLANOS ADQUIRIDOS (COM TÉRMINO PREVISTO) -->
+            <section class="table-section" style="margin-top: var(--space-lg);">
+                <div class="table-section__head">
+                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                        <h3>Planos Adquiridos e Horários de Pagamento</h3>
+                        <span class="planos-head__count"><strong id="totalPlanosAtivosAdmin">0</strong> ativos</span>
+                    </div>
+                </div>
+                <div id="infoUltimaExecucaoRobo" class="robo-status" style="margin-bottom: var(--space-md);">
+                    <div class="robo-status__card robo-status__card--vazio">Carregando status do robô de rendimentos...</div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>CLIENTE</th>
+                                <th>PLANO / DIÁRIO</th>
+                                <th>HORÁRIO QUE ADQUIRIU</th>
+                                <th>TÉRMINO PREVISTO</th>
+                                <th>ÚLTIMO RENDIMENTO PAGO</th>
+                                <th>JÁ CREDITADO / TETO</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaPlanosAdmin">
+                            <tr><td colspan="7" class="table-empty">Carregando planos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- FASE 2: AJUSTE MANUAL DE SALDO -->
             <section class="table-section" id="secaoRendimentoManual">
                 <div class="table-section__head">
