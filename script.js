@@ -316,7 +316,7 @@ function renderizarTabelaCarteira(planosObj) {
         : [];
 
     if (!planos.length) {
-        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum plano ativo no momento.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhum plano ativo no momento.</td></tr>';
         if (elTotalInvestido) elTotalInvestido.innerText = formatadorMoeda.format(0);
         if (elTotalRendimento) elTotalRendimento.innerText = formatadorMoeda.format(0);
         return;
