@@ -67,6 +67,15 @@ const STATUS_CORES = {
     cancelado_pelo_admin: 'var(--danger)',
 };
 
+/* Comprovante do saque no Telegram: aparece só para saques pagos com a exigência ligada */
+function notaComprovante(saque) {
+    if (!saque || saque.status !== 'pago' || saque.comprovanteObrigatorio !== true) return '';
+    const codigo = 'BC-' + String(saque.id || '').slice(-8).toUpperCase();
+    return saque.comprovantePostadoEm
+        ? `<div style="font-size: 0.75rem; color: var(--success); margin-top: 2px;">Comprovante postado ✓ <span style="color: var(--text-muted);">${escapeHTML(codigo)}</span></div>`
+        : `<div style="font-size: 0.75rem; color: var(--warning); margin-top: 2px;">Aguardando comprovante <span style="color: var(--text-muted);">${escapeHTML(codigo)}</span></div>`;
+}
+
 function badgeStatus(status) {
     const chave = (status || 'pendente').toLowerCase();
     const label = STATUS_LABELS[chave] || status || 'Pendente';
@@ -227,7 +236,7 @@ function renderizarTabelaSaques(saques, usuarios) {
                         <small style="color: var(--danger); font-size: 0.85em;">Taxa (14%): -${formatadorMoeda.format(saque.taxa || 0)}</small><br>
                         <small style="color: var(--success); font-weight: 600;">Líquido: ${formatadorMoeda.format(saque.valorLiquido || 0)}</small>
                     </td>
-                    <td>${badgeStatus(saque.status)}</td>
+                    <td>${badgeStatus(saque.status)}${notaComprovante(saque)}</td>
                     <td>${acoes}</td>
                 </tr>
             `;
