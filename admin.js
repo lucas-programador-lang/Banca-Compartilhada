@@ -2,6 +2,7 @@ import { auth, db, mostrarToast } from './auth.js';
 import { ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { iniciarRede, atualizarRede } from './admin-rede.js';
 import { iniciarMissoesAdmin, atualizarMissoesAdmin } from './admin-missoes.js';
+import { calcularTerminoPrevisto } from './termino-plano.js';
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
@@ -470,7 +471,7 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
         const jaCreditado = parseFloat(plano.valorCreditado || 0);
 
         const horarioAdquiriu = formatarDataHora(plano.dataAtivacao);
-        const terminoPrevisto = formatarDataHora(plano.dataExpiracao); // 👈 EXIBE DATA DE TÉRMINO PREVISTO
+        const terminoPrevisto = formatarDataHora(calcularTerminoPrevisto(plano) || plano.dataExpiracao); // 👈 EXIBE DATA DE TÉRMINO PREVISTO
         
         const horarioUltimoPagamento = plano.ultimoRendimentoEm
             ? `<span style="color: var(--success); font-weight: 600;">${formatarDataHora(plano.ultimoRendimentoEm)}</span>`
