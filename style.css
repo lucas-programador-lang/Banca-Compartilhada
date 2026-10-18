@@ -2170,14 +2170,15 @@ tbody tr:last-child td {
   }
 
   /* ---------- 2. Planos (6 colunas = 100%) ---------- */
-  table:has(> #tabelaPlanosAdmin) { min-width: 840px; }
-  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(1) { width: 22%; }
+  table:has(> #tabelaPlanosAdmin) { min-width: 960px; }
+  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(1) { width: 17%; }
   table:has(> #tabelaPlanosAdmin) td:nth-child(1) { white-space: normal; overflow-wrap: anywhere; }
-  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(2) { width: 21%; }
-  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(3) { width: 16%; }
-  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(4) { width: 18%; }
-  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(5) { width: 15%; text-align: right; font-variant-numeric: tabular-nums; }
-  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(6) { width: 8%; text-align: center; }
+  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(2) { width: 16%; }
+  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(3) { width: 14%; }
+  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(4) { width: 14%; }
+  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(5) { width: 14%; }
+  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(6) { width: 15%; text-align: right; font-variant-numeric: tabular-nums; }
+  table:has(> #tabelaPlanosAdmin) :is(th, td):nth-child(7) { width: 10%; text-align: center; }
 
   /* ---------- 3. Depósitos (5 colunas = 100%) ---------- */
   table:has(> #tabelaDepositosAdmin) { min-width: 760px; }
