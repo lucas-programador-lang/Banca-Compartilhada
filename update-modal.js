@@ -3,18 +3,13 @@
    Aviso de atualização obrigatória do app Android e Funções Nativas.
 
    Só roda dentro do app (quando existe a ponte "Android"): compara a
-   versão instalada com a última release do GitHub e, se forem
-   diferentes, bloqueia a tela com um aviso pedindo a atualização.
-
-   Cores: as mesmas do site (fundo #080503, dourado #c48849 / #f2ce97,
-   marrom #8a5429, texto #f8eedd). A logo vem de /logo.png.
+   versão instalada com a última release do GitHub e, se for
+   MAIOR, bloqueia a tela com um aviso pedindo a atualização.
    ========================================================= */
 (function () {
   "use strict";
 
   var REPO = "lucas-programador-lang/Banca-Compartilhada";
-  // O nome do arquivo no final do link PRECISA ser idêntico ao nome do APK
-  // anexado na Release do GitHub (banca-compartilhada.apk).
   var APK_URL = "https://github.com/" + REPO + "/releases/latest/download/banca-compartilhada.apk";
   var SUPPORT_URL = "https://t.me/Derekkf12?text=" + encodeURIComponent("Olá, estou com problemas para atualizar o aplicativo Banca Compartilhada.");
   var LOGO_URL = "/logo.png";
@@ -30,11 +25,9 @@
     "box-shadow:0 30px 80px rgba(0,0,0,.65),inset 0 1px 0 rgba(242,206,151,.07);animation:cpuRise .34s cubic-bezier(.2,.9,.3,1)}",
     ".cpu-card::before{content:\"\";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,#8a5429,#f2ce97,#8a5429)}",
 
-    /* Logo da Banca dentro de um círculo com anel dourado */
     ".cpu-icon{position:relative;width:104px;height:104px;margin:2px auto 22px;border-radius:50%;background:#0b0907;border:2px solid #c48849;",
     "box-shadow:0 12px 30px rgba(138,84,41,.5),0 0 0 4px rgba(196,136,73,.14)}",
     ".cpu-icon__disc{display:block;width:100%;height:100%;border-radius:50%;overflow:hidden}",
-    /* A logo já é redonda e tem margem transparente: o scale() preenche o círculo. */
     ".cpu-icon__disc img{display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.1)}",
     ".cpu-icon::after{content:\"\";position:absolute;inset:-10px;border-radius:50%;border:2px solid rgba(196,136,73,.5);animation:cpuPulse 2.2s ease-out infinite}",
 
@@ -78,10 +71,22 @@
     return String(v || "").trim().replace(/^v/i, "");
   }
 
-  // ==========================================================
-  // FUNÇÃO PARA BAIXAR O APK DIRETO PELO APLICATIVO
-  // ==========================================================
-  var RETRY_AFTER_MS = 20000; // sem novidades do app por esse tempo: libera o botão pra tentar de novo
+  // Função para comparar versões (Semantic Versioning)
+  // Retorna 1 se b (nova) for maior que a (instalada)
+  function isNovaVersaoMaior(instalada, nova) {
+    var vA = instalada.split('.').map(Number);
+    var vB = nova.split('.').map(Number);
+    var len = Math.max(vA.length, vB.length);
+    for (var i = 0; i < len; i++) {
+        var numA = vA[i] || 0;
+        var numB = vB[i] || 0;
+        if (numB > numA) return true;
+        if (numB < numA) return false;
+    }
+    return false;
+  }
+
+  var RETRY_AFTER_MS = 20000;
   var retryTimer = null;
   var btnOriginalHtml = null;
 
@@ -104,9 +109,6 @@
     }, RETRY_AFTER_MS);
   }
 
-  // O app Android chama estas duas funções durante a atualização:
-  //  - cpuAtualizacaoProgresso(0 a 100): mostra a porcentagem do download no botão;
-  //  - cpuAtualizacaoFalhou("mensagem"): libera o botão e mostra o motivo.
   window.cpuAtualizacaoProgresso = function (pct) {
     var btn = document.getElementById("cpuUpdateBtn");
     var hint = document.getElementById("cpuHint");
@@ -132,7 +134,6 @@
       btn.style.opacity = "0.7";
       btn.style.pointerEvents = "none";
       armarTemporizador();
-      // O app confere a permissão de instalar apps desconhecidos ANTES de baixar.
       Android.baixarApkDireto(APK_URL);
     } else {
       window.open(APK_URL, "_blank");
@@ -169,7 +170,6 @@
       '</div>';
     document.body.appendChild(backdrop);
 
-    // Versões entram como texto (nunca como HTML).
     document.getElementById("cpuInstalled").textContent = installed && installed !== "0.0.0" ? "v" + installed : "—";
     document.getElementById("cpuLatest").textContent = "v" + latest;
 
@@ -177,8 +177,6 @@
     var support = document.getElementById("cpuSupport");
     btn.addEventListener("click", openUpdateLink);
 
-    // Atualização é obrigatória: trava a rolagem do site e mantém o foco
-    // dentro do aviso (só tem dois elementos clicáveis).
     document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     backdrop.addEventListener("keydown", function (e) {
@@ -191,7 +189,7 @@
   }
 
   function checkForUpdate() {
-    if (typeof Android === "undefined") return; // só vale dentro do app
+    if (typeof Android === "undefined") return; 
 
     var installed = "0.0.0";
     if (typeof Android.obterVersaoApp === "function") {
@@ -203,7 +201,11 @@
       .then(function (data) {
         if (!data || !data.tag_name) return;
         var latest = normalizeVersion(data.tag_name);
-        if (installed !== latest) showUpdateModal(installed, latest);
+        
+        // A MÁGICA FOI ALTERADA AQUI: SÓ ATUALIZA SE FOR REALMENTE UMA NOVA VERSÃO
+        if (isNovaVersaoMaior(installed, latest)) {
+            showUpdateModal(installed, latest);
+        }
       })
       .catch(function (error) { console.error("Erro ao verificar atualizações.", error); });
   }
@@ -214,9 +216,6 @@
     checkForUpdate();
   }
 
-  // ==========================================================
-  // FUNÇÃO DE TEMA ESCURO (Ajustada para o seu 'data-theme')
-  // ==========================================================
   window.mudarTemaApp = function(isEscuro) {
       if (isEscuro) {
           document.documentElement.setAttribute('data-theme', 'dark');
@@ -225,21 +224,13 @@
       }
   };
 
-  // ==========================================================
-  // O TRUQUE GLOBAL DE VIBRAÇÃO (HAPTIC FEEDBACK)
-  // ==========================================================
   document.addEventListener('click', function(event) {
-      // Verifica se a pessoa clicou num botão ou num link
       var elementoClicado = event.target.closest('button, a');
-
       if (elementoClicado) {
-          // Se for no Android, dá o Toque Sutil (vibração premium)
           if (typeof Android !== 'undefined' && typeof Android.toqueSutil === 'function') {
               Android.toqueSutil();
           }
       }
-  }, true); // true = fase de captura: roda ANTES dos outros cliques. Sem isso, botões
-            // que redesenham a tela ao clicar (como o "Atualizar Agora" e a SPA toda)
-            // já saíram do DOM quando este código roda, e o closest() não acha mais o botão.
+  }, true); 
 
 })();
