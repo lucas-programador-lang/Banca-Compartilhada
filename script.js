@@ -1,6 +1,7 @@
 import { auth, db, mostrarToast } from './auth.js';
 import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { calcularTerminoPrevisto } from './termino-plano.js';
 
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 32.50,
@@ -351,8 +352,10 @@ function renderizarTabelaCarteira(planosObj) {
             : '—';
 
         // 👈 DATA DE PREVISÃO DE TÉRMINO / EXPIRAÇÃO
-        const dataExpiracaoStr = plano.dataExpiracao
-            ? formatadorDataHoraCurto.format(new Date(plano.dataExpiracao))
+        const terminoPrevistoIso = calcularTerminoPrevisto(plano) || plano.dataExpiracao;
+        const terminoPrevistoData = terminoPrevistoIso ? new Date(terminoPrevistoIso) : null;
+        const dataExpiracaoStr = (terminoPrevistoData && !isNaN(terminoPrevistoData.getTime()))
+            ? formatadorDataHoraCurto.format(terminoPrevistoData)
             : '—';
 
         const ultimoRend = plano.ultimoRendimentoEm ? new Date(plano.ultimoRendimentoEm) : null;
