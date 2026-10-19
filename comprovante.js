@@ -209,6 +209,70 @@ async function gerarImagem(d) {
 }
 
 /* ==========================================================================
+   Salvar a imagem
+   --------------------------------------------------------------------------
+   Em navegador comum: baixa pelo link com "download".
+   No app Android (WebView) o "download" de blob não faz nada. Por isso:
+     1) se a ponte window.Android.salvarImagem existir, salva na galeria por ela;
+     2) senão, mostra a imagem na própria tela para segurar o dedo e salvar
+        (ou tirar print).
+   ========================================================================== */
+function blobParaDataURL(blob) {
+    return new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onload = () => resolve(String(leitor.result));
+        leitor.onerror = () => reject(leitor.error || new Error('Falha ao ler a imagem.'));
+        leitor.readAsDataURL(blob);
+    });
+}
+
+function emWebView() {
+    const ua = navigator.userAgent || '';
+    if (window.Android) return true;
+    if (/; wv\)|FBAN|FBAV|Instagram|Line\/|MicroMessenger|Telegram/i.test(ua)) return true;
+    // iOS: WebView não traz "Safari" no user agent
+    return /(iPhone|iPad|iPod)/i.test(ua) && /AppleWebKit/i.test(ua) && !/Safari/i.test(ua);
+}
+
+async function salvarPeloApp(blob, nomeArquivo) {
+    try {
+        if (!window.Android || typeof window.Android.salvarImagem !== 'function') return false;
+        const url = await blobParaDataURL(blob);
+        const base64 = url.slice(url.indexOf(',') + 1);
+        const resultado = window.Android.salvarImagem(base64, nomeArquivo);
+        return resultado === true || resultado === 'true';
+    } catch (erro) {
+        console.error('Erro ao salvar pela ponte do app:', erro);
+        return false;
+    }
+}
+
+async function mostrarPrevia(blob) {
+    if (!overlay) return;
+    const url = await blobParaDataURL(blob);
+    const acao = overlay.querySelector('.cmp-acao');
+    if (!acao) return;
+    let caixa = overlay.querySelector('.cmp-previa');
+    if (!caixa) {
+        caixa = document.createElement('div');
+        caixa.className = 'cmp-previa';
+        caixa.style.cssText = 'margin-top:14px;text-align:center';
+        acao.appendChild(caixa);
+    }
+    caixa.innerHTML = `<p class="cmp-dica">Segure o dedo sobre a imagem e escolha salvar, ou tire um print da tela.</p>
+        <img src="${url}" alt="Comprovante de saque" style="width:100%;max-width:420px;border-radius:16px;display:block;margin:10px auto 0;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto">`;
+    caixa.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function baixarPeloNavegador(blob, nomeArquivo) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nomeArquivo;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+/* ==========================================================================
    Tela (modal que só fecha depois da confirmação)
    ========================================================================== */
 const estado = {
@@ -310,20 +374,29 @@ async function aoClicar(e) {
         el.disabled = true;
         try {
             const blob = await gerarImagem(d);
+            if (!blob) throw new Error('Não foi possível gerar a imagem.');
             const arquivo = new File([blob], `comprovante-${d.codigo}.png`, { type: 'image/png' });
+
             if (acao === 'compartilhar') {
                 try {
                     await navigator.share({ files: [arquivo], title: 'Comprovante de saque', text: `Comprovante ${d.codigo} — ${LINK_TELEGRAM}` });
                     liberarConfirmacao();
                 } catch (erro) {
-                    if (erro && erro.name !== 'AbortError') mostrarToast('Não foi possível compartilhar. Use "Salvar imagem".', 'warning');
+                    if (erro && erro.name !== 'AbortError') {
+                        mostrarToast('Não foi possível compartilhar. Use "Salvar imagem".', 'warning');
+                        await mostrarPrevia(blob);
+                    }
                 }
+            } else if (await salvarPeloApp(blob, arquivo.name)) {
+                mostrarToast('Imagem salva na galeria. Agora envie no grupo do Telegram.', 'success');
+                liberarConfirmacao();
+            } else if (emWebView()) {
+                // WebView / navegador embutido: o download não funciona, mostra a imagem na tela
+                await mostrarPrevia(blob);
+                mostrarToast('Segure o dedo sobre a imagem para salvar, ou tire um print.', 'warning');
+                liberarConfirmacao();
             } else {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url; a.download = arquivo.name;
-                document.body.appendChild(a); a.click(); a.remove();
-                setTimeout(() => URL.revokeObjectURL(url), 10000);
+                baixarPeloNavegador(blob, arquivo.name);
                 mostrarToast('Imagem salva. Agora envie no grupo do Telegram.', 'success');
                 liberarConfirmacao();
             }
@@ -356,13 +429,13 @@ async function confirmar(botao) {
         });
         const dados = await resposta.json().catch(() => ({}));
         if (!resposta.ok) throw new Error(dados.error || 'Erro ao confirmar o comprovante.');
-        mostrarToast('✅ Comprovante confirmado! Novos saques liberados.', 'success');
+        mostrarToast('Comprovante confirmado! Novos saques liberados.', 'success');
         // o listener do Firebase recebe a confirmação e fecha; fecha já para não depender da rede
         const saqueConfirmado = estado.aberto;
         if (estado.saques && estado.saques[saqueConfirmado]) estado.saques[saqueConfirmado].comprovantePostadoEm = new Date().toISOString();
         avaliar();
     } catch (erro) {
-        mostrarToast('❌ ' + erro.message, 'error');
+        mostrarToast(erro.message, 'error');
         botao.disabled = false; botao.textContent = textoOriginal;
     } finally {
         estado.enviando = false;
