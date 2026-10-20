@@ -46,6 +46,9 @@ try {
 export const auth = getAuth(app);
 export const db = getDatabase(app);
 
+const WORKER_BASE_URL = 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev';
+const PRAZO_CONFIRMAR_EMAIL_HORAS = 72;   // igual ao do servidor: depois disso a conta não confirmada é excluída
+
 const REDIRECT_APOS_LOGIN_MS = 1000;
 const REDIRECT_APOS_CADASTRO_MS = 1500;
 
@@ -365,6 +368,16 @@ if (registerForm) {
         senhaReg: { vazio: 'Preencha sua senha.', curto: 'A senha deve ter no mínimo 6 caracteres.' },
     });
 
+    // Aviso fixo abaixo do botão: quem se cadastra já sabe do prazo
+    const botaoCadastro = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('button');
+    if (botaoCadastro && !getEl('avisoPrazoEmail')) {
+        const nota = document.createElement('p');
+        nota.id = 'avisoPrazoEmail';
+        nota.textContent = `Depois de criar a conta, confirme seu e-mail em até ${PRAZO_CONFIRMAR_EMAIL_HORAS} horas. Contas que não confirmam o e-mail são excluídas automaticamente.`;
+        nota.style.cssText = 'margin:10px 0 0;font-size:0.85rem;line-height:1.4;color:var(--text-muted);text-align:center;';
+        botaoCadastro.insertAdjacentElement('afterend', nota);
+    }
+
     registerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         vibrar();
@@ -410,7 +423,7 @@ if (registerForm) {
 
             mostrarToast(
                 emailEnviado
-                    ? 'Conta criada! Enviamos um e-mail para você confirmar o endereço.'
+                    ? `Conta criada! Confirme seu e-mail em até ${PRAZO_CONFIRMAR_EMAIL_HORAS} horas: enviamos um link para você.`
                     : 'Conta criada com sucesso!',
                 'success'
             );
@@ -548,11 +561,62 @@ if (document.body.classList.contains('protected-page')) {
 }
 
 /* ==========================================================================
-   Aviso de confirmação de e-mail (painel)
+   Confirmação de e-mail (painel)
    ==========================================================================
-   Aparece só para contas novas (as antigas estão dispensadas no servidor, em
-   emailDispensado/{uid}). Se o nó não puder ser lido, o aviso não aparece. */
+   Vale só para contas novas (as antigas estão dispensadas no servidor, em
+   emailDispensado/{uid}). Enquanto o e-mail não é confirmado:
+     - aparece o aviso com o prazo de 72 horas;
+     - os botões de depositar, sacar, convidar e investir ficam bloqueados
+       (o servidor também recusa: o bloqueio daqui é só para avisar na hora);
+     - passado o prazo, o servidor exclui a conta automaticamente.
+   Se o nó emailDispensado não puder ser lido, nada é bloqueado nem avisado. */
 let avisoEmailIniciado = false;
+let funcoesBloqueadas = false;
+
+const SELETOR_FUNCOES_BLOQUEADAS = [
+    '#btnAbrirDeposito', '#btnDepositar', '#btnConfirmarModalDepositar', '.btn-escolher-plano',
+    '#btnAbrirSaqueModal', '#btnConfirmarModalSacar',
+    '#btnCopiarLinkIndicacao', '#btnCompartilharConvite',
+].join(', ');
+
+const MENSAGEM_FUNCAO_BLOQUEADA = 'Confirme seu e-mail para usar esta função. Veja o aviso no topo do painel.';
+
+// Intercepta o clique ANTES dos outros arquivos (fase de captura) e só avisa.
+function bloquearCliqueSemEmail(evento) {
+    if (!funcoesBloqueadas) return;
+    const alvo = evento.target && evento.target.closest ? evento.target.closest(SELETOR_FUNCOES_BLOQUEADAS) : null;
+    if (!alvo) return;
+    evento.preventDefault();
+    evento.stopImmediatePropagation();
+    mostrarToast(MENSAGEM_FUNCAO_BLOQUEADA, 'warning');
+}
+
+// Esconde o link de indicação e explica o motivo, no lugar do link
+function atualizarCartaoDeConvite(bloquear) {
+    const cartao = document.querySelector('.referral-card');
+    if (!cartao) return;
+    const linhaLink = getEl('linkIndicacao') ? getEl('linkIndicacao').closest('.referral-link-row') : null;
+    const botaoCompartilhar = getEl('btnCompartilharConvite');
+    if (linhaLink) linhaLink.style.display = bloquear ? 'none' : '';
+    if (botaoCompartilhar) botaoCompartilhar.style.display = bloquear ? 'none' : '';
+
+    let nota = getEl('avisoConviteBloqueado');
+    if (bloquear && !nota) {
+        nota = document.createElement('p');
+        nota.id = 'avisoConviteBloqueado';
+        nota.textContent = 'Confirme seu e-mail para liberar o seu link de indicação.';
+        nota.style.cssText = 'margin:8px 0 0;font-weight:600;';
+        cartao.appendChild(nota);
+    } else if (!bloquear && nota) {
+        nota.remove();
+    }
+}
+
+function definirFuncoesBloqueadas(bloquear) {
+    funcoesBloqueadas = bloquear;
+    atualizarCartaoDeConvite(bloquear);
+}
+document.addEventListener('click', bloquearCliqueSemEmail, true);
 
 async function precisaConfirmarEmail(user) {
     if (user.emailVerified) return false;
@@ -564,11 +628,45 @@ async function precisaConfirmarEmail(user) {
     }
 }
 
+// Avisa o servidor que o e-mail foi confirmado (ele confere dentro do token do Firebase).
+async function avisarServidorEmailConfirmado(user) {
+    try {
+        const token = await user.getIdToken(true);   // token novo, já com o e-mail confirmado
+        await fetch(`${WORKER_BASE_URL}/api/conta/email-confirmado`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+        });
+    } catch (erro) {
+        console.error('Não foi possível avisar o servidor da confirmação do e-mail:', erro);
+    }
+}
+
+function textoDoPrazo(user) {
+    const criadoEm = Date.parse((user.metadata && user.metadata.creationTime) || '');
+    if (!Number.isFinite(criadoEm)) return `${PRAZO_CONFIRMAR_EMAIL_HORAS} horas após o cadastro`;
+    const restanteMs = criadoEm + PRAZO_CONFIRMAR_EMAIL_HORAS * 3600000 - Date.now();
+    if (restanteMs <= 0) return 'o prazo terminou e a conta será excluída em breve';
+    const horas = Math.max(1, Math.ceil(restanteMs / 3600000));
+    return `restam cerca de ${horas} ${horas === 1 ? 'hora' : 'horas'}`;
+}
+
 async function iniciarAvisoEmail(user) {
     const cartaoSaldo = document.querySelector('.balance-card');
     if (avisoEmailIniciado || !cartaoSaldo || !getEl('saldoDisponivel')) return;
     avisoEmailIniciado = true;
+
+    // O app guarda o login; "emailVerified" pode estar desatualizado se a pessoa
+    // confirmou pelo link em outro lugar. Recarrega antes de decidir.
+    if (!user.emailVerified) {
+        try { await user.reload(); } catch (erro) { /* segue com o que tem */ }
+    }
+    if (user.emailVerified) {
+        avisarServidorEmailConfirmado(user);   // garante o registro no servidor
+        return;
+    }
     if (!(await precisaConfirmarEmail(user))) return;
+
+    definirFuncoesBloqueadas(true);
 
     const aviso = document.createElement('div');
     aviso.id = 'avisoConfirmarEmail';
@@ -583,12 +681,12 @@ async function iniciarAvisoEmail(user) {
     });
 
     const titulo = document.createElement('strong');
-    titulo.textContent = 'Confirme seu e-mail para poder sacar';
+    titulo.textContent = 'Confirme seu e-mail para ativar a sua conta';
     titulo.style.display = 'block';
     titulo.style.marginBottom = '6px';
 
     const texto = document.createElement('p');
-    texto.textContent = `Enviamos um link para ${user.email}. Abra o e-mail (veja também a caixa de spam), toque no link e depois em "Já confirmei".`;
+    texto.textContent = `Enviamos um link para ${user.email}. Sem a confirmação você não pode sacar, depositar, convidar nem fazer missões, e a conta será excluída automaticamente ${PRAZO_CONFIRMAR_EMAIL_HORAS} horas após o cadastro (${textoDoPrazo(user)}). Abra o e-mail (veja também a caixa de spam), toque no link e depois em "Já confirmei".`;
     texto.style.margin = '0 0 12px';
     texto.style.color = 'var(--text-muted)';
 
@@ -616,17 +714,18 @@ async function iniciarAvisoEmail(user) {
     aviso.append(titulo, texto, linhaBotoes);
     cartaoSaldo.parentNode.insertBefore(aviso, cartaoSaldo);
 
-    // Recarrega o usuário; se o e-mail já foi confirmado, atualiza o token (o servidor lê o
-    // "e-mail confirmado" de dentro do token) e tira o aviso.
+    // Recarrega o usuário; se o e-mail já foi confirmado, avisa o servidor, libera as
+    // funções e tira o aviso.
     async function conferirConfirmacao(silencioso) {
         try {
             const atual = auth.currentUser || user;
             await atual.reload();
             if (atual.emailVerified) {
-                await atual.getIdToken(true);
+                await avisarServidorEmailConfirmado(atual);
+                definirFuncoesBloqueadas(false);
                 aviso.remove();
                 document.removeEventListener('visibilitychange', aoVoltarParaAba);
-                mostrarToast('E-mail confirmado. Saques liberados.', 'success');
+                mostrarToast('E-mail confirmado. Tudo liberado.', 'success');
                 return;
             }
             if (!silencioso) mostrarToast('Ainda não encontramos a confirmação. Abra o link do e-mail e tente de novo.', 'warning');
