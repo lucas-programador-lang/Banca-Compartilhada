@@ -1,12 +1,16 @@
 /* ==========================================================================
    Comprovante de saque — aparece quando o saque é PAGO e só fecha depois que
-   o usuário abre o grupo do Telegram e confirma que postou.
+   o bot do Telegram confirmar a postagem no grupo.
    --------------------------------------------------------------------------
+   Como funciona agora:
+   1) o usuário salva a imagem do comprovante e posta no grupo do Telegram,
+      escrevendo o código (BC-XXXXXXXX) na LEGENDA da imagem;
+   2) o bot lê a mensagem, acha o saque pelo código e grava
+      comprovantePostadoEm no Firebase (o listener abaixo fecha esta tela);
+   3) o botão "Verificar comprovante" NÃO libera nada sozinho: ele só pede
+      ao worker para conferir se o bot já registrou a postagem.
    Quem obriga de verdade é o worker: enquanto o comprovante do último saque
-   pago não for confirmado, ele recusa um novo pedido de saque
-   (POST /api/saque/comprovante libera). Esta tela só mostra e pede.
-   O site não consegue ver o Telegram: a confirmação é do próprio usuário e o
-   painel admin mostra quem confirmou, para conferência no grupo.
+   pago não for verificado pelo bot, ele recusa um novo pedido de saque.
    ========================================================================== */
 import { auth, db, mostrarToast } from './auth.js';
 import { ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -318,16 +322,17 @@ function abrirModal(saqueId, saque) {
         ${htmlComprovante(d)}
         <section class="cmp-acao">
             <h2 id="cmpTitulo" class="cmp-titulo">Poste o comprovante no Telegram</h2>
-            <p class="cmp-texto-ajuda">Para <strong>liberar novos saques</strong>, poste este comprovante no nosso grupo oficial e escreva o código <strong class="cmp-codigo">${esc(d.codigo)}</strong> na mensagem.</p>
+            <p class="cmp-texto-ajuda">Para <strong>liberar novos saques</strong>, envie a imagem deste comprovante no nosso grupo oficial e escreva o código <strong class="cmp-codigo">${esc(d.codigo)}</strong> na <strong>legenda</strong> da imagem (o texto que vai junto com a foto). Um bot confere a mensagem e libera automaticamente.</p>
             <ol class="cmp-passos">
                 <li><span>1</span>Salve a imagem do comprovante${podeCompartilhar ? ' ou compartilhe direto' : ''}.</li>
-                <li><span>2</span>Abra o grupo do Telegram e envie a imagem.</li>
-                <li><span>3</span>Volte aqui e confirme.</li>
+                <li><span>2</span>Abra o grupo do Telegram, anexe a imagem e escreva o código na legenda antes de enviar.</li>
+                <li><span>3</span>Aguarde alguns segundos: a liberação é automática. Se demorar, toque em verificar.</li>
             </ol>
+            <button type="button" class="cmp-btn cmp-btn--contorno" data-cmp="copiar">Copiar código ${esc(d.codigo)}</button>
             <button type="button" class="cmp-btn cmp-btn--ouro" data-cmp="salvar">Salvar imagem do comprovante</button>
             ${podeCompartilhar ? '<button type="button" class="cmp-btn cmp-btn--contorno" data-cmp="compartilhar">Compartilhar imagem</button>' : ''}
             <a class="cmp-btn cmp-btn--contorno" data-cmp="grupo" href="${LINK_TELEGRAM}" target="_blank" rel="noopener noreferrer">Abrir grupo no Telegram</a>
-            <button type="button" class="cmp-btn cmp-btn--confirma" data-cmp="confirmar" disabled>Já postei no grupo</button>
+            <button type="button" class="cmp-btn cmp-btn--confirma" data-cmp="confirmar" disabled>Verificar comprovante</button>
             <p class="cmp-dica" data-cmp="dica">O botão acima libera depois que você salvar a imagem ou abrir o grupo.</p>
         </section>
     </div>`;
@@ -353,7 +358,7 @@ function liberarConfirmacao() {
     const botao = overlay.querySelector('[data-cmp="confirmar"]');
     if (botao && !estado.enviando) botao.disabled = false;
     const dica = overlay.querySelector('[data-cmp="dica"]');
-    if (dica) dica.textContent = 'Depois de postar no grupo, toque em "Já postei no grupo".';
+    if (dica) dica.textContent = 'Depois de postar no grupo com o código na legenda, a liberação é automática. Se não fechar, toque em "Verificar comprovante".';
 }
 
 async function dadosAtuais() {
@@ -368,6 +373,18 @@ async function aoClicar(e) {
 
     if (acao === 'grupo') { liberarConfirmacao(); return; }   // o link abre sozinho
 
+    if (acao === 'copiar') {
+        const d = await dadosAtuais();
+        if (!d) return;
+        try {
+            await navigator.clipboard.writeText(d.codigo);
+            mostrarToast('Código copiado. Cole na legenda da imagem.', 'success');
+        } catch (erro) {
+            mostrarToast(`Anote o código ${d.codigo} e escreva na legenda da imagem.`, 'warning');
+        }
+        return;
+    }
+
     if (acao === 'salvar' || acao === 'compartilhar') {
         const d = await dadosAtuais();
         if (!d) return;
@@ -379,7 +396,7 @@ async function aoClicar(e) {
 
             if (acao === 'compartilhar') {
                 try {
-                    await navigator.share({ files: [arquivo], title: 'Comprovante de saque', text: `Comprovante ${d.codigo} — ${LINK_TELEGRAM}` });
+                    await navigator.share({ files: [arquivo], title: 'Comprovante de saque', text: `Comprovante ${d.codigo}` });
                     liberarConfirmacao();
                 } catch (erro) {
                     if (erro && erro.name !== 'AbortError') {
@@ -388,7 +405,7 @@ async function aoClicar(e) {
                     }
                 }
             } else if (await salvarPeloApp(blob, arquivo.name)) {
-                mostrarToast('Imagem salva na galeria. Agora envie no grupo do Telegram.', 'success');
+                mostrarToast('Imagem salva na galeria. Envie no grupo com o código na legenda.', 'success');
                 liberarConfirmacao();
             } else if (emWebView()) {
                 // WebView / navegador embutido: o download não funciona, mostra a imagem na tela
@@ -397,7 +414,7 @@ async function aoClicar(e) {
                 liberarConfirmacao();
             } else {
                 baixarPeloNavegador(blob, arquivo.name);
-                mostrarToast('Imagem salva. Agora envie no grupo do Telegram.', 'success');
+                mostrarToast('Imagem salva. Envie no grupo com o código na legenda.', 'success');
                 liberarConfirmacao();
             }
         } catch (erro) {
@@ -417,7 +434,7 @@ async function confirmar(botao) {
     if (estado.enviando || !estado.mexeu || !estado.aberto) return;
     estado.enviando = true;
     const textoOriginal = botao.textContent;
-    botao.disabled = true; botao.textContent = 'Confirmando...';
+    botao.disabled = true; botao.textContent = 'Verificando...';
     try {
         const usuario = auth.currentUser;
         if (!usuario) throw new Error('Você precisa estar logado.');
@@ -428,9 +445,15 @@ async function confirmar(botao) {
             body: JSON.stringify({ saqueId: estado.aberto }),
         });
         const dados = await resposta.json().catch(() => ({}));
-        if (!resposta.ok) throw new Error(dados.error || 'Erro ao confirmar o comprovante.');
-        mostrarToast('Comprovante confirmado! Novos saques liberados.', 'success');
-        // o listener do Firebase recebe a confirmação e fecha; fecha já para não depender da rede
+        if (resposta.status === 409) {
+            // o bot ainda não viu a postagem: não libera nada
+            mostrarToast(dados.error || 'Ainda não encontramos seu comprovante no grupo. Confira se a imagem foi enviada com o código na legenda.', 'warning');
+            botao.disabled = false; botao.textContent = textoOriginal;
+            return;
+        }
+        if (!resposta.ok) throw new Error(dados.error || 'Erro ao verificar o comprovante.');
+        mostrarToast('Comprovante verificado! Novos saques liberados.', 'success');
+        // o listener do Firebase recebe a verificação e fecha; fecha já para não depender da rede
         const saqueConfirmado = estado.aberto;
         if (estado.saques && estado.saques[saqueConfirmado]) estado.saques[saqueConfirmado].comprovantePostadoEm = new Date().toISOString();
         avaliar();
