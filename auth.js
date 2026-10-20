@@ -8,6 +8,7 @@ import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
+    sendEmailVerification,
     onAuthStateChanged,
     deleteUser,
     signOut
@@ -208,6 +209,39 @@ document.querySelectorAll('.toggle-senha').forEach((botao) => {
 });
 
 /* ==========================================================================
+   Nome completo
+   ========================================================================== */
+let REGEX_PALAVRA_NOME;
+try {
+    REGEX_PALAVRA_NOME = new RegExp("^[\\p{L}][\\p{L}'’.-]*$", 'u');
+} catch (erro) {
+    REGEX_PALAVRA_NOME = /^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ'’.-]*$/;
+}
+
+// Barra o lixo óbvio ("hwsr", "123", um nome só). Não prova que o nome é verdadeiro:
+// quem confirma a identidade de verdade é o e-mail confirmado e o CPF/Pix no saque.
+function validarNomeCompleto(nome) {
+    const palavras = String(nome || '').split(' ').filter(Boolean);
+    if (palavras.length < 2) return 'Informe seu nome e sobrenome.';
+    if (!palavras.every((palavra) => REGEX_PALAVRA_NOME.test(palavra))) return 'Use apenas letras no nome.';
+
+    const letras = (palavra) => palavra.replace(/[^\p{L}]/gu, '').length;
+    try {
+        if (letras(palavras[0]) < 2 || letras(palavras[palavras.length - 1]) < 2) return 'Informe seu nome e sobrenome.';
+    } catch (erro) { /* navegador sem \p{L}: segue sem esta checagem */ }
+
+    // nomes reais têm vogal; "hwsr" e "xkcd" não
+    // (conta só as letras: "Jr." e "Dr." não entram nesta checagem)
+    const semVogal = palavras.some((palavra) => {
+        let soLetras = palavra;
+        try { soLetras = palavra.replace(/[^\p{L}]/gu, ''); } catch (erro) { /* navegador sem \p{L} */ }
+        return soLetras.length >= 3 && !/[aeiouyáàâãéêíóôõúü]/i.test(soLetras);
+    });
+    if (semVogal) return 'Informe seu nome e sobrenome reais.';
+    return null;
+}
+
+/* ==========================================================================
    Códigos de indicação
    ========================================================================== */
 const CHAVE_CODIGO_SALVO = 'bc_codigo_indicacao';
@@ -341,6 +375,13 @@ if (registerForm) {
         const codigoIndicador = normalizarCodigoIndicacao(getEl('refIndicador')?.value);
         const botao = registerForm.querySelector('button[type="submit"]') || registerForm.querySelector('button');
 
+        const erroNome = validarNomeCompleto(nome);
+        if (erroNome) {
+            mostrarToast(erroNome, 'warning');
+            getEl('nome')?.focus();
+            return;
+        }
+
         const erroValidacao = validarEmailSenha(email, senha);
         if (erroValidacao) {
             mostrarToast(erroValidacao, 'warning');
@@ -358,7 +399,21 @@ if (registerForm) {
             await criarPerfilDoUsuario(user, { nome, email, codigoIndicador });
             limparCodigoSalvo();
 
-            mostrarToast('Conta criada com sucesso!', 'success');
+            // e-mail de confirmação (se falhar, a conta continua valendo; o painel tem o botão de reenviar)
+            let emailEnviado = false;
+            try {
+                await sendEmailVerification(user);
+                emailEnviado = true;
+            } catch (erroEmail) {
+                console.error('Não foi possível enviar o e-mail de confirmação:', erroEmail);
+            }
+
+            mostrarToast(
+                emailEnviado
+                    ? 'Conta criada! Enviamos um e-mail para você confirmar o endereço.'
+                    : 'Conta criada com sucesso!',
+                'success'
+            );
             solicitarTokenPush(); // pede ao Android o token de notificação push (FCM)
 
             setTimeout(() => {
@@ -493,6 +548,129 @@ if (document.body.classList.contains('protected-page')) {
 }
 
 /* ==========================================================================
+   Aviso de confirmação de e-mail (painel)
+   ==========================================================================
+   Aparece só para contas novas (as antigas estão dispensadas no servidor, em
+   emailDispensado/{uid}). Se o nó não puder ser lido, o aviso não aparece. */
+let avisoEmailIniciado = false;
+
+async function precisaConfirmarEmail(user) {
+    if (user.emailVerified) return false;
+    try {
+        const snap = await get(ref(db, 'emailDispensado/' + user.uid));
+        return snap.val() !== true;
+    } catch (erro) {
+        return false;
+    }
+}
+
+async function iniciarAvisoEmail(user) {
+    const cartaoSaldo = document.querySelector('.balance-card');
+    if (avisoEmailIniciado || !cartaoSaldo || !getEl('saldoDisponivel')) return;
+    avisoEmailIniciado = true;
+    if (!(await precisaConfirmarEmail(user))) return;
+
+    const aviso = document.createElement('div');
+    aviso.id = 'avisoConfirmarEmail';
+    aviso.setAttribute('role', 'status');
+    Object.assign(aviso.style, {
+        background: 'var(--warning-soft)',
+        border: '1px solid var(--warning)',
+        borderRadius: 'var(--radius-md)',
+        padding: 'var(--space-md)',
+        marginBottom: 'var(--space-md)',
+        color: 'var(--text-main)',
+    });
+
+    const titulo = document.createElement('strong');
+    titulo.textContent = 'Confirme seu e-mail para poder sacar';
+    titulo.style.display = 'block';
+    titulo.style.marginBottom = '6px';
+
+    const texto = document.createElement('p');
+    texto.textContent = `Enviamos um link para ${user.email}. Abra o e-mail (veja também a caixa de spam), toque no link e depois em "Já confirmei".`;
+    texto.style.margin = '0 0 12px';
+    texto.style.color = 'var(--text-muted)';
+
+    const linhaBotoes = document.createElement('div');
+    linhaBotoes.style.display = 'flex';
+    linhaBotoes.style.flexWrap = 'wrap';
+    linhaBotoes.style.gap = '8px';
+
+    const botaoConfirmei = document.createElement('button');
+    botaoConfirmei.type = 'button';
+    botaoConfirmei.className = 'btn';
+    botaoConfirmei.textContent = 'Já confirmei';
+
+    const botaoReenviar = document.createElement('button');
+    botaoReenviar.type = 'button';
+    botaoReenviar.className = 'btn btn-outline';
+    botaoReenviar.textContent = 'Reenviar e-mail';
+
+    [botaoConfirmei, botaoReenviar].forEach((botao) => {
+        botao.style.flex = '1 1 150px';
+        botao.style.width = 'auto';
+        linhaBotoes.appendChild(botao);
+    });
+
+    aviso.append(titulo, texto, linhaBotoes);
+    cartaoSaldo.parentNode.insertBefore(aviso, cartaoSaldo);
+
+    // Recarrega o usuário; se o e-mail já foi confirmado, atualiza o token (o servidor lê o
+    // "e-mail confirmado" de dentro do token) e tira o aviso.
+    async function conferirConfirmacao(silencioso) {
+        try {
+            const atual = auth.currentUser || user;
+            await atual.reload();
+            if (atual.emailVerified) {
+                await atual.getIdToken(true);
+                aviso.remove();
+                document.removeEventListener('visibilitychange', aoVoltarParaAba);
+                mostrarToast('E-mail confirmado. Saques liberados.', 'success');
+                return;
+            }
+            if (!silencioso) mostrarToast('Ainda não encontramos a confirmação. Abra o link do e-mail e tente de novo.', 'warning');
+        } catch (erro) {
+            console.error('Erro ao conferir a confirmação do e-mail:', erro);
+            if (!silencioso) mostrarToast('Não foi possível conferir agora. Tente novamente.', 'error');
+        }
+    }
+
+    // quem volta do app de e-mail para o site é conferido sozinho
+    function aoVoltarParaAba() {
+        if (document.visibilityState === 'visible') conferirConfirmacao(true);
+    }
+    document.addEventListener('visibilitychange', aoVoltarParaAba);
+
+    botaoConfirmei.addEventListener('click', async () => {
+        vibrar();
+        setBotaoCarregando(botaoConfirmei, true, 'Conferindo...');
+        await conferirConfirmacao(false);
+        setBotaoCarregando(botaoConfirmei, false);
+    });
+
+    botaoReenviar.addEventListener('click', async () => {
+        vibrar();
+        botaoReenviar.disabled = true;
+        let espera = 5000;
+        try {
+            await sendEmailVerification(auth.currentUser || user);
+            mostrarToast('Enviamos o e-mail de confirmação novamente. Veja também o spam.', 'success');
+            espera = 60000;
+        } catch (erro) {
+            console.error('Erro ao reenviar o e-mail de confirmação:', erro);
+            mostrarToast(
+                erro?.code === 'auth/too-many-requests'
+                    ? 'Muitas tentativas. Aguarde alguns minutos.'
+                    : 'Não foi possível reenviar agora. Tente novamente em instantes.',
+                'error'
+            );
+        }
+        setTimeout(() => { botaoReenviar.disabled = false; }, espera);
+    });
+}
+
+/* ==========================================================================
    LISTENERS GLOBAIS DA PONTE ANDROID (WEBVIEW)
    ==========================================================================
    O Android (MainActivity.java) chama estas funções injetando JavaScript
@@ -536,7 +714,9 @@ window.onTokenFCM = async function (tokenFCM) {
 };
 
 onAuthStateChanged(auth, (user) => {
-    if (user && tokenFCMPendente) salvarTokenFCM(user, tokenFCMPendente);
+    if (!user) return;
+    if (tokenFCMPendente) salvarTokenFCM(user, tokenFCMPendente);
+    iniciarAvisoEmail(user);
 });
 
 // 2. Recebe o resultado da Biometria
