@@ -294,9 +294,6 @@ async function criarPerfilDoUsuario(user, { nome, email, codigoIndicador }) {
         const perfil = {
             nome,
             email,
-            saldo: 0,
-            rendimento: 0,
-            comissao: 0,
             tipoPix: 'cpf',
             chavePix: '',
             codigoIndicacao: meuCodigoIndicacao,
