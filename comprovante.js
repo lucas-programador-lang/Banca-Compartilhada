@@ -1,16 +1,17 @@
 /* ==========================================================================
    Comprovante de saque — aparece quando o saque é PAGO e só fecha depois que
-   o bot do Telegram confirmar a postagem no grupo.
+   a administração conferir o comprovante postado no grupo do Telegram.
    --------------------------------------------------------------------------
    Como funciona agora:
    1) o usuário salva a imagem do comprovante e posta no grupo do Telegram,
       escrevendo o código (BC-XXXXXXXX) na LEGENDA da imagem;
-   2) o bot lê a mensagem, acha o saque pelo código e grava
-      comprovantePostadoEm no Firebase (o listener abaixo fecha esta tela);
+   2) o bot recebe a mensagem e manda a imagem para um administrador, com os
+      botões Aprovar e Recusar; quem aprova grava comprovantePostadoEm no
+      Firebase (o listener abaixo fecha esta tela);
    3) o botão "Verificar comprovante" NÃO libera nada sozinho: ele só pede
-      ao worker para conferir se o bot já registrou a postagem.
+      ao worker para conferir em que pé está (aguardando, recusado ou liberado).
    Quem obriga de verdade é o worker: enquanto o comprovante do último saque
-   pago não for verificado pelo bot, ele recusa um novo pedido de saque.
+   pago não for liberado, ele recusa um novo pedido de saque.
    ========================================================================== */
 import { auth, db, mostrarToast } from './auth.js';
 import { ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -322,11 +323,11 @@ function abrirModal(saqueId, saque) {
         ${htmlComprovante(d)}
         <section class="cmp-acao">
             <h2 id="cmpTitulo" class="cmp-titulo">Poste o comprovante no Telegram</h2>
-            <p class="cmp-texto-ajuda">Para <strong>liberar novos saques</strong>, envie a imagem deste comprovante no nosso grupo oficial e escreva o código <strong class="cmp-codigo">${esc(d.codigo)}</strong> na <strong>legenda</strong> da imagem (o texto que vai junto com a foto). Um bot confere a mensagem e libera automaticamente.</p>
+            <p class="cmp-texto-ajuda">Para <strong>liberar novos saques</strong>, envie a imagem deste comprovante no nosso grupo oficial e escreva o código <strong class="cmp-codigo">${esc(d.codigo)}</strong> na <strong>legenda</strong> da imagem (o texto que vai junto com a foto). A administração confere o comprovante e libera o seu saque.</p>
             <ol class="cmp-passos">
                 <li><span>1</span>Salve a imagem do comprovante${podeCompartilhar ? ' ou compartilhe direto' : ''}.</li>
                 <li><span>2</span>Abra o grupo do Telegram, anexe a imagem e escreva o código na legenda antes de enviar.</li>
-                <li><span>3</span>Aguarde alguns segundos: a liberação é automática. Se demorar, toque em verificar.</li>
+                <li><span>3</span>Aguarde a conferência. A tela fecha sozinha quando for liberado. Se demorar, toque em verificar.</li>
             </ol>
             <button type="button" class="cmp-btn cmp-btn--contorno" data-cmp="copiar">Copiar código ${esc(d.codigo)}</button>
             <button type="button" class="cmp-btn cmp-btn--ouro" data-cmp="salvar">Salvar imagem do comprovante</button>
@@ -358,7 +359,7 @@ function liberarConfirmacao() {
     const botao = overlay.querySelector('[data-cmp="confirmar"]');
     if (botao && !estado.enviando) botao.disabled = false;
     const dica = overlay.querySelector('[data-cmp="dica"]');
-    if (dica) dica.textContent = 'Depois de postar no grupo com o código na legenda, a liberação é automática. Se não fechar, toque em "Verificar comprovante".';
+    if (dica) dica.textContent = 'Depois de postar no grupo com o código na legenda, aguarde a conferência. A tela fecha sozinha quando for liberado; se demorar, toque em "Verificar comprovante".';
 }
 
 async function dadosAtuais() {
