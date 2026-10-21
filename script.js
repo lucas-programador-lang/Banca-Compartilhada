@@ -5,7 +5,7 @@ import { calcularTerminoPrevisto } from './termino-plano.js';
 
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 32.50,
-    DIA_SAQUE_PERMITIDO: 3, // 0 = Domingo (Padrão)
+    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo (Padrão)
     TAXA_SAQUE_PERCENTUAL: 0.14,
     VALORES_PLANOS_PERMITIDOS: [10, 15, 30, 50, 60, 100, 150, 200, 300, 450, 500, 1000],
     PLANOS_DE_CICLO: [10, 15, 60, 150, 200, 450],
