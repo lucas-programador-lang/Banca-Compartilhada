@@ -41,6 +41,10 @@
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                         Investir
                     </a>
+                    <a href="#" class="nav-item" data-target="view-ciclos">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-15.5-6.2L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 15.5 6.2L21 16"/><path d="M16 16h5v5"/></svg>
+                        Ciclos
+                    </a>
                     <a href="#" class="nav-item" data-target="view-carteira">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
                         Carteira
@@ -158,9 +162,137 @@
             <!-- ================= ABA INVESTIR ================= -->
             <section id="view-investir" class="view-section" style="display: none;">
                 <h2>Planos de Banca Compartilhada</h2>
-                <p class="section-lead">Escolha abaixo o nível de aporte para iniciar a rentabilidade diária.</p>
+                <p class="section-lead">Escolha abaixo o nível de aporte para iniciar a rentabilidade diária. Os planos com prazo fechado ficam na aba Ciclos.</p>
 
                 <!-- Grid de Planos -->
+                <div class="grid-planos">
+
+                    <!-- Plano: R$ 30 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Starter</h3>
+                        <span class="plan-badge">R$ 0,90 / dia útil (3% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 30,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">70% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="30">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 50 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Bronze</h3>
+                        <span class="plan-badge">R$ 1,50 / dia útil (3% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 50,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">70% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="50">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 100 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Prata</h3>
+                        <span class="plan-badge">R$ 2,00 / dia útil (2% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 100,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="100">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 300 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Ouro</h3>
+                        <span class="plan-badge">R$ 6,00 / dia útil (2% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 300,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="300">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 500 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Platinum</h3>
+                        <span class="plan-badge">R$ 10,00 / dia útil (2% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 500,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="500">APLICAR AGORA</button>
+                    </div>
+
+                    <!-- Plano: R$ 1.000 (Antigo) -->
+                    <div class="card plan-card">
+                        <h3 class="plan-card__title">Banca Master</h3>
+                        <span class="plan-badge">R$ 20,00 / dia útil (2% por dia útil)</span>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Aporte:</span>
+                            <strong class="plan-row__value">R$ 1.000,00</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Teto de Retorno:</span>
+                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
+                        </div>
+                        <div class="plan-row">
+                            <span class="plan-row__label">Limite:</span>
+                            <strong class="plan-row__value">1 por conta</strong>
+                        </div>
+                        <button class="btn btn-escolher-plano" data-valor="1000">APLICAR AGORA</button>
+                    </div>
+
+                </div>
+
+                <input type="hidden" id="valorPlano" value="10">
+                <button id="btnDepositar" style="display: none;"></button>
+            </section>
+
+            <!-- ================= ABA CICLOS ================= -->
+            <section id="view-ciclos" class="view-section" style="display: none;">
+                <h2>Planos de Ciclo</h2>
+                <p class="section-lead">Planos com prazo fechado, de 48 horas a 60 dias. Escolha o valor do aporte para começar o seu ciclo.</p>
+
+                <!-- Grid de Planos de Ciclo -->
                 <div class="grid-planos">
 
                     <!-- Plano: R$ 10 (48h) -->
@@ -205,44 +337,6 @@
                         <button class="btn btn-escolher-plano" data-valor="15">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano: R$ 30 (Antigo) -->
-                    <div class="card plan-card">
-                        <h3 class="plan-card__title">Banca Starter</h3>
-                        <span class="plan-badge">R$ 0,90 / dia útil (3% por dia útil)</span>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Aporte:</span>
-                            <strong class="plan-row__value">R$ 30,00</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Teto de Retorno:</span>
-                            <strong class="plan-row__value plan-row__value--positive">70% sobre capital</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Limite:</span>
-                            <strong class="plan-row__value">1 por conta</strong>
-                        </div>
-                        <button class="btn btn-escolher-plano" data-valor="30">APLICAR AGORA</button>
-                    </div>
-
-                    <!-- Plano: R$ 50 (Antigo) -->
-                    <div class="card plan-card">
-                        <h3 class="plan-card__title">Banca Bronze</h3>
-                        <span class="plan-badge">R$ 1,50 / dia útil (3% por dia útil)</span>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Aporte:</span>
-                            <strong class="plan-row__value">R$ 50,00</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Teto de Retorno:</span>
-                            <strong class="plan-row__value plan-row__value--positive">70% sobre capital</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Limite:</span>
-                            <strong class="plan-row__value">1 por conta</strong>
-                        </div>
-                        <button class="btn btn-escolher-plano" data-valor="50">APLICAR AGORA</button>
-                    </div>
-
                     <!-- Plano: R$ 60 (40 dias) - ILIMITADO -->
                     <div class="card plan-card" style="border: 2px solid var(--primary);">
                         <h3 class="plan-card__title">Ciclo Médio 60</h3>
@@ -264,25 +358,6 @@
                             <strong class="plan-row__value plan-row__value--positive">Ilimitado</strong>
                         </div>
                         <button class="btn btn-escolher-plano" data-valor="60">APLICAR AGORA</button>
-                    </div>
-
-                    <!-- Plano: R$ 100 (Antigo) -->
-                    <div class="card plan-card">
-                        <h3 class="plan-card__title">Banca Prata</h3>
-                        <span class="plan-badge">R$ 2,00 / dia útil (2% por dia útil)</span>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Aporte:</span>
-                            <strong class="plan-row__value">R$ 100,00</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Teto de Retorno:</span>
-                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Limite:</span>
-                            <strong class="plan-row__value">1 por conta</strong>
-                        </div>
-                        <button class="btn btn-escolher-plano" data-valor="100">APLICAR AGORA</button>
                     </div>
 
                     <!-- Plano: R$ 150 (40 dias) - ILIMITADO -->
@@ -331,25 +406,6 @@
                         <button class="btn btn-escolher-plano" data-valor="200">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano: R$ 300 (Antigo) -->
-                    <div class="card plan-card">
-                        <h3 class="plan-card__title">Banca Ouro</h3>
-                        <span class="plan-badge">R$ 6,00 / dia útil (2% por dia útil)</span>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Aporte:</span>
-                            <strong class="plan-row__value">R$ 300,00</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Teto de Retorno:</span>
-                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Limite:</span>
-                            <strong class="plan-row__value">1 por conta</strong>
-                        </div>
-                        <button class="btn btn-escolher-plano" data-valor="300">APLICAR AGORA</button>
-                    </div>
-
                     <!-- Plano: R$ 450 (60 dias) - ILIMITADO -->
                     <div class="card plan-card" style="border: 2px solid var(--primary);">
                         <h3 class="plan-card__title">Ciclo Longo 450</h3>
@@ -373,48 +429,7 @@
                         <button class="btn btn-escolher-plano" data-valor="450">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano: R$ 500 (Antigo) -->
-                    <div class="card plan-card">
-                        <h3 class="plan-card__title">Banca Platinum</h3>
-                        <span class="plan-badge">R$ 10,00 / dia útil (2% por dia útil)</span>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Aporte:</span>
-                            <strong class="plan-row__value">R$ 500,00</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Teto de Retorno:</span>
-                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Limite:</span>
-                            <strong class="plan-row__value">1 por conta</strong>
-                        </div>
-                        <button class="btn btn-escolher-plano" data-valor="500">APLICAR AGORA</button>
-                    </div>
-
-                    <!-- Plano: R$ 1.000 (Antigo) -->
-                    <div class="card plan-card">
-                        <h3 class="plan-card__title">Banca Master</h3>
-                        <span class="plan-badge">R$ 20,00 / dia útil (2% por dia útil)</span>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Aporte:</span>
-                            <strong class="plan-row__value">R$ 1.000,00</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Teto de Retorno:</span>
-                            <strong class="plan-row__value plan-row__value--positive">60% sobre capital</strong>
-                        </div>
-                        <div class="plan-row">
-                            <span class="plan-row__label">Limite:</span>
-                            <strong class="plan-row__value">1 por conta</strong>
-                        </div>
-                        <button class="btn btn-escolher-plano" data-valor="1000">APLICAR AGORA</button>
-                    </div>
-
                 </div>
-
-                <input type="hidden" id="valorPlano" value="10">
-                <button id="btnDepositar" style="display: none;"></button>
             </section>
 
             <!-- ================= ABA CARTEIRA ================= -->
