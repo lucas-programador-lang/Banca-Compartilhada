@@ -126,7 +126,7 @@
             <!-- ================= ABA INÍCIO ================= -->
             <section id="view-inicio" class="view-section">
 
-                <!-- Card Principal com Saldo e Botões DEPOSITAR / SACAR -->
+                <!-- Card Principal com Saldo e Estatísticas -->
                 <div class="card balance-card">
                     <div class="balance-card__label">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
@@ -134,28 +134,29 @@
                     </div>
                     <div id="saldoDisponivel" class="balance-amount">R$ 0,00</div>
 
-                    <div class="action-row">
-                        <button class="btn" id="btnAbrirDeposito">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            Depositar
-                        </button>
-                        <button class="btn btn-outline" id="btnAbrirSaqueModal">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
-                            Sacar
-                        </button>
+                    <!-- Estatísticas Rápidas -->
+                    <div class="balance-stats">
+                        <div class="balance-stat">
+                            <h3>Rendimento Acumulado</h3>
+                            <p id="rendimentoTotal">R$ 0,00</p>
+                        </div>
+                        <div class="balance-stat">
+                            <h3>Comissões (1º Nível - 10%)</h3>
+                            <p id="comissaoTotal">R$ 0,00</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Estatísticas Rápidas -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Rendimento Acumulado</h3>
-                        <p id="rendimentoTotal">R$ 0,00</p>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Comissões (1º Nível - 10%)</h3>
-                        <p id="comissaoTotal">R$ 0,00</p>
-                    </div>
+                <!-- Botões DEPOSITAR / SACAR -->
+                <div class="action-row">
+                    <button class="btn" id="btnAbrirDeposito">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Depositar
+                    </button>
+                    <button class="btn btn-outline" id="btnAbrirSaqueModal">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+                        Sacar
+                    </button>
                 </div>
             </section>
 
