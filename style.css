@@ -3746,27 +3746,31 @@ body.cmp-aberto { overflow: hidden; }
     border-radius: 28px;
     margin-bottom: var(--space-md);
     background:
-        radial-gradient(90% 120% at 0% 0%, rgba(242, 206, 151, 0.07), transparent 55%),
-        linear-gradient(160deg, #1d1510, #0c0804 80%);
+        url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 .85 0 0 0 0 .6 0 0 0 .55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/></svg>") 0 0 / 160px 160px,
+        radial-gradient(70% 120% at 100% 0%, rgba(196, 136, 73, 0.26), transparent 62%),
+        radial-gradient(55% 90% at 0% 0%, rgba(242, 206, 151, 0.07), transparent 65%),
+        linear-gradient(115deg, transparent 38%, rgba(242, 206, 151, 0.045) 50%, transparent 62%),
+        linear-gradient(160deg, #1f1610, #0b0704 85%);
     border: 1px solid rgba(196, 136, 73, 0.22);
     box-shadow:
         0 30px 60px -20px rgba(0, 0, 0, 0.75),
+        0 18px 50px -30px rgba(196, 136, 73, 0.35),
         0 0 0 1px rgba(0, 0, 0, 0.5),
-        inset 0 1px 0 rgba(242, 206, 151, 0.10);
+        inset 0 1px 0 rgba(242, 206, 151, 0.12),
+        inset 0 -40px 60px -40px rgba(0, 0, 0, 0.6);
     isolation: isolate;
 }
 
-/* Padrão de cubos ao fundo, esmaecendo para a esquerda */
+/* Cubos em 3D com tons variados, iluminados pelo canto superior direito */
 #view-inicio .balance-card::before {
     content: '';
     position: absolute;
     inset: 0;
     height: auto;
     z-index: -1;
-    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='90' viewBox='0 0 52 90'><defs><g id='c'><polygon points='26,0 52,15 26,30 0,15' fill='%23352819' stroke='%230b0704' stroke-width='1'/><polygon points='0,15 26,30 26,60 0,45' fill='%231f1810' stroke='%230b0704' stroke-width='1'/><polygon points='26,30 52,15 52,45 26,60' fill='%23130e09' stroke='%230b0704' stroke-width='1'/></g></defs><use href='%23c' x='0' y='0'/><use href='%23c' x='-26' y='45'/><use href='%23c' x='26' y='45'/><use href='%23c' x='-26' y='-45'/><use href='%23c' x='26' y='-45'/></svg>") 0 0 / 78px auto repeat;
-    opacity: 0.85;
-    -webkit-mask-image: linear-gradient(115deg, transparent 30%, #000 105%);
-    mask-image: linear-gradient(115deg, transparent 30%, #000 105%);
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='156' height='180' viewBox='0 0 156 180'><g stroke='%230a0704' stroke-width='1' stroke-linejoin='round'><polygon points='-26,-90 0,-75 -26,-60 -52,-75' fill='%233a2b1a'/><polygon points='-52,-75 -26,-60 -26,-30 -52,-45' fill='%23241a10'/><polygon points='-26,-60 0,-75 0,-45 -26,-30' fill='%23170f09'/><polygon points='-52,-45 -26,-30 -52,-15 -78,-30' fill='%233a2b1a'/><polygon points='-78,-30 -52,-15 -52,15 -78,0' fill='%23241a10'/><polygon points='-52,-15 -26,-30 -26,0 -52,15' fill='%23170f09'/><polygon points='26,-90 52,-75 26,-60 0,-75' fill='%2315100a'/><polygon points='0,-75 26,-60 26,-30 0,-45' fill='%230f0a06'/><polygon points='26,-60 52,-75 52,-45 26,-30' fill='%230a0704'/><polygon points='0,-45 26,-30 0,-15 -26,-30' fill='%233a2b1a'/><polygon points='-26,-30 0,-15 0,15 -26,0' fill='%23241a10'/><polygon points='0,-15 26,-30 26,0 0,15' fill='%23170f09'/><polygon points='78,-90 104,-75 78,-60 52,-75' fill='%233a2b1a'/><polygon points='52,-75 78,-60 78,-30 52,-45' fill='%23241a10'/><polygon points='78,-60 104,-75 104,-45 78,-30' fill='%23170f09'/><polygon points='52,-45 78,-30 52,-15 26,-30' fill='%233a2b1a'/><polygon points='26,-30 52,-15 52,15 26,0' fill='%23241a10'/><polygon points='52,-15 78,-30 78,0 52,15' fill='%23170f09'/><polygon points='130,-90 156,-75 130,-60 104,-75' fill='%233a2b1a'/><polygon points='104,-75 130,-60 130,-30 104,-45' fill='%23241a10'/><polygon points='130,-60 156,-75 156,-45 130,-30' fill='%23170f09'/><polygon points='104,-45 130,-30 104,-15 78,-30' fill='%233a2b1a'/><polygon points='78,-30 104,-15 104,15 78,0' fill='%23241a10'/><polygon points='104,-15 130,-30 130,0 104,15' fill='%23170f09'/><polygon points='182,-90 208,-75 182,-60 156,-75' fill='%2315100a'/><polygon points='156,-75 182,-60 182,-30 156,-45' fill='%230f0a06'/><polygon points='182,-60 208,-75 208,-45 182,-30' fill='%230a0704'/><polygon points='156,-45 182,-30 156,-15 130,-30' fill='%233a2b1a'/><polygon points='130,-30 156,-15 156,15 130,0' fill='%23241a10'/><polygon points='156,-15 182,-30 182,0 156,15' fill='%23170f09'/><polygon points='-26,0 0,15 -26,30 -52,15' fill='%232a1f14'/><polygon points='-52,15 -26,30 -26,60 -52,45' fill='%2319120c'/><polygon points='-26,30 0,15 0,45 -26,60' fill='%23100b07'/><polygon points='-52,45 -26,60 -52,75 -78,60' fill='%233a2b1a'/><polygon points='-78,60 -52,75 -52,105 -78,90' fill='%23241a10'/><polygon points='-52,75 -26,60 -26,90 -52,105' fill='%23170f09'/><polygon points='26,0 52,15 26,30 0,15' fill='%233a2b1a'/><polygon points='0,15 26,30 26,60 0,45' fill='%23241a10'/><polygon points='26,30 52,15 52,45 26,60' fill='%23170f09'/><polygon points='0,45 26,60 0,75 -26,60' fill='%234f3a23'/><polygon points='-26,60 0,75 0,105 -26,90' fill='%2330221a'/><polygon points='0,75 26,60 26,90 0,105' fill='%231d140b'/><polygon points='78,0 104,15 78,30 52,15' fill='%232a1f14'/><polygon points='52,15 78,30 78,60 52,45' fill='%2319120c'/><polygon points='78,30 104,15 104,45 78,60' fill='%23100b07'/><polygon points='52,45 78,60 52,75 26,60' fill='%232a1f14'/><polygon points='26,60 52,75 52,105 26,90' fill='%2319120c'/><polygon points='52,75 78,60 78,90 52,105' fill='%23100b07'/><polygon points='130,0 156,15 130,30 104,15' fill='%232a1f14'/><polygon points='104,15 130,30 130,60 104,45' fill='%2319120c'/><polygon points='130,30 156,15 156,45 130,60' fill='%23100b07'/><polygon points='104,45 130,60 104,75 78,60' fill='%233a2b1a'/><polygon points='78,60 104,75 104,105 78,90' fill='%23241a10'/><polygon points='104,75 130,60 130,90 104,105' fill='%23170f09'/><polygon points='182,0 208,15 182,30 156,15' fill='%233a2b1a'/><polygon points='156,15 182,30 182,60 156,45' fill='%23241a10'/><polygon points='182,30 208,15 208,45 182,60' fill='%23170f09'/><polygon points='156,45 182,60 156,75 130,60' fill='%234f3a23'/><polygon points='130,60 156,75 156,105 130,90' fill='%2330221a'/><polygon points='156,75 182,60 182,90 156,105' fill='%231d140b'/><polygon points='-26,90 0,105 -26,120 -52,105' fill='%233a2b1a'/><polygon points='-52,105 -26,120 -26,150 -52,135' fill='%23241a10'/><polygon points='-26,120 0,105 0,135 -26,150' fill='%23170f09'/><polygon points='-52,135 -26,150 -52,165 -78,150' fill='%233a2b1a'/><polygon points='-78,150 -52,165 -52,195 -78,180' fill='%23241a10'/><polygon points='-52,165 -26,150 -26,180 -52,195' fill='%23170f09'/><polygon points='26,90 52,105 26,120 0,105' fill='%2315100a'/><polygon points='0,105 26,120 26,150 0,135' fill='%230f0a06'/><polygon points='26,120 52,105 52,135 26,150' fill='%230a0704'/><polygon points='0,135 26,150 0,165 -26,150' fill='%233a2b1a'/><polygon points='-26,150 0,165 0,195 -26,180' fill='%23241a10'/><polygon points='0,165 26,150 26,180 0,195' fill='%23170f09'/><polygon points='78,90 104,105 78,120 52,105' fill='%233a2b1a'/><polygon points='52,105 78,120 78,150 52,135' fill='%23241a10'/><polygon points='78,120 104,105 104,135 78,150' fill='%23170f09'/><polygon points='52,135 78,150 52,165 26,150' fill='%233a2b1a'/><polygon points='26,150 52,165 52,195 26,180' fill='%23241a10'/><polygon points='52,165 78,150 78,180 52,195' fill='%23170f09'/><polygon points='130,90 156,105 130,120 104,105' fill='%233a2b1a'/><polygon points='104,105 130,120 130,150 104,135' fill='%23241a10'/><polygon points='130,120 156,105 156,135 130,150' fill='%23170f09'/><polygon points='104,135 130,150 104,165 78,150' fill='%233a2b1a'/><polygon points='78,150 104,165 104,195 78,180' fill='%23241a10'/><polygon points='104,165 130,150 130,180 104,195' fill='%23170f09'/><polygon points='182,90 208,105 182,120 156,105' fill='%2315100a'/><polygon points='156,105 182,120 182,150 156,135' fill='%230f0a06'/><polygon points='182,120 208,105 208,135 182,150' fill='%230a0704'/><polygon points='156,135 182,150 156,165 130,150' fill='%233a2b1a'/><polygon points='130,150 156,165 156,195 130,180' fill='%23241a10'/><polygon points='156,165 182,150 182,180 156,195' fill='%23170f09'/><polygon points='-26,180 0,195 -26,210 -52,195' fill='%232a1f14'/><polygon points='-52,195 -26,210 -26,240 -52,225' fill='%2319120c'/><polygon points='-26,210 0,195 0,225 -26,240' fill='%23100b07'/><polygon points='-52,225 -26,240 -52,255 -78,240' fill='%233a2b1a'/><polygon points='-78,240 -52,255 -52,285 -78,270' fill='%23241a10'/><polygon points='-52,255 -26,240 -26,270 -52,285' fill='%23170f09'/><polygon points='26,180 52,195 26,210 0,195' fill='%233a2b1a'/><polygon points='0,195 26,210 26,240 0,225' fill='%23241a10'/><polygon points='26,210 52,195 52,225 26,240' fill='%23170f09'/><polygon points='0,225 26,240 0,255 -26,240' fill='%234f3a23'/><polygon points='-26,240 0,255 0,285 -26,270' fill='%2330221a'/><polygon points='0,255 26,240 26,270 0,285' fill='%231d140b'/><polygon points='78,180 104,195 78,210 52,195' fill='%232a1f14'/><polygon points='52,195 78,210 78,240 52,225' fill='%2319120c'/><polygon points='78,210 104,195 104,225 78,240' fill='%23100b07'/><polygon points='52,225 78,240 52,255 26,240' fill='%232a1f14'/><polygon points='26,240 52,255 52,285 26,270' fill='%2319120c'/><polygon points='52,255 78,240 78,270 52,285' fill='%23100b07'/><polygon points='130,180 156,195 130,210 104,195' fill='%232a1f14'/><polygon points='104,195 130,210 130,240 104,225' fill='%2319120c'/><polygon points='130,210 156,195 156,225 130,240' fill='%23100b07'/><polygon points='104,225 130,240 104,255 78,240' fill='%233a2b1a'/><polygon points='78,240 104,255 104,285 78,270' fill='%23241a10'/><polygon points='104,255 130,240 130,270 104,285' fill='%23170f09'/><polygon points='182,180 208,195 182,210 156,195' fill='%233a2b1a'/><polygon points='156,195 182,210 182,240 156,225' fill='%23241a10'/><polygon points='182,210 208,195 208,225 182,240' fill='%23170f09'/><polygon points='156,225 182,240 156,255 130,240' fill='%234f3a23'/><polygon points='130,240 156,255 156,285 130,270' fill='%2330221a'/><polygon points='156,255 182,240 182,270 156,285' fill='%231d140b'/></g></svg>") 0 0 / 104px auto repeat;
+    -webkit-mask-image: radial-gradient(ellipse 95% 150% at 92% 0%, #000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.12) 80%, transparent 100%);
+    mask-image: radial-gradient(ellipse 95% 150% at 92% 0%, #000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.12) 80%, transparent 100%);
     box-shadow: none;
 }
 
@@ -3856,7 +3860,7 @@ body.cmp-aberto { overflow: hidden; }
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 96px));
     justify-content: space-between;
-    gap: clamp(6px, 2vw, 22px);
+    gap: clamp(10px, 2.8vw, 22px);
     margin-bottom: var(--space-lg);
 }
 
@@ -3942,7 +3946,7 @@ body.cmp-aberto { overflow: hidden; }
 @media (min-width: 700px) {
     #view-inicio .action-row {
         justify-content: start;
-        gap: 28px;
+        gap: 44px;
     }
 }
 
