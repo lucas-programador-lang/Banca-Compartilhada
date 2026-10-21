@@ -3738,26 +3738,38 @@ body.cmp-aberto { overflow: hidden; }
 
 /* ==========================================================================
    Estilo "Carteira" — aba Início (apenas visual, mantém a paleta do site)
-   Card liso e arredondado, números grandes e finos, botões em blocos
-   quadrados com o ícone em cima e o texto embaixo.
+   Card escuro com padrão de cubos, valores em duas colunas com números
+   grandes e finos, e botões em blocos quadrados fora do card.
    ========================================================================== */
 #view-inicio .balance-card {
-    padding: var(--space-lg) clamp(18px, 4vw, 28px);
+    padding: clamp(20px, 4vw, 28px);
     border-radius: 28px;
+    margin-bottom: var(--space-md);
+    background: linear-gradient(160deg, #1a130c, #0d0905 75%);
     border: 1px solid var(--border-color);
-    background:
-        radial-gradient(120% 90% at 100% 0%, rgba(196, 136, 73, 0.10), transparent 55%),
-        linear-gradient(160deg, var(--card-bg-hover), var(--bg-color-elevated) 70%);
     box-shadow: var(--shadow-soft);
+    isolation: isolate;
 }
 
-/* Remove os fios/molduras decorativos do card padrão */
-#view-inicio .balance-card::before,
+/* Padrão de cubos ao fundo, esmaecendo para a esquerda/topo */
+#view-inicio .balance-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    height: auto;
+    z-index: -1;
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='90' viewBox='0 0 52 90'><defs><g id='c'><polygon points='26,0 52,15 26,30 0,15' fill='%23342718' stroke='%230b0704' stroke-width='1'/><polygon points='0,15 26,30 26,60 0,45' fill='%231f1810' stroke='%230b0704' stroke-width='1'/><polygon points='26,30 52,15 52,45 26,60' fill='%23130e09' stroke='%230b0704' stroke-width='1'/></g></defs><use href='%23c' x='0' y='0'/><use href='%23c' x='-26' y='45'/><use href='%23c' x='26' y='45'/><use href='%23c' x='-26' y='-45'/><use href='%23c' x='26' y='-45'/></svg>") 0 0 / 78px auto repeat;
+    opacity: 0.9;
+    -webkit-mask-image: linear-gradient(115deg, transparent 25%, #000 100%);
+    mask-image: linear-gradient(115deg, transparent 25%, #000 100%);
+    box-shadow: none;
+}
+
 #view-inicio .balance-card::after {
     display: none;
 }
 
-/* Título: maiúsculo, espaçado e em negrito, na cor do texto */
+/* Título: maiúsculo, espaçado e em negrito */
 #view-inicio .balance-card__label {
     color: var(--text-main);
     font-size: 1.05rem;
@@ -3778,23 +3790,51 @@ body.cmp-aberto { overflow: hidden; }
     line-height: 1.1;
     letter-spacing: -0.01em;
     color: var(--text-main);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
 }
 
-/* Botões: blocos quadrados com ícone em cima e texto embaixo */
+/* Rótulo leve em cima, número fino embaixo, em duas colunas */
+#view-inicio .balance-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-md) var(--space-lg);
+}
+
+#view-inicio .balance-stat h3 {
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+#view-inicio .balance-stat p {
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.2rem);
+    line-height: 1.15;
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Botões: blocos quadrados com ícone dentro e texto embaixo, fora do card */
 #view-inicio .action-row {
+    display: flex;
     flex-wrap: nowrap;
-    justify-content: space-around;
-    gap: var(--space-sm);
+    justify-content: flex-start;
+    gap: clamp(14px, 4vw, 24px);
+    margin-bottom: var(--space-lg);
 }
 
 #view-inicio .action-row .btn,
 #view-inicio .action-row .btn-outline {
-    flex: 1 1 0;
+    flex: 0 0 auto;
+    width: clamp(78px, 22vw, 92px);
     min-width: 0;
-    width: auto;
     padding: 0;
+    margin: 0;
+    display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 10px;
     background: transparent;
     border: none;
@@ -3811,14 +3851,14 @@ body.cmp-aberto { overflow: hidden; }
 }
 
 #view-inicio .action-row .btn svg {
-    box-sizing: content-box;
-    width: 28px;
-    height: 28px;
-    padding: 18px;
-    border-radius: 18px;
+    box-sizing: border-box;
+    width: clamp(78px, 22vw, 92px);
+    height: clamp(78px, 22vw, 92px);
+    padding: 26px;
+    border-radius: 20px;
     color: var(--primary-hover);
-    background: var(--primary-soft);
-    border: 1px solid var(--primary-deep);
+    background: #1a130c;
+    border: 1.5px solid var(--primary-deep);
     transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
 }
 
@@ -3829,51 +3869,16 @@ body.cmp-aberto { overflow: hidden; }
 }
 
 #view-inicio .action-row .btn:hover svg {
-    background: rgba(196, 136, 73, 0.24);
+    background: var(--primary-soft);
     border-color: var(--primary);
     transform: translateY(-2px);
 }
 
-/* Cards de estatística: mesmo estilo de rótulo leve + número fino */
-#view-inicio .stat-card {
-    border-radius: 24px;
-    padding: var(--space-md) clamp(18px, 4vw, 24px);
-    background: linear-gradient(160deg, var(--card-bg-hover), var(--bg-color-elevated) 70%);
-}
-
-#view-inicio .stat-card::before {
-    display: none;
-}
-
-#view-inicio .stat-card:hover {
-    transform: none;
-}
-
-#view-inicio .stat-card h3 {
-    font-size: 0.95rem;
-    font-weight: 400;
-    text-transform: none;
-    letter-spacing: 0;
-    color: var(--text-muted);
-    margin-bottom: 6px;
-}
-
-#view-inicio .stat-card p {
-    font-family: var(--font-body);
-    font-weight: 300;
-    font-size: clamp(1.7rem, 1.3rem + 1.4vw, 2.2rem);
-    color: var(--text-main);
-    letter-spacing: -0.01em;
-}
-
-@media (max-width: 480px) {
-    #view-inicio .action-row .btn svg {
-        width: 24px;
-        height: 24px;
-        padding: 14px;
-        border-radius: 16px;
+@media (max-width: 380px) {
+    #view-inicio .balance-stats {
+        gap: var(--space-sm);
     }
-    #view-inicio .action-row .btn {
-        font-size: 0.8rem;
+    #view-inicio .balance-stat h3 {
+        font-size: 0.9rem;
     }
 }
