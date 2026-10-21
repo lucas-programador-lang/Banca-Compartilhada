@@ -45,13 +45,24 @@
             var pct = porcentagem(badge, /(\d+(?:[.,]\d+)?)\s*%\s*por dia/i);
             var teto = porcentagem(valorDaLinha(card, 'teto'), /(\d+(?:[.,]\d+)?)\s*%/);
             if (!aporte || !pct || !teto) return;
+            // Mesma regra do site: paga o rendimento diário até atingir o teto;
+            // o último dia paga só o que falta para chegar no teto.
+            var diario = aporte * pct / 100;
+            var tetoValor = aporte * teto / 100;
+            var diasPagos = Math.ceil(tetoValor / diario - 1e-9);
+            var ultimoDia = Math.round((tetoValor - diario * (diasPagos - 1)) * 100) / 100;
+            var detalhe = 'Teto de ' + teto + '% sobre o aporte (' + BRL.format(tetoValor) + ').';
+            if (Math.abs(ultimoDia - diario) > 0.005) {
+                detalhe += ' O último dia paga só ' + BRL.format(ultimoDia) + ' para fechar o teto.';
+            }
             planos.push({
                 grupo: 'rendimento',
                 nome: titulo.trim(),
                 aporte: aporte,
-                diario: aporte * pct / 100,
-                prazo: Math.ceil(teto / pct - 1e-9) + ' dias úteis',
-                lucro: aporte * teto / 100
+                diario: diario,
+                prazo: diasPagos + ' dias úteis',
+                lucro: tetoValor,
+                detalhe: detalhe
             });
         });
 
@@ -73,13 +84,15 @@
             if (dias) prazo = dias[1] + ' dias';
             else if (horas) prazo = horas[1] + ' horas';
 
+            var retornoFinal = aporte + aporte * pct / 100;
             planos.push({
                 grupo: 'ciclo',
                 nome: titulo.trim(),
                 aporte: aporte,
                 diario: diario,
                 prazo: prazo,
-                lucro: aporte * pct / 100
+                lucro: aporte * pct / 100,
+                detalhe: 'Retorno final de ' + BRL.format(retornoFinal) + ' (aporte + ' + pct + '%) menos o aporte de ' + BRL.format(aporte) + '.'
             });
         });
 
@@ -115,7 +128,8 @@
         aporte: document.getElementById('simAporte'),
         diario: document.getElementById('simDiario'),
         prazo: document.getElementById('simPrazo'),
-        lucro: document.getElementById('simLucro')
+        lucro: document.getElementById('simLucro'),
+        detalhe: document.getElementById('simDetalhe')
     };
 
     function animar(node) {
@@ -130,6 +144,7 @@
         el.diario.textContent = p.diario ? BRL.format(p.diario) : '—';
         el.prazo.textContent = p.prazo;
         el.lucro.textContent = BRL.format(p.lucro);
+        if (el.detalhe) el.detalhe.textContent = p.detalhe || '';
         [el.aporte, el.diario, el.prazo, el.lucro].forEach(animar);
     }
 
