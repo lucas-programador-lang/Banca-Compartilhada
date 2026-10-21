@@ -489,7 +489,7 @@
                 </div>
 
                 <div class="table-container">
-                    <h3>Planos Ativos e Rendimentos Diários</h3>
+                    <h3>Planos de Rendimento</h3>
                     <table>
                         <thead>
                             <tr>
@@ -502,7 +502,26 @@
                             </tr>
                         </thead>
                         <tbody id="tabelaPlanosCarteira">
-                            <tr><td colspan="6" class="table-empty">Nenhum plano ativo no momento.</td></tr>
+                            <tr><td colspan="6" class="table-empty">Nenhum plano de rendimento ativo no momento.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-container">
+                    <h3>Planos de Ciclo</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data da Ativação</th>
+                                <th>Plano / Valor</th>
+                                <th>Rendimento Diário</th>
+                                <th>Rendimento Acumulado</th>
+                                <th>Término Previsto</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCiclosCarteira">
+                            <tr><td colspan="6" class="table-empty">Nenhum ciclo ativo no momento.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -559,21 +578,60 @@
 
             <!-- ================= ABA EXTRATO ================= -->
             <section id="view-extrato" class="view-section" style="display: none;">
-                <h2>Extrato de Recebimentos</h2>
+                <h2>Extrato</h2>
                 <div class="table-container">
-                    <h3>Histórico Geral de Valores Recebidos</h3>
+                    <h3>Rendimentos dos Planos de Rendimento</h3>
+                    <p class="table-subtitle">Valores recebidos dos planos com rendimento por dia útil.</p>
                     <table>
                         <thead>
                             <tr>
                                 <th>Data e Horário</th>
                                 <th>Mês / Ano</th>
                                 <th>Descrição / Origem</th>
-                                <th>Valor Recebido</th>
+                                <th>Valor</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
-                        <tbody id="tabelaExtratoGeral">
-                            <tr><td colspan="4" class="table-empty">Nenhum registro no extrato ainda.</td></tr>
+                        <tbody id="tabelaExtratoRendimento">
+                            <tr><td colspan="5" class="table-empty">Nenhum rendimento recebido ainda.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-container">
+                    <h3>Rendimentos dos Ciclos</h3>
+                    <p class="table-subtitle">Valores recebidos dos planos de ciclo.</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data e Horário</th>
+                                <th>Mês / Ano</th>
+                                <th>Descrição / Origem</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaExtratoCiclos">
+                            <tr><td colspan="5" class="table-empty">Nenhum ciclo concluído ainda.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-container">
+                    <h3>Movimentações da Conta</h3>
+                    <p class="table-subtitle">Depósitos, saques, comissões e missões.</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data e Horário</th>
+                                <th>Tipo</th>
+                                <th>Descrição / Origem</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaExtratoConta">
+                            <tr><td colspan="5" class="table-empty">Nenhuma movimentação ainda.</td></tr>
                         </tbody>
                     </table>
                 </div>
