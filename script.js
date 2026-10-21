@@ -1124,6 +1124,30 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Acesso rápido da aba Início: leva para a aba correspondente do menu lateral
+    function irParaAba(targetId) {
+        const item = document.querySelector('.sidebar-nav .nav-item[data-target="' + targetId + '"]');
+        if (item) item.click();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const btnAcessoRendimento = document.getElementById('btnAcessoRendimento');
+    if (btnAcessoRendimento) {
+        btnAcessoRendimento.addEventListener('click', function() { irParaAba('view-investir'); });
+    }
+
+    const btnAcessoHistorico = document.getElementById('btnAcessoHistorico');
+    if (btnAcessoHistorico) {
+        btnAcessoHistorico.addEventListener('click', function() { irParaAba('view-extrato'); });
+    }
+
+    const btnAcessoCupons = document.getElementById('btnAcessoCupons');
+    if (btnAcessoCupons) {
+        btnAcessoCupons.addEventListener('click', function() {
+            mostrarToast('🎁 Cupons em breve!', 'warning');
+        });
+    }
+
     if (btnSair) {
         btnSair.addEventListener('click', async function() {
             btnSair.disabled = true;
