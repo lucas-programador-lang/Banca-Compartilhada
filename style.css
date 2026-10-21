@@ -3738,97 +3738,130 @@ body.cmp-aberto { overflow: hidden; }
 
 /* ==========================================================================
    Estilo "Carteira" — aba Início (apenas visual, mantém a paleta do site)
-   Card escuro com padrão de cubos, valores em duas colunas com números
-   grandes e finos, e botões em blocos quadrados fora do card.
+   Card premium com padrão de cubos, valores em duas colunas e acesso
+   rápido em blocos quadrados.
    ========================================================================== */
 #view-inicio .balance-card {
-    padding: clamp(20px, 4vw, 28px);
+    padding: clamp(22px, 4.5vw, 32px);
     border-radius: 28px;
     margin-bottom: var(--space-md);
-    background: linear-gradient(160deg, #1a130c, #0d0905 75%);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-soft);
+    background:
+        radial-gradient(90% 120% at 0% 0%, rgba(242, 206, 151, 0.07), transparent 55%),
+        linear-gradient(160deg, #1d1510, #0c0804 80%);
+    border: 1px solid rgba(196, 136, 73, 0.22);
+    box-shadow:
+        0 30px 60px -20px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(242, 206, 151, 0.10);
     isolation: isolate;
 }
 
-/* Padrão de cubos ao fundo, esmaecendo para a esquerda/topo */
+/* Padrão de cubos ao fundo, esmaecendo para a esquerda */
 #view-inicio .balance-card::before {
     content: '';
     position: absolute;
     inset: 0;
     height: auto;
     z-index: -1;
-    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='90' viewBox='0 0 52 90'><defs><g id='c'><polygon points='26,0 52,15 26,30 0,15' fill='%23342718' stroke='%230b0704' stroke-width='1'/><polygon points='0,15 26,30 26,60 0,45' fill='%231f1810' stroke='%230b0704' stroke-width='1'/><polygon points='26,30 52,15 52,45 26,60' fill='%23130e09' stroke='%230b0704' stroke-width='1'/></g></defs><use href='%23c' x='0' y='0'/><use href='%23c' x='-26' y='45'/><use href='%23c' x='26' y='45'/><use href='%23c' x='-26' y='-45'/><use href='%23c' x='26' y='-45'/></svg>") 0 0 / 78px auto repeat;
-    opacity: 0.9;
-    -webkit-mask-image: linear-gradient(115deg, transparent 25%, #000 100%);
-    mask-image: linear-gradient(115deg, transparent 25%, #000 100%);
+    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='52' height='90' viewBox='0 0 52 90'><defs><g id='c'><polygon points='26,0 52,15 26,30 0,15' fill='%23352819' stroke='%230b0704' stroke-width='1'/><polygon points='0,15 26,30 26,60 0,45' fill='%231f1810' stroke='%230b0704' stroke-width='1'/><polygon points='26,30 52,15 52,45 26,60' fill='%23130e09' stroke='%230b0704' stroke-width='1'/></g></defs><use href='%23c' x='0' y='0'/><use href='%23c' x='-26' y='45'/><use href='%23c' x='26' y='45'/><use href='%23c' x='-26' y='-45'/><use href='%23c' x='26' y='-45'/></svg>") 0 0 / 78px auto repeat;
+    opacity: 0.85;
+    -webkit-mask-image: linear-gradient(115deg, transparent 30%, #000 105%);
+    mask-image: linear-gradient(115deg, transparent 30%, #000 105%);
     box-shadow: none;
 }
 
+/* Moldura em degradê bronze, bem fina */
 #view-inicio .balance-card::after {
-    display: none;
+    display: block;
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: 28px;
+    background: linear-gradient(140deg, rgba(242, 206, 151, 0.55), rgba(196, 136, 73, 0.08) 35%, transparent 60%, rgba(196, 136, 73, 0.30));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
-/* Título: maiúsculo, espaçado e em negrito */
+/* Título */
 #view-inicio .balance-card__label {
-    color: var(--text-main);
-    font-size: 1.05rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
     font-weight: 700;
-    letter-spacing: 0.22em;
-    margin-bottom: var(--space-md);
+    letter-spacing: 0.24em;
+    margin-bottom: 10px;
 }
 
 #view-inicio .balance-card__label svg {
-    color: var(--text-faint);
+    width: 20px;
+    height: 20px;
+    color: var(--primary);
 }
 
-/* Número grande e fino */
+/* Valor principal: grande, fino e com brilho champanhe */
 #view-inicio .balance-amount {
     font-family: var(--font-body);
     font-weight: 300;
-    font-size: clamp(2.4rem, 1.7rem + 3vw, 3.2rem);
-    line-height: 1.1;
-    letter-spacing: -0.01em;
-    color: var(--text-main);
+    font-size: clamp(2.6rem, 1.8rem + 3.6vw, 3.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
     margin-bottom: var(--space-md);
+    color: var(--text-main);
+    background: linear-gradient(180deg, #fff8ea 10%, var(--primary-hover) 120%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-variant-numeric: tabular-nums;
 }
 
-/* Rótulo leve em cima, número fino embaixo, em duas colunas */
+/* Valores secundários em duas colunas, separados por linhas finas */
 #view-inicio .balance-stats {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-md) var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(196, 136, 73, 0.20);
+}
+
+#view-inicio .balance-stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#view-inicio .balance-stat + .balance-stat {
+    padding-left: clamp(14px, 3vw, 28px);
+    border-left: 1px solid rgba(196, 136, 73, 0.20);
 }
 
 #view-inicio .balance-stat h3 {
-    font-size: 1rem;
-    font-weight: 400;
+    font-size: 0.85rem;
+    font-weight: 500;
     color: var(--text-muted);
     margin-bottom: 4px;
 }
 
 #view-inicio .balance-stat p {
     font-family: var(--font-body);
-    font-weight: 300;
-    font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.2rem);
+    font-weight: 400;
+    font-size: clamp(1.35rem, 1.05rem + 1.3vw, 1.85rem);
     line-height: 1.15;
     color: var(--text-main);
     font-variant-numeric: tabular-nums;
 }
 
-/* Botões: blocos quadrados com ícone dentro e texto embaixo, fora do card */
+/* Acesso rápido: 5 blocos quadrados, ícone dentro e texto embaixo */
 #view-inicio .action-row {
-    display: flex;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    gap: clamp(14px, 4vw, 24px);
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 96px));
+    justify-content: space-between;
+    gap: clamp(6px, 2vw, 22px);
     margin-bottom: var(--space-lg);
 }
 
-#view-inicio .action-row .btn,
-#view-inicio .action-row .btn-outline {
-    flex: 0 0 auto;
-    width: clamp(78px, 22vw, 92px);
+#view-inicio .action-row .btn {
+    width: 100%;
     min-width: 0;
     padding: 0;
     margin: 0;
@@ -3840,10 +3873,22 @@ body.cmp-aberto { overflow: hidden; }
     border: none;
     box-shadow: none;
     color: var(--text-main);
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0;
+    font-size: clamp(0.66rem, 0.55rem + 0.5vw, 0.82rem);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
     overflow: visible;
+    animation: tileIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+#view-inicio .action-row .btn:nth-child(2) { animation-delay: 0.05s; }
+#view-inicio .action-row .btn:nth-child(3) { animation-delay: 0.10s; }
+#view-inicio .action-row .btn:nth-child(4) { animation-delay: 0.15s; }
+#view-inicio .action-row .btn:nth-child(5) { animation-delay: 0.20s; }
+
+@keyframes tileIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 #view-inicio .action-row .btn::after {
@@ -3852,14 +3897,20 @@ body.cmp-aberto { overflow: hidden; }
 
 #view-inicio .action-row .btn svg {
     box-sizing: border-box;
-    width: clamp(78px, 22vw, 92px);
-    height: clamp(78px, 22vw, 92px);
-    padding: 26px;
-    border-radius: 20px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    padding: 28%;
+    border-radius: 22%;
     color: var(--primary-hover);
-    background: #1a130c;
-    border: 1.5px solid var(--primary-deep);
-    transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+    background:
+        radial-gradient(120% 120% at 20% 0%, rgba(242, 206, 151, 0.14), transparent 60%),
+        linear-gradient(160deg, #2a1e13, #130d08);
+    border: 1px solid rgba(196, 136, 73, 0.45);
+    box-shadow:
+        inset 0 1px 0 rgba(242, 206, 151, 0.14),
+        0 10px 22px -8px rgba(0, 0, 0, 0.7);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-base), transform var(--transition-fast), color var(--transition-fast);
 }
 
 #view-inicio .action-row .btn:hover {
@@ -3869,16 +3920,38 @@ body.cmp-aberto { overflow: hidden; }
 }
 
 #view-inicio .action-row .btn:hover svg {
-    background: var(--primary-soft);
+    color: #fff4df;
     border-color: var(--primary);
-    transform: translateY(-2px);
+    box-shadow:
+        inset 0 1px 0 rgba(242, 206, 151, 0.2),
+        0 0 0 3px rgba(196, 136, 73, 0.12),
+        0 12px 26px -8px rgba(196, 136, 73, 0.35);
+    transform: translateY(-3px);
+}
+
+#view-inicio .action-row .btn:active svg {
+    transform: translateY(0) scale(0.97);
+}
+
+#view-inicio .action-row .btn:focus-visible svg {
+    outline: 2px solid var(--primary-hover);
+    outline-offset: 3px;
+}
+
+/* Telas largas: blocos agrupados à esquerda, sem se esticar pela tela toda */
+@media (min-width: 700px) {
+    #view-inicio .action-row {
+        justify-content: start;
+        gap: 28px;
+    }
 }
 
 @media (max-width: 380px) {
-    #view-inicio .balance-stats {
-        gap: var(--space-sm);
-    }
     #view-inicio .balance-stat h3 {
-        font-size: 0.9rem;
+        font-size: 0.78rem;
     }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #view-inicio .action-row .btn { animation: none; }
 }
