@@ -4225,3 +4225,57 @@ body:not(.admin-page) .sidebar {
     background: linear-gradient(160deg, rgba(242, 206, 151, 0.06), rgba(196, 136, 73, 0.02));
     border-color: rgba(196, 136, 73, 0.28);
 }
+
+/* ==========================================================================
+   Tabelas de Carteira e Extrato
+   ========================================================================== */
+.table-subtitle {
+    margin: -4px 0 var(--space-sm);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    color: var(--primary-hover);
+    background: rgba(196, 136, 73, 0.14);
+    border: 1px solid rgba(196, 136, 73, 0.35);
+}
+
+.tipo-badge--deposito {
+    color: var(--success-hover);
+    background: var(--success-soft);
+    border-color: rgba(52, 211, 153, 0.35);
+}
+
+.tipo-badge--saque {
+    color: var(--danger);
+    background: var(--danger-soft);
+    border-color: rgba(248, 113, 113, 0.35);
+}
+
+.tipo-badge--missao {
+    color: #f2ce97;
+    background: rgba(242, 206, 151, 0.12);
+    border-color: rgba(242, 206, 151, 0.35);
+}
+
+/* Colunas alinhadas entre as tabelas do Extrato */
+#view-extrato .table-container table {
+    table-layout: fixed;
+    width: 100%;
+    min-width: 680px;
+}
+
+#view-extrato .table-container th:nth-child(1) { width: 21%; }
+#view-extrato .table-container th:nth-child(2) { width: 16%; }
+#view-extrato .table-container th:nth-child(3) { width: 31%; }
+#view-extrato .table-container th:nth-child(4) { width: 14%; }
+#view-extrato .table-container th:nth-child(5) { width: 18%; }
