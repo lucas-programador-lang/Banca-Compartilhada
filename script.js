@@ -306,29 +306,66 @@ async function sincronizarRendimentosComSaldoDisponivel(planosObj) {
     }
 }
 
+function montarLinhaPlano(plano, estado) {
+    const valor = parseFloat(plano.valor || 0);
+
+    let statusTexto = 'Ativo';
+    let statusClasse = 'plan-row__value plan-row__value--positive';
+    if (estado.cancelado) {
+        statusTexto = 'Cancelado';
+        statusClasse = 'plan-row__value plan-row__value--negative';
+    } else if (estado.finalizado) {
+        statusTexto = 'Finalizado';
+        statusClasse = 'plan-row__value';
+    }
+
+    const dataHoraAtivacao = !isNaN(estado.dataAtivacao.getTime())
+        ? formatadorDataHoraCurto.format(estado.dataAtivacao)
+        : '—';
+
+    // Data de previsão de término / expiração
+    const terminoPrevistoIso = calcularTerminoPrevisto(plano) || plano.dataExpiracao;
+    const terminoPrevistoData = terminoPrevistoIso ? new Date(terminoPrevistoIso) : null;
+    const dataExpiracaoStr = (terminoPrevistoData && !isNaN(terminoPrevistoData.getTime()))
+        ? formatadorDataHoraCurto.format(terminoPrevistoData)
+        : '—';
+
+    const ultimoRend = plano.ultimoRendimentoEm ? new Date(plano.ultimoRendimentoEm) : null;
+    const textoUltimoRend = (ultimoRend && !isNaN(ultimoRend.getTime()))
+        ? `<div style="font-size: 0.75rem; opacity: 0.75; margin-top: 2px;">Últ. pago: ${formatadorDataHoraCurto.format(ultimoRend)}</div>`
+        : '';
+
+    return `
+        <tr>
+            <td>${dataHoraAtivacao}${textoUltimoRend}</td>
+            <td>${formatadorMoeda.format(valor)}</td>
+            <td>${formatadorMoeda.format(estado.rendimentoDiario)}</td>
+            <td>${formatadorMoeda.format(estado.rendimentoAcumulado)}</td>
+            <td><strong>${dataExpiracaoStr}</strong></td>
+            <td><span class="${statusClasse}" style="font-weight: 600;">${statusTexto}</span></td>
+        </tr>
+    `;
+}
+
 function renderizarTabelaCarteira(planosObj) {
-    const tbody = getEl('tabelaPlanosCarteira');
+    const tbodyRendimento = getEl('tabelaPlanosCarteira');
+    const tbodyCiclos = getEl('tabelaCiclosCarteira');
     const elTotalInvestido = getEl('totalInvestidoPlanos');
     const elTotalRendimento = getEl('totalRendimentoPlanos');
-    if (!tbody) return;
+    if (!tbodyRendimento && !tbodyCiclos) return;
 
     const planos = planosObj
         ? Object.entries(planosObj).map(function([id, dados]) { return { id, ...dados }; })
         : [];
 
-    if (!planos.length) {
-        tbody.innerHTML = '<tr><td colspan="6" class="table-empty">Nenhum plano ativo no momento.</td></tr>';
-        if (elTotalInvestido) elTotalInvestido.innerText = formatadorMoeda.format(0);
-        if (elTotalRendimento) elTotalRendimento.innerText = formatadorMoeda.format(0);
-        return;
-    }
-
     planos.sort(function(a, b) { return new Date(b.dataAtivacao || 0) - new Date(a.dataAtivacao || 0); });
 
     let totalInvestido = 0;
     let totalRendimento = 0;
+    const linhasRendimento = [];
+    const linhasCiclos = [];
 
-    tbody.innerHTML = planos.map(function(plano) {
+    planos.forEach(function(plano) {
         const valor = parseFloat(plano.valor || 0);
         const estado = calcularEstadoPlano(plano);
 
@@ -337,51 +374,28 @@ function renderizarTabelaCarteira(planosObj) {
             totalRendimento += estado.rendimentoAcumulado;
         }
 
-        let statusTexto = 'Ativo';
-        let statusClasse = 'plan-row__value plan-row__value--positive';
-        if (estado.cancelado) {
-            statusTexto = 'Cancelado';
-            statusClasse = 'plan-row__value plan-row__value--negative';
-        } else if (estado.finalizado) {
-            statusTexto = 'Finalizado';
-            statusClasse = 'plan-row__value';
-        }
+        const linha = montarLinhaPlano(plano, estado);
+        if (CONFIG.PLANOS_DE_CICLO.includes(valor)) linhasCiclos.push(linha);
+        else linhasRendimento.push(linha);
+    });
 
-        const dataHoraAtivacao = !isNaN(estado.dataAtivacao.getTime())
-            ? formatadorDataHoraCurto.format(estado.dataAtivacao)
-            : '—';
-
-        // 👈 DATA DE PREVISÃO DE TÉRMINO / EXPIRAÇÃO
-        const terminoPrevistoIso = calcularTerminoPrevisto(plano) || plano.dataExpiracao;
-        const terminoPrevistoData = terminoPrevistoIso ? new Date(terminoPrevistoIso) : null;
-        const dataExpiracaoStr = (terminoPrevistoData && !isNaN(terminoPrevistoData.getTime()))
-            ? formatadorDataHoraCurto.format(terminoPrevistoData)
-            : '—';
-
-        const ultimoRend = plano.ultimoRendimentoEm ? new Date(plano.ultimoRendimentoEm) : null;
-        const textoUltimoRend = (ultimoRend && !isNaN(ultimoRend.getTime()))
-            ? `<div style="font-size: 0.75rem; opacity: 0.75; margin-top: 2px;">Últ. pago: ${formatadorDataHoraCurto.format(ultimoRend)}</div>`
-            : '';
-
-        return `
-            <tr>
-                <td>${dataHoraAtivacao}${textoUltimoRend}</td>
-                <td>${formatadorMoeda.format(valor)}</td>
-                <td>${formatadorMoeda.format(estado.rendimentoDiario)}</td>
-                <td>${formatadorMoeda.format(estado.rendimentoAcumulado)}</td>
-                <td><strong>${dataExpiracaoStr}</strong></td> <!-- 👈 EXIBE A EXPIRAÇÃO AQUI -->
-                <td><span class="${statusClasse}" style="font-weight: 600;">${statusTexto}</span></td>
-            </tr>
-        `;
-    }).join('');
+    if (tbodyRendimento) {
+        tbodyRendimento.innerHTML = linhasRendimento.length
+            ? linhasRendimento.join('')
+            : '<tr><td colspan="6" class="table-empty">Nenhum plano de rendimento ativo no momento.</td></tr>';
+    }
+    if (tbodyCiclos) {
+        tbodyCiclos.innerHTML = linhasCiclos.length
+            ? linhasCiclos.join('')
+            : '<tr><td colspan="6" class="table-empty">Nenhum ciclo ativo no momento.</td></tr>';
+    }
 
     if (elTotalInvestido) elTotalInvestido.innerText = formatadorMoeda.format(totalInvestido);
     if (elTotalRendimento) elTotalRendimento.innerText = formatadorMoeda.format(totalRendimento);
 }
 
 function inicializarCarteiraUsuario(userId) {
-    const tbody = getEl('tabelaPlanosCarteira');
-    if (!tbody) return;
+    if (!getEl('tabelaPlanosCarteira') && !getEl('tabelaCiclosCarteira')) return;
 
     const planosRef = ref(db, 'planos/' + userId);
     onValue(planosRef, function(snapshot) {
@@ -423,63 +437,198 @@ function atualizarDisponibilidadePlanos(planosObj) {
     }
 }
 
+// Classificação dos lançamentos do extrato pelo texto (tipo, origem e descrição).
+// Para mudar em qual tabela cada lançamento cai, ajuste as palavras abaixo.
+const CATEGORIAS_CONTA = [
+    { chave: 'saque',    rotulo: 'Saque',    regex: /saque/ },
+    { chave: 'deposito', rotulo: 'Depósito', regex: /deposit/ },
+    { chave: 'comissao', rotulo: 'Comissão', regex: /comiss/ },
+    { chave: 'missao',   rotulo: 'Missão',   regex: /missao|missoes/ },
+];
+const REGEX_CICLO = /ciclo/;
+
+function normalizarTexto(texto) {
+    return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function classificarRegistroExtrato(registro) {
+    const texto = normalizarTexto([registro.tipo, registro.origem, registro.descricao].join(' '));
+    for (let i = 0; i < CATEGORIAS_CONTA.length; i++) {
+        if (CATEGORIAS_CONTA[i].regex.test(texto)) return { grupo: 'conta', categoria: CATEGORIAS_CONTA[i] };
+    }
+    if (REGEX_CICLO.test(texto)) return { grupo: 'ciclos' };
+    if (parseFloat(registro.valor || 0) < 0) return { grupo: 'conta', categoria: { chave: 'ajuste', rotulo: 'Ajuste' } };
+    return { grupo: 'rendimento' };
+}
+
+function badgeStatus(texto, classe) {
+    return `<span class="status-badge ${classe}">${escapeHTML(texto)}</span>`;
+}
+
+function statusDoRegistroExtrato(registro, valor) {
+    if (registro.status === 'pendente') return badgeStatus('Pendente', 'status-pendente');
+    if (registro.status === 'processando') return badgeStatus('Processando', 'status-pendente');
+    if (registro.status === 'pago') return badgeStatus('Pago', 'status-aprovado');
+    if (valor < 0 && !registro.status) return badgeStatus('Debitado', 'status-recusado');
+    return badgeStatus('Creditado', 'status-aprovado');
+}
+
 function inicializarExtratoUsuario(userId) {
-    const tbody = getEl('tabelaExtratoGeral');
-    if (!tbody) return;
+    const tbRendimento = getEl('tabelaExtratoRendimento');
+    const tbCiclos = getEl('tabelaExtratoCiclos');
+    const tbConta = getEl('tabelaExtratoConta');
+    if (!tbRendimento && !tbCiclos && !tbConta) return;
 
     const formatadorMesAno = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
     const formatadorDataHora = new Intl.DateTimeFormat('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
     });
 
-    const extratoRef = ref(db, 'extrato/' + userId);
-    onValue(extratoRef, function(snapshot) {
-        const dados = snapshot.val();
-        const registros = dados
-            ? Object.entries(dados).map(function([id, info]) { return { id, ...info }; })
-            : [];
+    const estado = { extrato: [], depositos: [], saques: [], depositosErro: false, saquesErro: false };
 
-        if (!registros.length) {
-            tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhum registro no extrato ainda.</td></tr>';
-            return;
-        }
+    function paraLista(obj) {
+        return obj ? Object.entries(obj).map(function([id, info]) { return { id, ...info }; }) : [];
+    }
 
-        registros.sort(function(a, b) { return new Date(b.data || 0) - new Date(a.data || 0); });
+    function dataValida(valor) {
+        const d = new Date(valor || Date.now());
+        return isNaN(d.getTime()) ? new Date() : d;
+    }
 
-        tbody.innerHTML = registros.map(function(registro) {
-            const data = new Date(registro.data || Date.now());
-            let mesAno = formatadorMesAno.format(data);
-            mesAno = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
+    function linhaRendimento(item) {
+        let mesAno = formatadorMesAno.format(item.data);
+        mesAno = mesAno.charAt(0).toUpperCase() + mesAno.slice(1);
+        const classeValor = item.valor < 0 ? 'plan-row__value plan-row__value--negative' : 'plan-row__value plan-row__value--positive';
+        return `
+            <tr>
+                <td>${formatadorDataHora.format(item.data)}</td>
+                <td>${mesAno}</td>
+                <td>${escapeHTML(item.descricao) || '—'}</td>
+                <td class="${classeValor}">${formatadorMoeda.format(item.valor)}</td>
+                <td>${item.statusHtml}</td>
+            </tr>
+        `;
+    }
 
+    function linhaConta(item) {
+        const classeValor = item.valor < 0 ? 'plan-row__value plan-row__value--negative' : 'plan-row__value plan-row__value--positive';
+        return `
+            <tr>
+                <td>${formatadorDataHora.format(item.data)}</td>
+                <td><span class="tipo-badge tipo-badge--${item.categoria.chave}">${escapeHTML(item.categoria.rotulo)}</span></td>
+                <td>${escapeHTML(item.descricao) || '—'}</td>
+                <td class="${classeValor}">${formatadorMoeda.format(item.valor)}</td>
+                <td>${item.statusHtml}</td>
+            </tr>
+        `;
+    }
+
+    function preencher(tbody, itens, montar, vazio) {
+        if (!tbody) return;
+        itens.sort(function(a, b) { return b.data - a.data; });
+        tbody.innerHTML = itens.length
+            ? itens.map(montar).join('')
+            : `<tr><td colspan="5" class="table-empty">${vazio}</td></tr>`;
+    }
+
+    function renderizar() {
+        const rendimento = [];
+        const ciclos = [];
+        const conta = [];
+
+        // Lançamentos do extrato
+        estado.extrato.forEach(function(registro) {
             const valor = parseFloat(registro.valor || 0);
-            const classeValor = valor < 0 ? 'plan-row__value plan-row__value--negative' : 'plan-row__value plan-row__value--positive';
+            const classe = classificarRegistroExtrato(registro);
+            const item = {
+                data: dataValida(registro.data),
+                descricao: registro.descricao,
+                valor: valor,
+                statusHtml: statusDoRegistroExtrato(registro, valor),
+            };
 
-            let statusHtml = '<span class="status-badge status-aprovado">Creditado</span>';
-            if (registro.status === 'pendente') {
-                statusHtml = '<span class="status-badge status-pendente">Pendente</span>';
-            } else if (registro.status === 'processando') {
-                statusHtml = '<span class="status-badge status-pendente">Processando</span>';
-            } else if (registro.status === 'pago') {
-                statusHtml = '<span class="status-badge status-aprovado">Pago</span>';
-            } else if (valor < 0 && !registro.status) {
-                statusHtml = '<span class="status-badge status-recusado">Debitado</span>';
+            if (classe.grupo === 'ciclos') {
+                ciclos.push(item);
+            } else if (classe.grupo === 'rendimento') {
+                rendimento.push(item);
+            } else {
+                // Saques e depósitos vêm das próprias listas abaixo (evita duplicar),
+                // a não ser que não seja possível ler essas listas.
+                const duplicaSaque = classe.categoria.chave === 'saque' && !estado.saquesErro;
+                const duplicaDeposito = classe.categoria.chave === 'deposito' && !estado.depositosErro;
+                if (duplicaSaque || duplicaDeposito) return;
+                item.categoria = classe.categoria;
+                conta.push(item);
             }
+        });
 
-            return `
-                <tr>
-                    <td>${formatadorDataHora.format(data)}</td>
-                    <td>${mesAno}</td>
-                    <td>${escapeHTML(registro.descricao) || '—'}</td>
-                    <td class="${classeValor}">${formatadorMoeda.format(valor)}</td>
-                    <td>${statusHtml}</td>
-                </tr>
-            `;
-        }).join('');
+        // Depósitos
+        estado.depositos.forEach(function(dep) {
+            const status = String(dep.status || 'pendente').toLowerCase();
+            let statusHtml;
+            if (['aprovado', 'aprovado_sem_plano', 'resolvido_sem_plano'].includes(status)) statusHtml = badgeStatus('Aprovado', 'status-aprovado');
+            else if (status === 'recusado') statusHtml = badgeStatus('Recusado', 'status-recusado');
+            else statusHtml = badgeStatus('Pendente', 'status-pendente');
+
+            const valorPlano = parseFloat(dep.valorPlano || 0);
+            conta.push({
+                data: dataValida(dep.dataAprovacao || dep.dataSolicitacao),
+                categoria: { chave: 'deposito', rotulo: 'Depósito' },
+                descricao: 'Depósito via Pix — plano de ' + formatadorMoeda.format(valorPlano),
+                valor: valorPlano,
+                statusHtml: statusHtml,
+            });
+        });
+
+        // Saques
+        estado.saques.forEach(function(saq) {
+            const status = String(saq.status || 'pendente').toLowerCase();
+            let statusHtml;
+            if (status === 'pago') statusHtml = badgeStatus('Pago', 'status-aprovado');
+            else if (['recusado', 'estornado', 'cancelado'].includes(status)) statusHtml = badgeStatus('Recusado', 'status-recusado');
+            else if (status === 'processando') statusHtml = badgeStatus('Processando', 'status-pendente');
+            else statusHtml = badgeStatus('Pendente', 'status-pendente');
+
+            const solicitado = parseFloat(saq.valorSolicitado || 0);
+            const liquido = parseFloat(saq.valorLiquido || 0);
+            conta.push({
+                data: dataValida(saq.dataSolicitacao || saq.dataPagamento),
+                categoria: { chave: 'saque', rotulo: 'Saque' },
+                descricao: 'Saque via Pix' + (liquido ? ' — líquido de ' + formatadorMoeda.format(liquido) : ''),
+                valor: -solicitado,
+                statusHtml: statusHtml,
+            });
+        });
+
+        preencher(tbRendimento, rendimento, linhaRendimento, 'Nenhum rendimento recebido ainda.');
+        preencher(tbCiclos, ciclos, linhaRendimento, 'Nenhum ciclo concluído ainda.');
+        preencher(tbConta, conta, linhaConta, 'Nenhuma movimentação ainda.');
+    }
+
+    onValue(ref(db, 'extrato/' + userId), function(snapshot) {
+        estado.extrato = paraLista(snapshot.val());
+        renderizar();
+    });
+
+    onValue(ref(db, 'depositos/' + userId), function(snapshot) {
+        estado.depositosErro = false;
+        estado.depositos = paraLista(snapshot.val());
+        renderizar();
+    }, function(erro) {
+        console.warn('Não foi possível ler os depósitos para o extrato:', erro);
+        estado.depositosErro = true;
+        renderizar();
+    });
+
+    onValue(ref(db, 'saques/' + userId), function(snapshot) {
+        estado.saquesErro = false;
+        estado.saques = paraLista(snapshot.val());
+        renderizar();
+    }, function(erro) {
+        console.warn('Não foi possível ler os saques para o extrato:', erro);
+        estado.saquesErro = true;
+        renderizar();
     });
 }
 
