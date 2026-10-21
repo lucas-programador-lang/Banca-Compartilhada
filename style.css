@@ -3735,3 +3735,145 @@ body.cmp-aberto { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
     .cmp-overlay, .cmp-btn--confirma:not(:disabled) { animation: none; }
 }
+
+/* ==========================================================================
+   Estilo "Carteira" — aba Início (apenas visual, mantém a paleta do site)
+   Card liso e arredondado, números grandes e finos, botões em blocos
+   quadrados com o ícone em cima e o texto embaixo.
+   ========================================================================== */
+#view-inicio .balance-card {
+    padding: var(--space-lg) clamp(18px, 4vw, 28px);
+    border-radius: 28px;
+    border: 1px solid var(--border-color);
+    background:
+        radial-gradient(120% 90% at 100% 0%, rgba(196, 136, 73, 0.10), transparent 55%),
+        linear-gradient(160deg, var(--card-bg-hover), var(--bg-color-elevated) 70%);
+    box-shadow: var(--shadow-soft);
+}
+
+/* Remove os fios/molduras decorativos do card padrão */
+#view-inicio .balance-card::before,
+#view-inicio .balance-card::after {
+    display: none;
+}
+
+/* Título: maiúsculo, espaçado e em negrito, na cor do texto */
+#view-inicio .balance-card__label {
+    color: var(--text-main);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    margin-bottom: var(--space-md);
+}
+
+#view-inicio .balance-card__label svg {
+    color: var(--text-faint);
+}
+
+/* Número grande e fino */
+#view-inicio .balance-amount {
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: clamp(2.4rem, 1.7rem + 3vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--text-main);
+    margin-bottom: var(--space-lg);
+}
+
+/* Botões: blocos quadrados com ícone em cima e texto embaixo */
+#view-inicio .action-row {
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    gap: var(--space-sm);
+}
+
+#view-inicio .action-row .btn,
+#view-inicio .action-row .btn-outline {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
+    padding: 0;
+    flex-direction: column;
+    gap: 10px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: var(--text-main);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    overflow: visible;
+}
+
+#view-inicio .action-row .btn::after {
+    display: none;
+}
+
+#view-inicio .action-row .btn svg {
+    box-sizing: content-box;
+    width: 28px;
+    height: 28px;
+    padding: 18px;
+    border-radius: 18px;
+    color: var(--primary-hover);
+    background: var(--primary-soft);
+    border: 1px solid var(--primary-deep);
+    transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+#view-inicio .action-row .btn:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+}
+
+#view-inicio .action-row .btn:hover svg {
+    background: rgba(196, 136, 73, 0.24);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Cards de estatística: mesmo estilo de rótulo leve + número fino */
+#view-inicio .stat-card {
+    border-radius: 24px;
+    padding: var(--space-md) clamp(18px, 4vw, 24px);
+    background: linear-gradient(160deg, var(--card-bg-hover), var(--bg-color-elevated) 70%);
+}
+
+#view-inicio .stat-card::before {
+    display: none;
+}
+
+#view-inicio .stat-card:hover {
+    transform: none;
+}
+
+#view-inicio .stat-card h3 {
+    font-size: 0.95rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+#view-inicio .stat-card p {
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: clamp(1.7rem, 1.3rem + 1.4vw, 2.2rem);
+    color: var(--text-main);
+    letter-spacing: -0.01em;
+}
+
+@media (max-width: 480px) {
+    #view-inicio .action-row .btn svg {
+        width: 24px;
+        height: 24px;
+        padding: 14px;
+        border-radius: 16px;
+    }
+    #view-inicio .action-row .btn {
+        font-size: 0.8rem;
+    }
+}
