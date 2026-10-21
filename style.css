@@ -3742,14 +3742,18 @@ body.cmp-aberto { overflow: hidden; }
    rápido em blocos quadrados.
    ========================================================================== */
 #view-inicio .balance-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: clamp(20px, 3vw, 36px);
+    align-items: stretch;
     padding: clamp(22px, 4.5vw, 32px);
     border-radius: 28px;
     margin-bottom: var(--space-md);
     background:
         url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 .85 0 0 0 0 .6 0 0 0 .55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.07'/></svg>") 0 0 / 160px 160px,
-        radial-gradient(70% 120% at 100% 0%, rgba(196, 136, 73, 0.26), transparent 62%),
+        repeating-radial-gradient(circle at 100% 0%, transparent 0 58px, rgba(196, 136, 73, 0.055) 58px 59px),
+        radial-gradient(75% 130% at 100% 0%, rgba(196, 136, 73, 0.24), transparent 62%),
         radial-gradient(55% 90% at 0% 0%, rgba(242, 206, 151, 0.07), transparent 65%),
-        linear-gradient(115deg, transparent 38%, rgba(242, 206, 151, 0.045) 50%, transparent 62%),
         linear-gradient(160deg, #1f1610, #0b0704 85%);
     border: 1px solid rgba(196, 136, 73, 0.22);
     box-shadow:
@@ -3761,17 +3765,20 @@ body.cmp-aberto { overflow: hidden; }
     isolation: isolate;
 }
 
-/* Cubos em 3D com tons variados, iluminados pelo canto superior direito */
+/* Remove o fio dourado padrão do .card (o card tem moldura própria abaixo) */
 #view-inicio .balance-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    height: auto;
-    z-index: -1;
-    background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='156' height='180' viewBox='0 0 156 180'><g stroke='%230a0704' stroke-width='1' stroke-linejoin='round'><polygon points='-26,-90 0,-75 -26,-60 -52,-75' fill='%233a2b1a'/><polygon points='-52,-75 -26,-60 -26,-30 -52,-45' fill='%23241a10'/><polygon points='-26,-60 0,-75 0,-45 -26,-30' fill='%23170f09'/><polygon points='-52,-45 -26,-30 -52,-15 -78,-30' fill='%233a2b1a'/><polygon points='-78,-30 -52,-15 -52,15 -78,0' fill='%23241a10'/><polygon points='-52,-15 -26,-30 -26,0 -52,15' fill='%23170f09'/><polygon points='26,-90 52,-75 26,-60 0,-75' fill='%2315100a'/><polygon points='0,-75 26,-60 26,-30 0,-45' fill='%230f0a06'/><polygon points='26,-60 52,-75 52,-45 26,-30' fill='%230a0704'/><polygon points='0,-45 26,-30 0,-15 -26,-30' fill='%233a2b1a'/><polygon points='-26,-30 0,-15 0,15 -26,0' fill='%23241a10'/><polygon points='0,-15 26,-30 26,0 0,15' fill='%23170f09'/><polygon points='78,-90 104,-75 78,-60 52,-75' fill='%233a2b1a'/><polygon points='52,-75 78,-60 78,-30 52,-45' fill='%23241a10'/><polygon points='78,-60 104,-75 104,-45 78,-30' fill='%23170f09'/><polygon points='52,-45 78,-30 52,-15 26,-30' fill='%233a2b1a'/><polygon points='26,-30 52,-15 52,15 26,0' fill='%23241a10'/><polygon points='52,-15 78,-30 78,0 52,15' fill='%23170f09'/><polygon points='130,-90 156,-75 130,-60 104,-75' fill='%233a2b1a'/><polygon points='104,-75 130,-60 130,-30 104,-45' fill='%23241a10'/><polygon points='130,-60 156,-75 156,-45 130,-30' fill='%23170f09'/><polygon points='104,-45 130,-30 104,-15 78,-30' fill='%233a2b1a'/><polygon points='78,-30 104,-15 104,15 78,0' fill='%23241a10'/><polygon points='104,-15 130,-30 130,0 104,15' fill='%23170f09'/><polygon points='182,-90 208,-75 182,-60 156,-75' fill='%2315100a'/><polygon points='156,-75 182,-60 182,-30 156,-45' fill='%230f0a06'/><polygon points='182,-60 208,-75 208,-45 182,-30' fill='%230a0704'/><polygon points='156,-45 182,-30 156,-15 130,-30' fill='%233a2b1a'/><polygon points='130,-30 156,-15 156,15 130,0' fill='%23241a10'/><polygon points='156,-15 182,-30 182,0 156,15' fill='%23170f09'/><polygon points='-26,0 0,15 -26,30 -52,15' fill='%232a1f14'/><polygon points='-52,15 -26,30 -26,60 -52,45' fill='%2319120c'/><polygon points='-26,30 0,15 0,45 -26,60' fill='%23100b07'/><polygon points='-52,45 -26,60 -52,75 -78,60' fill='%233a2b1a'/><polygon points='-78,60 -52,75 -52,105 -78,90' fill='%23241a10'/><polygon points='-52,75 -26,60 -26,90 -52,105' fill='%23170f09'/><polygon points='26,0 52,15 26,30 0,15' fill='%233a2b1a'/><polygon points='0,15 26,30 26,60 0,45' fill='%23241a10'/><polygon points='26,30 52,15 52,45 26,60' fill='%23170f09'/><polygon points='0,45 26,60 0,75 -26,60' fill='%234f3a23'/><polygon points='-26,60 0,75 0,105 -26,90' fill='%2330221a'/><polygon points='0,75 26,60 26,90 0,105' fill='%231d140b'/><polygon points='78,0 104,15 78,30 52,15' fill='%232a1f14'/><polygon points='52,15 78,30 78,60 52,45' fill='%2319120c'/><polygon points='78,30 104,15 104,45 78,60' fill='%23100b07'/><polygon points='52,45 78,60 52,75 26,60' fill='%232a1f14'/><polygon points='26,60 52,75 52,105 26,90' fill='%2319120c'/><polygon points='52,75 78,60 78,90 52,105' fill='%23100b07'/><polygon points='130,0 156,15 130,30 104,15' fill='%232a1f14'/><polygon points='104,15 130,30 130,60 104,45' fill='%2319120c'/><polygon points='130,30 156,15 156,45 130,60' fill='%23100b07'/><polygon points='104,45 130,60 104,75 78,60' fill='%233a2b1a'/><polygon points='78,60 104,75 104,105 78,90' fill='%23241a10'/><polygon points='104,75 130,60 130,90 104,105' fill='%23170f09'/><polygon points='182,0 208,15 182,30 156,15' fill='%233a2b1a'/><polygon points='156,15 182,30 182,60 156,45' fill='%23241a10'/><polygon points='182,30 208,15 208,45 182,60' fill='%23170f09'/><polygon points='156,45 182,60 156,75 130,60' fill='%234f3a23'/><polygon points='130,60 156,75 156,105 130,90' fill='%2330221a'/><polygon points='156,75 182,60 182,90 156,105' fill='%231d140b'/><polygon points='-26,90 0,105 -26,120 -52,105' fill='%233a2b1a'/><polygon points='-52,105 -26,120 -26,150 -52,135' fill='%23241a10'/><polygon points='-26,120 0,105 0,135 -26,150' fill='%23170f09'/><polygon points='-52,135 -26,150 -52,165 -78,150' fill='%233a2b1a'/><polygon points='-78,150 -52,165 -52,195 -78,180' fill='%23241a10'/><polygon points='-52,165 -26,150 -26,180 -52,195' fill='%23170f09'/><polygon points='26,90 52,105 26,120 0,105' fill='%2315100a'/><polygon points='0,105 26,120 26,150 0,135' fill='%230f0a06'/><polygon points='26,120 52,105 52,135 26,150' fill='%230a0704'/><polygon points='0,135 26,150 0,165 -26,150' fill='%233a2b1a'/><polygon points='-26,150 0,165 0,195 -26,180' fill='%23241a10'/><polygon points='0,165 26,150 26,180 0,195' fill='%23170f09'/><polygon points='78,90 104,105 78,120 52,105' fill='%233a2b1a'/><polygon points='52,105 78,120 78,150 52,135' fill='%23241a10'/><polygon points='78,120 104,105 104,135 78,150' fill='%23170f09'/><polygon points='52,135 78,150 52,165 26,150' fill='%233a2b1a'/><polygon points='26,150 52,165 52,195 26,180' fill='%23241a10'/><polygon points='52,165 78,150 78,180 52,195' fill='%23170f09'/><polygon points='130,90 156,105 130,120 104,105' fill='%233a2b1a'/><polygon points='104,105 130,120 130,150 104,135' fill='%23241a10'/><polygon points='130,120 156,105 156,135 130,150' fill='%23170f09'/><polygon points='104,135 130,150 104,165 78,150' fill='%233a2b1a'/><polygon points='78,150 104,165 104,195 78,180' fill='%23241a10'/><polygon points='104,165 130,150 130,180 104,195' fill='%23170f09'/><polygon points='182,90 208,105 182,120 156,105' fill='%2315100a'/><polygon points='156,105 182,120 182,150 156,135' fill='%230f0a06'/><polygon points='182,120 208,105 208,135 182,150' fill='%230a0704'/><polygon points='156,135 182,150 156,165 130,150' fill='%233a2b1a'/><polygon points='130,150 156,165 156,195 130,180' fill='%23241a10'/><polygon points='156,165 182,150 182,180 156,195' fill='%23170f09'/><polygon points='-26,180 0,195 -26,210 -52,195' fill='%232a1f14'/><polygon points='-52,195 -26,210 -26,240 -52,225' fill='%2319120c'/><polygon points='-26,210 0,195 0,225 -26,240' fill='%23100b07'/><polygon points='-52,225 -26,240 -52,255 -78,240' fill='%233a2b1a'/><polygon points='-78,240 -52,255 -52,285 -78,270' fill='%23241a10'/><polygon points='-52,255 -26,240 -26,270 -52,285' fill='%23170f09'/><polygon points='26,180 52,195 26,210 0,195' fill='%233a2b1a'/><polygon points='0,195 26,210 26,240 0,225' fill='%23241a10'/><polygon points='26,210 52,195 52,225 26,240' fill='%23170f09'/><polygon points='0,225 26,240 0,255 -26,240' fill='%234f3a23'/><polygon points='-26,240 0,255 0,285 -26,270' fill='%2330221a'/><polygon points='0,255 26,240 26,270 0,285' fill='%231d140b'/><polygon points='78,180 104,195 78,210 52,195' fill='%232a1f14'/><polygon points='52,195 78,210 78,240 52,225' fill='%2319120c'/><polygon points='78,210 104,195 104,225 78,240' fill='%23100b07'/><polygon points='52,225 78,240 52,255 26,240' fill='%232a1f14'/><polygon points='26,240 52,255 52,285 26,270' fill='%2319120c'/><polygon points='52,255 78,240 78,270 52,285' fill='%23100b07'/><polygon points='130,180 156,195 130,210 104,195' fill='%232a1f14'/><polygon points='104,195 130,210 130,240 104,225' fill='%2319120c'/><polygon points='130,210 156,195 156,225 130,240' fill='%23100b07'/><polygon points='104,225 130,240 104,255 78,240' fill='%233a2b1a'/><polygon points='78,240 104,255 104,285 78,270' fill='%23241a10'/><polygon points='104,255 130,240 130,270 104,285' fill='%23170f09'/><polygon points='182,180 208,195 182,210 156,195' fill='%233a2b1a'/><polygon points='156,195 182,210 182,240 156,225' fill='%23241a10'/><polygon points='182,210 208,195 208,225 182,240' fill='%23170f09'/><polygon points='156,225 182,240 156,255 130,240' fill='%234f3a23'/><polygon points='130,240 156,255 156,285 130,270' fill='%2330221a'/><polygon points='156,255 182,240 182,270 156,285' fill='%231d140b'/></g></svg>") 0 0 / 104px auto repeat;
-    -webkit-mask-image: radial-gradient(ellipse 95% 150% at 92% 0%, #000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.12) 80%, transparent 100%);
-    mask-image: radial-gradient(ellipse 95% 150% at 92% 0%, #000 0%, rgba(0, 0, 0, 0.55) 45%, rgba(0, 0, 0, 0.12) 80%, transparent 100%);
-    box-shadow: none;
+    display: none;
+}
+
+#view-inicio .balance-card__main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Título no topo; saldo e valores agrupados na base, alinhados ao simulador */
+#view-inicio .balance-card__main .balance-amount {
+    margin-top: auto;
 }
 
 /* Moldura em degradê bronze, bem fina */
@@ -3958,4 +3965,181 @@ body.cmp-aberto { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
     #view-inicio .action-row .btn { animation: none; }
+}
+
+/* ==========================================================================
+   Simulador de lucro (dentro do card de saldo)
+   ========================================================================== */
+.profit-sim {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+    padding: clamp(16px, 3vw, 22px);
+    border-radius: 22px;
+    background:
+        linear-gradient(160deg, rgba(242, 206, 151, 0.08), rgba(196, 136, 73, 0.02) 60%),
+        rgba(10, 6, 3, 0.55);
+    border: 1px solid rgba(196, 136, 73, 0.28);
+    box-shadow:
+        inset 0 1px 0 rgba(242, 206, 151, 0.10),
+        0 18px 40px -22px rgba(0, 0, 0, 0.8);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+}
+
+.profit-sim[hidden] { display: none; }
+
+.profit-sim__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.profit-sim__head svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: var(--primary);
+}
+
+.profit-sim__title {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.profit-sim__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.profit-sim__field-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-faint);
+}
+
+.profit-sim__select {
+    width: 100%;
+    padding: 12px 42px 12px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(196, 136, 73, 0.40);
+    background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c48849' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 14px center / 16px,
+        #120c07;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    text-overflow: ellipsis;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.profit-sim__select:hover {
+    border-color: var(--primary);
+}
+
+.profit-sim__select:focus-visible {
+    outline: none;
+    border-color: var(--primary-hover);
+    box-shadow: 0 0 0 3px rgba(196, 136, 73, 0.25);
+}
+
+.profit-sim__select option,
+.profit-sim__select optgroup {
+    background: #120c07;
+    color: var(--text-main);
+}
+
+.profit-sim__rows {
+    margin: 0;
+    display: grid;
+}
+
+.profit-sim__row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px dashed rgba(196, 136, 73, 0.20);
+    font-size: 0.9rem;
+}
+
+.profit-sim__row dt {
+    color: var(--text-muted);
+}
+
+.profit-sim__row dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text-main);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.profit-sim__result {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, rgba(196, 136, 73, 0.22), rgba(196, 136, 73, 0.06));
+    border: 1px solid rgba(196, 136, 73, 0.38);
+    box-shadow: inset 0 1px 0 rgba(242, 206, 151, 0.12);
+}
+
+.profit-sim__result-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary-hover);
+}
+
+.profit-sim__result strong {
+    font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.1rem);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: #fff4df;
+    font-variant-numeric: tabular-nums;
+}
+
+.profit-sim__note {
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: var(--text-faint);
+}
+
+.sim-pop {
+    animation: simPop 0.35s ease both;
+}
+
+@keyframes simPop {
+    from { opacity: 0.35; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 860px) {
+    #view-inicio .balance-card {
+        grid-template-columns: minmax(0, 1fr);
+    }
+    #view-inicio .balance-card__main .balance-stats {
+        margin-top: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sim-pop { animation: none; }
 }
