@@ -38,7 +38,6 @@ function tempoRelativo(isoString) {
 }
 
 const ICONE_ROBO_AUTO = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-const ICONE_ROBO_APP = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>';
 const ICONE_ROBO_MANUAL = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>';
 
 const STATUS_LABELS = {
@@ -395,6 +394,95 @@ function garantirEstiloPlanos() {
     const estilo = document.createElement('style');
     estilo.id = 'estiloPlanosAdmin';
     estilo.textContent = `
+        /* ---------- Histórico de rendimentos pagos ---------- */
+        .admin-page .hist-rend {
+            margin: 0 0 var(--space-md, 16px);
+            padding: var(--space-md, 16px);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md, 12px);
+        }
+        .admin-page .hist-rend__head {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .admin-page .hist-rend__titulo { margin: 0; font-size: 1rem; }
+        .admin-page .hist-rend__filtros { display: flex; flex-wrap: wrap; gap: 8px; }
+        .admin-page .hist-rend__filtros select,
+        .admin-page .hist-rend__filtros input {
+            min-width: 0;
+            margin: 0;
+            padding: 9px 12px;
+            font-size: 0.85rem;
+            background-color: var(--bg-color-elevated);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm, 8px);
+            color-scheme: dark;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .admin-page .hist-rend__filtros select:hover,
+        .admin-page .hist-rend__filtros input:hover { border-color: var(--border-color-strong); }
+        .admin-page .hist-rend__filtros select:focus,
+        .admin-page .hist-rend__filtros input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+        .admin-page .hist-rend__filtros input::placeholder { color: var(--text-faint); }
+        .admin-page .hist-rend__resumo { margin: 12px 0 4px; font-size: 0.85rem; color: var(--text-muted); }
+        .admin-page .hist-rend__resumo strong { color: var(--text-main, inherit); }
+        .admin-page .hist-rend__lista {
+            list-style: none;
+            margin: 8px 0 0;
+            padding: 0;
+            max-height: 420px;
+            overflow-y: auto;
+            border-top: 1px solid var(--border-color);
+        }
+        .admin-page .hist-rend__item {
+            display: grid;
+            grid-template-columns: 52px minmax(0, 1fr) auto 90px;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.86rem;
+        }
+        .admin-page .hist-rend__hora { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+        .admin-page .hist-rend__nome { min-width: 0; overflow-wrap: anywhere; }
+        .admin-page .hist-rend__valor { text-align: right; color: var(--success, #10b981); white-space: nowrap; }
+        .admin-page .hist-rend__origem {
+            padding: 2px 9px;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            font-size: 0.7rem;
+            font-weight: 600;
+            white-space: nowrap;
+            color: var(--text-muted);
+        }
+        .admin-page .hist-rend__origem--cron { color: var(--success, #10b981); border-color: currentColor; }
+        .admin-page .hist-rend__origem--manual { color: var(--warning, #f59e0b); border-color: currentColor; }
+        .admin-page .hist-rend__origem--app { color: var(--primary, #d4a853); border-color: currentColor; }
+        .admin-page .hist-rend__vazio { padding: 14px 0; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+        @media (max-width: 600px) {
+            .admin-page .hist-rend__filtros { width: 100%; }
+            .admin-page .hist-rend__filtros select,
+            .admin-page .hist-rend__filtros input { flex: 1 1 100%; width: 100%; }
+            .admin-page .hist-rend__item {
+                grid-template-columns: minmax(0, 1fr) auto;
+                grid-template-areas: "nome valor" "hora origem";
+                gap: 4px 12px;
+            }
+            .admin-page .hist-rend__nome { grid-area: nome; font-weight: 600; }
+            .admin-page .hist-rend__valor { grid-area: valor; }
+            .admin-page .hist-rend__hora { grid-area: hora; font-size: 0.78rem; }
+            .admin-page .hist-rend__origem { grid-area: origem; justify-self: end; }
+        }
+
         /* ---------- Cartões do robô: lista de quem foi pago ---------- */
         .admin-page .robo-lista { margin-top: 12px; }
         .admin-page .robo-lista > summary {
@@ -637,24 +725,6 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
             cards.push(montarCard('robo-status__card--manual', ICONE_ROBO_MANUAL, 'Último giro manual', ultimoManual));
         }
 
-        // Rendimentos pagos na hora em que o cliente abre o site/app (acumulado do dia)
-        const aoAbrir = execucoesRendimentos?.aoAbrir;
-        if (aoAbrir?.atualizadoEm && aoAbrir.pagos) {
-            const hojeBrasilia = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
-            const [ano, mes, dia] = String(aoAbrir.dia || '').split('-');
-            const rotuloDia = aoAbrir.dia === hojeBrasilia ? 'hoje' : (dia && mes ? `dia ${dia}/${mes}` : '');
-            cards.push(montarCard(
-                'robo-status__card--app',
-                ICONE_ROBO_APP,
-                `Pagos ao abrir o app${rotuloDia ? ` (${rotuloDia})` : ''}`,
-                {
-                    data: aoAbrir.atualizadoEm,
-                    usuariosCreditados: Object.keys(aoAbrir.pagos).length,
-                    pagos: aoAbrir.pagos,
-                }
-            ));
-        }
-
         elInfoRobo.innerHTML = cards.length
             ? cards.join('')
             : '<div class="robo-status__card robo-status__card--vazio">Robô automático agendado para rodar de segunda a sexta às 23:00 (Brasília).</div>';
@@ -716,6 +786,121 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
             </tr>
         `;
     }).join('');
+}
+
+/* ==========================================================================
+   Histórico de rendimentos pagos (últimos 7 dias)
+   Cada pagamento: { uid, valor, em, origem } em controle/historicoRendimentos/{dia}/{id}
+   ========================================================================== */
+const ORIGENS_RENDIMENTO = {
+    cron: 'Automático',
+    manual: 'Manual',
+    app: 'Ao abrir o app',
+};
+
+function diaDeHojeBrasilia() {
+    return new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+function rotuloDoDia(dia) {
+    const [ano, mes, d] = String(dia).split('-');
+    const texto = d && mes && ano ? `${d}/${mes}/${ano}` : dia;
+    return dia === diaDeHojeBrasilia() ? `${texto} (hoje)` : texto;
+}
+
+function semAcentoMinusculo(texto) {
+    return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function garantirHistoricoNoHTML() {
+    if (document.getElementById('historicoRendimentos')) return;
+    const aposEste = document.getElementById('infoUltimaExecucaoRobo');
+    if (!aposEste) return;
+
+    const secao = document.createElement('div');
+    secao.id = 'historicoRendimentos';
+    secao.className = 'hist-rend';
+    secao.innerHTML = `
+        <div class="hist-rend__head">
+            <h4 class="hist-rend__titulo">Histórico de rendimentos pagos</h4>
+            <div class="hist-rend__filtros">
+                <select id="histRendDia" aria-label="Escolher o dia"></select>
+                <input type="search" id="histRendBusca" placeholder="Buscar cliente" aria-label="Buscar cliente" autocomplete="off">
+            </div>
+        </div>
+        <div id="histRendResumo" class="hist-rend__resumo"></div>
+        <ul id="histRendLista" class="hist-rend__lista"></ul>
+    `;
+    aposEste.insertAdjacentElement('afterend', secao);
+
+    document.getElementById('histRendDia').addEventListener('change', (e) => {
+        estado.filtroHistoricoDia = e.target.value;
+        renderizarHistoricoRendimentos(estado.historicoRendimentos || {}, estado.usuarios || {});
+    });
+    document.getElementById('histRendBusca').addEventListener('input', (e) => {
+        estado.filtroHistoricoBusca = e.target.value;
+        renderizarHistoricoRendimentos(estado.historicoRendimentos || {}, estado.usuarios || {});
+    });
+}
+
+function renderizarHistoricoRendimentos(historico, usuarios) {
+    garantirEstiloPlanos();
+    garantirHistoricoNoHTML();
+
+    const selectDia = document.getElementById('histRendDia');
+    const resumoEl = document.getElementById('histRendResumo');
+    const listaEl = document.getElementById('histRendLista');
+    if (!selectDia || !resumoEl || !listaEl) return;
+
+    // dias disponíveis: hoje (sempre) + os que têm registro, do mais novo para o mais antigo
+    const hoje = diaDeHojeBrasilia();
+    const dias = [...new Set([hoje, ...Object.keys(historico || {})])]
+        .filter((dia) => /^\d{4}-\d{2}-\d{2}$/.test(dia))
+        .sort()
+        .reverse();
+
+    const assinaturaOpcoes = dias.join('|');
+    if (selectDia.dataset.opcoes !== assinaturaOpcoes) {
+        selectDia.innerHTML = dias.map((dia) => `<option value="${dia}">${rotuloDoDia(dia)}</option>`).join('');
+        selectDia.dataset.opcoes = assinaturaOpcoes;
+    }
+    if (!dias.includes(estado.filtroHistoricoDia)) estado.filtroHistoricoDia = hoje;
+    selectDia.value = estado.filtroHistoricoDia;
+
+    const termo = semAcentoMinusculo(estado.filtroHistoricoBusca).trim();
+    const registros = Object.entries((historico || {})[estado.filtroHistoricoDia] || {})
+        .map(([id, r]) => ({ id, ...r, nome: nomeDoUsuario(usuarios, r.uid) }))
+        .filter((r) => r && r.uid && Number(r.valor) > 0)
+        .filter((r) => !termo || semAcentoMinusculo(r.nome).includes(termo))
+        .sort((a, b) => String(b.em).localeCompare(String(a.em)));
+
+    const total = registros.reduce((soma, r) => soma + Number(r.valor || 0), 0);
+    const clientes = new Set(registros.map((r) => r.uid)).size;
+
+    resumoEl.innerHTML = registros.length
+        ? `<strong>${registros.length}</strong> ${registros.length === 1 ? 'pagamento' : 'pagamentos'} para <strong>${clientes}</strong> ${clientes === 1 ? 'cliente' : 'clientes'} &middot; <strong>${formatadorMoeda.format(total)}</strong> no total`
+        : '';
+
+    if (!registros.length) {
+        const vazio = termo
+            ? 'Nenhum cliente encontrado para essa busca neste dia.'
+            : (estado.filtroHistoricoDia === hoje ? 'Nenhum rendimento foi pago hoje ainda.' : 'Nenhum rendimento foi pago neste dia.');
+        listaEl.innerHTML = `<li class="hist-rend__vazio">${vazio}</li>`;
+        return;
+    }
+
+    const LIMITE = 300;
+    listaEl.innerHTML = registros.slice(0, LIMITE).map((r) => {
+        const hora = formatarDataHora(r.em).split(', ')[1] || '';
+        const origem = ORIGENS_RENDIMENTO[r.origem] || 'Outro';
+        return `
+            <li class="hist-rend__item">
+                <span class="hist-rend__hora">${escapeHTML(hora)}</span>
+                <span class="hist-rend__nome">${escapeHTML(r.nome)}</span>
+                <span class="hist-rend__origem hist-rend__origem--${escapeHTML(r.origem || 'outro')}">${origem}</span>
+                <strong class="hist-rend__valor">${formatadorMoeda.format(Number(r.valor))}</strong>
+            </li>`;
+    }).join('') + (registros.length > LIMITE ? `<li class="hist-rend__vazio">Mostrando os ${LIMITE} mais recentes. Use a busca para achar um cliente.</li>` : '');
 }
 
 function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, planosObj, filtro) {
@@ -1029,6 +1214,9 @@ const estado = {
     missoesColetas: null,
     missoesErro: null,
     execucoesRendimentos: null,
+    historicoRendimentos: null,
+    filtroHistoricoDia: '',
+    filtroHistoricoBusca: '',
     auditoria: null,
     filtroUsuarios: '',
 };
@@ -1321,7 +1509,7 @@ function aplicarRotulosMobile() {
         const titulos = [...tabela.querySelectorAll('thead th')].map(th => th.textContent.trim());
         tabela.querySelectorAll('tbody tr').forEach((tr) => {
             [...tr.children].forEach((td, i) => {
-                if (!td.classList.contains('table-empty')) td.dataset.label = titulos[i] || '';
+                if (!td.classList.contains('table-empty') && !td.dataset.label) td.dataset.label = titulos[i] || '';
             });
         });
     });
@@ -1361,6 +1549,10 @@ function rerenderizarTudo() {
             estado.usuarios || {},
             estado.execucoesRendimentos || {}
         );
+    }
+
+    if (estado.historicoRendimentos !== null) {
+        renderizarHistoricoRendimentos(estado.historicoRendimentos, estado.usuarios || {});
     }
 
     if (estado.usuarios !== null) {
@@ -1545,6 +1737,14 @@ function iniciarListenersAdmin() {
         rerenderizarTudo();
     }, (error) => {
         console.warn('Não foi possível ler controle/execucoesRendimentos (opcional):', error.message);
+    });
+
+    const historicoRef = ref(db, 'controle/historicoRendimentos');
+    onValue(historicoRef, (snapshot) => {
+        estado.historicoRendimentos = snapshot.val() || {};
+        rerenderizarTudo();
+    }, (error) => {
+        console.warn('Não foi possível ler controle/historicoRendimentos (opcional):', error.message);
     });
 
     const tbodyCreditos = document.getElementById('tabelaCreditosManuais');
