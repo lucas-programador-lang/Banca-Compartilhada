@@ -4114,6 +4114,13 @@ body.cmp-aberto { overflow: hidden; }
     font-variant-numeric: tabular-nums;
 }
 
+.profit-sim__result-detail {
+    margin-top: 6px;
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--text-muted);
+}
+
 .profit-sim__note {
     grid-area: note;
     margin: 0;
