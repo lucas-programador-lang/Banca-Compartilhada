@@ -128,23 +128,51 @@
 
                 <!-- Card Principal com Saldo e Estatísticas -->
                 <div class="card balance-card">
-                    <div class="balance-card__label">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                        Saldo Disponível
-                    </div>
-                    <div id="saldoDisponivel" class="balance-amount">R$ 0,00</div>
+                    <div class="balance-card__main">
+                        <div class="balance-card__label">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                            Saldo Disponível
+                        </div>
+                        <div id="saldoDisponivel" class="balance-amount">R$ 0,00</div>
 
-                    <!-- Estatísticas Rápidas -->
-                    <div class="balance-stats">
-                        <div class="balance-stat">
-                            <h3>Rendimento Acumulado</h3>
-                            <p id="rendimentoTotal">R$ 0,00</p>
-                        </div>
-                        <div class="balance-stat">
-                            <h3>Comissões (1º Nível - 10%)</h3>
-                            <p id="comissaoTotal">R$ 0,00</p>
+                        <!-- Estatísticas Rápidas -->
+                        <div class="balance-stats">
+                            <div class="balance-stat">
+                                <h3>Rendimento Acumulado</h3>
+                                <p id="rendimentoTotal">R$ 0,00</p>
+                            </div>
+                            <div class="balance-stat">
+                                <h3>Comissões (1º Nível - 10%)</h3>
+                                <p id="comissaoTotal">R$ 0,00</p>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Simulador de lucro (estimativa baseada nos planos da plataforma) -->
+                    <aside class="profit-sim" id="simuladorLucro" aria-labelledby="simTitulo">
+                        <div class="profit-sim__head">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8.01" y2="11"/><line x1="12" y1="11" x2="12.01" y2="11"/><line x1="16" y1="11" x2="16.01" y2="11"/><line x1="8" y1="15" x2="8.01" y2="15"/><line x1="12" y1="15" x2="12.01" y2="15"/><line x1="16" y1="15" x2="16.01" y2="15"/><line x1="8" y1="19" x2="12" y2="19"/></svg>
+                            <h3 class="profit-sim__title" id="simTitulo">Simulador de lucro</h3>
+                        </div>
+
+                        <label class="profit-sim__field" for="simPlano">
+                            <span class="profit-sim__field-label">Escolha o plano</span>
+                            <select id="simPlano" class="profit-sim__select"></select>
+                        </label>
+
+                        <dl class="profit-sim__rows">
+                            <div class="profit-sim__row"><dt>Aporte</dt><dd id="simAporte">R$ 0,00</dd></div>
+                            <div class="profit-sim__row"><dt>Rendimento diário</dt><dd id="simDiario">—</dd></div>
+                            <div class="profit-sim__row"><dt>Prazo estimado</dt><dd id="simPrazo">—</dd></div>
+                        </dl>
+
+                        <div class="profit-sim__result">
+                            <span class="profit-sim__result-label">Lucro estimado</span>
+                            <strong id="simLucro">R$ 0,00</strong>
+                        </div>
+
+                        <p class="profit-sim__note">Simulação baseada nas regras de cada plano. Não é garantia de ganhos.</p>
+                    </aside>
                 </div>
 
                 <!-- Acesso rápido: Cupons / Depositar / Sacar / Rendimento / Histórico -->
@@ -793,6 +821,7 @@
     <script type="module" src="script.js"></script>
     <script type="module" src="missoes.js"></script>
     <script type="module" src="comprovante.js"></script>
+    <script type="module" src="simulador-lucro.js"></script>
      <script src="update-modal.js"></script>
 </body>
 </html>
