@@ -444,20 +444,28 @@ const CATEGORIAS_CONTA = [
     { chave: 'deposito', rotulo: 'Depósito', regex: /deposit/ },
     { chave: 'comissao', rotulo: 'Comissão', regex: /comiss/ },
     { chave: 'missao',   rotulo: 'Missão',   regex: /missao|missoes/ },
+    { chave: 'ajuste',   rotulo: 'Ajuste',   regex: /administra|ajuste/ },
 ];
-const REGEX_CICLO = /ciclo/;
 
 function normalizarTexto(texto) {
     return String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 }
 
 function classificarRegistroExtrato(registro) {
-    const texto = normalizarTexto([registro.tipo, registro.origem, registro.descricao].join(' '));
+    // 1) Campo "tipo" gravado pelo servidor ('rendimento' ou 'ciclo') manda sempre.
+    const tipo = normalizarTexto(registro.tipo);
+    if (tipo === 'ciclo') return { grupo: 'ciclos' };
+    if (tipo === 'rendimento') return { grupo: 'rendimento' };
+
+    // 2) Movimentações da conta pelo texto (tipo, origem e descrição)
+    const texto = normalizarTexto([tipo, registro.origem, registro.descricao].join(' '));
     for (let i = 0; i < CATEGORIAS_CONTA.length; i++) {
         if (CATEGORIAS_CONTA[i].regex.test(texto)) return { grupo: 'conta', categoria: CATEGORIAS_CONTA[i] };
     }
-    if (REGEX_CICLO.test(texto)) return { grupo: 'ciclos' };
     if (parseFloat(registro.valor || 0) < 0) return { grupo: 'conta', categoria: { chave: 'ajuste', rotulo: 'Ajuste' } };
+
+    // 3) O resto é rendimento. Os lançamentos antigos ("Rendimento diário / Retorno final
+    //    de ciclo") somavam planos e ciclos juntos e ficam aqui.
     return { grupo: 'rendimento' };
 }
 
