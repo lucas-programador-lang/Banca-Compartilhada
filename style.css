@@ -3742,10 +3742,6 @@ body.cmp-aberto { overflow: hidden; }
    rápido em blocos quadrados.
    ========================================================================== */
 #view-inicio .balance-card {
-    display: grid;
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    gap: clamp(20px, 3vw, 36px);
-    align-items: stretch;
     padding: clamp(22px, 4.5vw, 32px);
     border-radius: 28px;
     margin-bottom: var(--space-md);
@@ -3774,11 +3770,6 @@ body.cmp-aberto { overflow: hidden; }
     display: flex;
     flex-direction: column;
     min-width: 0;
-}
-
-/* Título no topo; saldo e valores agrupados na base, alinhados ao simulador */
-#view-inicio .balance-card__main .balance-amount {
-    margin-top: auto;
 }
 
 /* Moldura em degradê bronze, bem fina */
@@ -3968,52 +3959,54 @@ body.cmp-aberto { overflow: hidden; }
 }
 
 /* ==========================================================================
-   Simulador de lucro (dentro do card de saldo)
+   Simulador de lucro (painel abaixo dos botões de acesso rápido)
    ========================================================================== */
 .profit-sim {
     position: relative;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
     min-width: 0;
-    padding: clamp(16px, 3vw, 22px);
-    border-radius: 22px;
+    margin-bottom: var(--space-lg);
+    padding: clamp(20px, 4.5vw, 32px);
+    border-radius: 28px;
     background:
-        linear-gradient(160deg, rgba(242, 206, 151, 0.08), rgba(196, 136, 73, 0.02) 60%),
-        rgba(10, 6, 3, 0.55);
-    border: 1px solid rgba(196, 136, 73, 0.28);
+        radial-gradient(70% 130% at 100% 0%, rgba(196, 136, 73, 0.16), transparent 62%),
+        linear-gradient(160deg, #1d150e, #0b0704 85%);
+    border: 1px solid rgba(196, 136, 73, 0.22);
     box-shadow:
-        inset 0 1px 0 rgba(242, 206, 151, 0.10),
-        0 18px 40px -22px rgba(0, 0, 0, 0.8);
-    -webkit-backdrop-filter: blur(6px);
-    backdrop-filter: blur(6px);
+        0 30px 60px -24px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(242, 206, 151, 0.12);
 }
 
 .profit-sim[hidden] { display: none; }
 
 .profit-sim__head {
+    grid-area: head;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .profit-sim__head svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     flex-shrink: 0;
     color: var(--primary);
 }
 
 .profit-sim__title {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    letter-spacing: 0.22em;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
     color: var(--text-muted);
 }
 
 .profit-sim__field {
+    grid-area: field;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -4027,8 +4020,8 @@ body.cmp-aberto { overflow: hidden; }
 
 .profit-sim__select {
     width: 100%;
-    padding: 12px 42px 12px 14px;
-    border-radius: 12px;
+    padding: 13px 42px 13px 14px;
+    border-radius: 14px;
     border: 1px solid rgba(196, 136, 73, 0.40);
     background:
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c48849' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 14px center / 16px,
@@ -4061,8 +4054,10 @@ body.cmp-aberto { overflow: hidden; }
 }
 
 .profit-sim__rows {
+    grid-area: rows;
     margin: 0;
     display: grid;
+    align-content: start;
 }
 
 .profit-sim__row {
@@ -4070,9 +4065,9 @@ body.cmp-aberto { overflow: hidden; }
     align-items: baseline;
     justify-content: space-between;
     gap: 12px;
-    padding: 9px 0;
+    padding: 10px 0;
     border-bottom: 1px dashed rgba(196, 136, 73, 0.20);
-    font-size: 0.9rem;
+    font-size: 0.92rem;
 }
 
 .profit-sim__row dt {
@@ -4088,36 +4083,41 @@ body.cmp-aberto { overflow: hidden; }
 }
 
 .profit-sim__result {
+    grid-area: result;
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding: 14px 16px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, rgba(196, 136, 73, 0.22), rgba(196, 136, 73, 0.06));
+    justify-content: center;
+    gap: 4px;
+    padding: 18px 20px;
+    border-radius: 20px;
+    background:
+        radial-gradient(90% 140% at 100% 0%, rgba(242, 206, 151, 0.14), transparent 60%),
+        linear-gradient(135deg, rgba(196, 136, 73, 0.24), rgba(196, 136, 73, 0.06));
     border: 1px solid rgba(196, 136, 73, 0.38);
     box-shadow: inset 0 1px 0 rgba(242, 206, 151, 0.12);
 }
 
 .profit-sim__result-label {
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     font-weight: 700;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--primary-hover);
 }
 
 .profit-sim__result strong {
-    font-size: clamp(1.6rem, 1.2rem + 1.6vw, 2.1rem);
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    font-size: clamp(2rem, 1.4rem + 2.4vw, 2.9rem);
+    font-weight: 300;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
     color: #fff4df;
     font-variant-numeric: tabular-nums;
 }
 
 .profit-sim__note {
+    grid-area: note;
     margin: 0;
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     line-height: 1.4;
     color: var(--text-faint);
 }
@@ -4131,12 +4131,27 @@ body.cmp-aberto { overflow: hidden; }
     to   { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 860px) {
-    #view-inicio .balance-card {
-        grid-template-columns: minmax(0, 1fr);
+/* Telas largas: seletor + dados à esquerda, lucro em destaque à direita */
+@media (min-width: 860px) {
+    .profit-sim {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+        grid-template-areas:
+            "head   head"
+            "field  result"
+            "rows   result"
+            "note   note";
+        column-gap: clamp(20px, 3vw, 36px);
     }
-    #view-inicio .balance-card__main .balance-stats {
-        margin-top: 0;
+}
+
+@media (max-width: 859px) {
+    .profit-sim {
+        grid-template-areas:
+            "head"
+            "field"
+            "rows"
+            "result"
+            "note";
     }
 }
 
