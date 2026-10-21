@@ -72,9 +72,19 @@ const STATUS_CORES = {
 function notaComprovante(saque) {
     if (!saque || saque.status !== 'pago' || saque.comprovanteObrigatorio !== true) return '';
     const codigo = 'BC-' + String(saque.id || '').slice(-8).toUpperCase();
-    return saque.comprovantePostadoEm
-        ? `<div style="font-size: 0.75rem; color: var(--success); margin-top: 2px;">Comprovante postado ✓ <span style="color: var(--text-muted);">${escapeHTML(codigo)}</span></div>`
-        : `<div style="font-size: 0.75rem; color: var(--warning); margin-top: 2px;">Aguardando comprovante <span style="color: var(--text-muted);">${escapeHTML(codigo)}</span></div>`;
+    let texto = 'Aguardando comprovante';
+    let cor = 'var(--warning)';
+    if (saque.comprovantePostadoEm) {
+        texto = 'Comprovante aprovado';
+        cor = 'var(--success)';
+    } else if (saque.comprovanteEnviadoEm) {
+        texto = 'Comprovante em conferência';
+        cor = 'var(--warning)';
+    } else if (saque.comprovanteRecusadoEm) {
+        texto = 'Comprovante recusado, aguardando novo envio';
+        cor = 'var(--danger)';
+    }
+    return `<div style="font-size: 0.75rem; color: ${cor}; margin-top: 2px;">${texto} <span style="color: var(--text-muted);">${escapeHTML(codigo)}</span></div>`;
 }
 
 function badgeStatus(status) {
@@ -348,6 +358,103 @@ function renderizarTabelaDepositos(depositos, usuarios) {
 /* ==========================================================================
    Planos Adquiridos e Horários de Rendimento
    ========================================================================== */
+const ICONE_AGUARDANDO = '<svg class="pl-ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+
+// Estilo da tabela de planos: risca os planos encerrados, mostra o texto inteiro no
+// computador e vira lista de cartões organizada no celular.
+function garantirEstiloPlanos() {
+    if (document.getElementById('estiloPlanosAdmin')) return;
+    const estilo = document.createElement('style');
+    estilo.id = 'estiloPlanosAdmin';
+    estilo.textContent = `
+        /* ---------- Planos encerrados (finalizado / cancelado): riscados e esmaecidos ---------- */
+        .admin-page .pl-v { text-decoration: none; }
+        .admin-page tr.plano-linha--encerrado td:not(.pl-status) { opacity: 0.55; }
+        .admin-page tr.plano-linha--encerrado .pl-v {
+            text-decoration: line-through;
+            text-decoration-thickness: 1.5px;
+            text-decoration-color: var(--text-muted, #888);
+        }
+
+        /* ---------- Barra de progresso do teto ---------- */
+        .admin-page .pl-barra {
+            height: 5px;
+            margin-top: 7px;
+            border-radius: 999px;
+            background: var(--border-color, rgba(255, 255, 255, 0.12));
+            overflow: hidden;
+        }
+        .admin-page .pl-barra > span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: var(--success, #10b981);
+        }
+        .admin-page tr.plano-linha--encerrado .pl-barra > span { background: var(--text-muted, #888); }
+        .admin-page .pl-ico { display: inline-block; vertical-align: -2px; margin-right: 4px; }
+
+        /* ---------- Computador: mostra o texto inteiro (antes era cortado com "...") ---------- */
+        @media (min-width: 992px) {
+            .admin-page table:has(> #tabelaPlanosAdmin) { min-width: 1000px; }
+            .admin-page table:has(> #tabelaPlanosAdmin) td {
+                white-space: normal;
+                overflow: visible;
+                text-overflow: clip;
+                overflow-wrap: anywhere;
+            }
+        }
+
+        /* ---------- Celular e tablet: cada plano vira um cartão ---------- */
+        @media (max-width: 991px) {
+            .admin-page table:has(> #tabelaPlanosAdmin) tbody tr.plano-linha {
+                grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+                grid-template-areas:
+                    "cliente  status"
+                    "plano    credito"
+                    "adquiriu termino"
+                    "ultimo   ultimo";
+                align-items: start;
+                gap: 14px 16px;
+            }
+            .admin-page table:has(> #tabelaPlanosAdmin) tr.plano-linha--encerrado {
+                background: transparent;
+                border-style: dashed;
+            }
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-cliente {
+                grid-area: cliente;
+                font-size: 1rem;
+                font-weight: 600;
+                line-height: 1.3;
+            }
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-status { grid-area: status; text-align: right; }
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-plano { grid-area: plano; }
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-credito { grid-area: credito; text-align: right; }
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-adquiriu { grid-area: adquiriu; }
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-termino { grid-area: termino; text-align: right; }
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-ultimo {
+                grid-area: ultimo;
+                padding-top: 12px;
+                border-top: 1px solid var(--border-color);
+            }
+            /* nome e status não precisam de rótulo: o cartão já deixa claro */
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-cliente::before,
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-status::before { display: none; }
+        }
+
+        /* ---------- Celular bem estreito: uma coluna só ---------- */
+        @media (max-width: 380px) {
+            .admin-page table:has(> #tabelaPlanosAdmin) tbody tr.plano-linha {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-areas: "cliente" "status" "plano" "credito" "adquiriu" "termino" "ultimo";
+            }
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-status,
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-credito,
+            .admin-page table:has(> #tabelaPlanosAdmin) td.pl-termino { text-align: left; }
+        }
+    `;
+    document.head.appendChild(estilo);
+}
+
 function garantirSecaoPlanosNoHTML() {
     if (document.getElementById('tabelaPlanosAdmin')) return;
 
@@ -401,6 +508,7 @@ function garantirSecaoPlanosNoHTML() {
 
 function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendimentos) {
     garantirSecaoPlanosNoHTML();
+    garantirEstiloPlanos();
 
     const tbody = document.getElementById('tabelaPlanosAdmin');
     const elTotalAtivos = document.getElementById('totalPlanosAtivosAdmin');
@@ -471,29 +579,39 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
         const jaCreditado = parseFloat(plano.valorCreditado || 0);
 
         const horarioAdquiriu = formatarDataHora(plano.dataAtivacao);
-        const terminoPrevisto = formatarDataHora(calcularTerminoPrevisto(plano) || plano.dataExpiracao); // 👈 EXIBE DATA DE TÉRMINO PREVISTO
-        
+        const terminoPrevisto = formatarDataHora(calcularTerminoPrevisto(plano) || plano.dataExpiracao);
+
         const horarioUltimoPagamento = plano.ultimoRendimentoEm
             ? `<span style="color: var(--success); font-weight: 600;">${formatarDataHora(plano.ultimoRendimentoEm)}</span>`
             : (jaCreditado > 0
                 ? `<span style="color: var(--success);">Já pago (${formatadorMoeda.format(jaCreditado)})</span>`
-                : `<span style="color: var(--text-muted); font-size: 0.85em;">⏳ Aguardando ciclo (24h)</span>`);
+                : `<span style="color: var(--text-muted); font-size: 0.85em;">${ICONE_AGUARDANDO}Aguardando ciclo (24h)</span>`);
+
+        // Plano encerrado (finalizado ou cancelado): a linha fica riscada e esmaecida
+        const statusPlano = String(plano.status || 'ativo').toLowerCase();
+        const encerrado = statusPlano === 'finalizado' || statusPlano === 'cancelado_pelo_admin';
+        const percentualDoTeto = valorTeto > 0 ? Math.min(100, Math.round((jaCreditado / valorTeto) * 100)) : 0;
 
         return `
-            <tr>
-                <td>${escapeHTML(nomeDoUsuario(usuarios, plano.uid))}</td>
-                <td>
-                    <strong>${formatadorMoeda.format(valor)}</strong><br>
-                    <small style="color: var(--success); font-size: 0.82em;">+${formatadorMoeda.format(valorDiario)}/dia (${(percDiario * 100).toFixed(1)}%)</small>
+            <tr class="plano-linha${encerrado ? ' plano-linha--encerrado' : ''}">
+                <td class="pl-cliente" data-label="Cliente"><span class="pl-v">${escapeHTML(nomeDoUsuario(usuarios, plano.uid))}</span></td>
+                <td class="pl-plano" data-label="Plano / diário">
+                    <span class="pl-v">
+                        <strong>${formatadorMoeda.format(valor)}</strong><br>
+                        <small style="color: var(--success); font-size: 0.82em;">+${formatadorMoeda.format(valorDiario)}/dia (${(percDiario * 100).toFixed(1)}%)</small>
+                    </span>
                 </td>
-                <td>${horarioAdquiriu}</td>
-                <td><strong style="color: var(--adm-primary, #10b981);">${terminoPrevisto}</strong></td>
-                <td>${horarioUltimoPagamento}</td>
-                <td>
-                    <strong>${formatadorMoeda.format(jaCreditado)}</strong>
-                    <small style="color: var(--text-muted);"> / ${formatadorMoeda.format(valorTeto)}</small>
+                <td class="pl-adquiriu" data-label="Adquirido em"><span class="pl-v">${horarioAdquiriu}</span></td>
+                <td class="pl-termino" data-label="Término previsto"><span class="pl-v"><strong style="color: var(--adm-primary, #10b981);">${terminoPrevisto}</strong></span></td>
+                <td class="pl-ultimo" data-label="Último rendimento pago"><span class="pl-v">${horarioUltimoPagamento}</span></td>
+                <td class="pl-credito" data-label="Já creditado / teto">
+                    <span class="pl-v">
+                        <strong>${formatadorMoeda.format(jaCreditado)}</strong>
+                        <small style="color: var(--text-muted);"> / ${formatadorMoeda.format(valorTeto)}</small>
+                    </span>
+                    <div class="pl-barra" role="img" aria-label="${percentualDoTeto}% do teto"><span style="width: ${percentualDoTeto}%;"></span></div>
                 </td>
-                <td>${badgeStatus(plano.status || 'ativo')}</td>
+                <td class="pl-status">${badgeStatus(plano.status || 'ativo')}</td>
             </tr>
         `;
     }).join('');
@@ -597,10 +715,10 @@ async function aprovarDeposito(uid, depositoId, valorPlano) {
         const dadosResposta = await resposta.json();
         if (!resposta.ok) throw new Error(dadosResposta.error || 'Erro ao aprovar depósito.');
 
-        mostrarToast('✅ Depósito aprovado! O plano já está ativo na Carteira do usuário.', 'success');
+        mostrarToast('Depósito aprovado! O plano já está ativo na Carteira do usuário.', 'success');
     } catch (error) {
         console.error('Erro ao aprovar depósito:', error);
-        mostrarToast('❌ Erro ao aprovar depósito: ' + error.message, 'error');
+        mostrarToast('Erro ao aprovar depósito: ' + error.message, 'error');
     }
 }
 
@@ -622,7 +740,7 @@ async function recusarDeposito(uid, depositoId) {
         mostrarToast('Depósito recusado.', 'warning');
     } catch (error) {
         console.error('Erro ao recusar depósito:', error);
-        mostrarToast('❌ Erro ao recusar depósito: ' + error.message, 'error');
+        mostrarToast('Erro ao recusar depósito: ' + error.message, 'error');
     }
 }
 
@@ -642,12 +760,12 @@ async function resolverPendenciaPlano(uid, depositoId, acao) {
         if (!resposta.ok) throw new Error(dadosResposta.error || 'Erro ao resolver pendência.');
 
         mostrarToast(
-            acao === 'criar_plano' ? '✅ Plano criado manualmente.' : '✅ Pendência marcada como resolvida.',
+            acao === 'criar_plano' ? 'Plano criado manualmente.' : 'Pendência marcada como resolvida.',
             'success'
         );
     } catch (error) {
         console.error('Erro ao resolver pendência de plano:', error);
-        mostrarToast('❌ Erro ao resolver pendência: ' + error.message, 'error');
+        mostrarToast('Erro ao resolver pendência: ' + error.message, 'error');
     }
 }
 
@@ -669,7 +787,7 @@ async function arquivarRegistro(colecao, uid, id) {
         mostrarToast('Registro excluído da lista.', 'warning');
     } catch (error) {
         console.error('Erro ao arquivar registro:', error);
-        mostrarToast('❌ Erro ao excluir: ' + error.message, 'error');
+        mostrarToast('Erro ao excluir: ' + error.message, 'error');
     }
 }
 
@@ -688,10 +806,10 @@ async function marcarSaquePago(uid, saqueId) {
         const dadosResposta = await resposta.json();
         if (!resposta.ok) throw new Error(dadosResposta.error || 'Erro ao marcar saque como pago.');
 
-        mostrarToast('✅ Saque marcado como pago.', 'success');
+        mostrarToast('Saque marcado como pago.', 'success');
     } catch (error) {
         console.error('Erro ao marcar saque como pago:', error);
-        mostrarToast('❌ Erro ao marcar saque como pago: ' + error.message, 'error');
+        mostrarToast('Erro ao marcar saque como pago: ' + error.message, 'error');
     }
 }
 
@@ -1190,22 +1308,22 @@ function iniciarBotaoRodarRendimentos() {
             }
 
             const { resumo } = dadosResposta;
-            mostrarToast(`✅ ${resumo.usuariosCreditados} usuário(s) creditado(s) agora.`, 'success');
+            mostrarToast(`${resumo.usuariosCreditados} usuário(s) creditado(s) agora.`, 'success');
 
             if (resumoEl) {
                 const linhas = [`Usuários creditados: ${resumo.usuariosCreditados}`];
 
                 if (resumo.usuariosSemConta?.length) {
-                    linhas.push(`\n⚠️ Usuários com plano mas sem conta encontrada (dado órfão): ${resumo.usuariosSemConta.join(', ')}`);
+                    linhas.push(`\nUsuários com plano mas sem conta encontrada (dado órfão): ${resumo.usuariosSemConta.join(', ')}`);
                 }
                 if (resumo.planosComDataInvalida?.length) {
-                    linhas.push(`\n⚠️ Planos com data de ativação inválida (não creditados até corrigir manualmente):`);
+                    linhas.push(`\nPlanos com data de ativação inválida (não creditados até corrigir manualmente):`);
                     resumo.planosComDataInvalida.forEach(p => {
                         linhas.push(`  - uid: ${p.uid} | planoId: ${p.planoId} | dataAtivacao: ${JSON.stringify(p.dataAtivacao)}`);
                     });
                 }
                 if (resumo.usuariosComErro?.length) {
-                    linhas.push(`\n❌ Usuários com erro ao creditar:`);
+                    linhas.push(`\nUsuários com erro ao creditar:`);
                     resumo.usuariosComErro.forEach(u => {
                         linhas.push(`  - uid: ${u.uid} | erro: ${u.erro}`);
                     });
@@ -1216,7 +1334,7 @@ function iniciarBotaoRodarRendimentos() {
             }
         } catch (error) {
             console.error('Erro ao rodar cálculo de rendimentos:', error);
-            mostrarToast('❌ ' + error.message, 'error');
+            mostrarToast('' + error.message, 'error');
         } finally {
             btn.disabled = false;
             btn.textContent = 'Rodar cálculo de rendimentos agora';
@@ -1240,7 +1358,7 @@ async function salvarConfigMissoes(missoes) {
     });
     const dados = await resposta.json().catch(() => ({}));
     if (!resposta.ok) throw new Error(dados.error || 'Erro ao salvar as missões.');
-    mostrarToast('✅ Missões salvas.', 'success');
+    mostrarToast('Missões salvas.', 'success');
     return dados;
 }
 
