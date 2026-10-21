@@ -38,6 +38,7 @@ function tempoRelativo(isoString) {
 }
 
 const ICONE_ROBO_AUTO = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+const ICONE_ROBO_APP = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>';
 const ICONE_ROBO_MANUAL = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>';
 
 const STATUS_LABELS = {
@@ -85,6 +86,33 @@ function notaComprovante(saque) {
         cor = 'var(--danger)';
     }
     return `<div style="font-size: 0.75rem; color: ${cor}; margin-top: 2px;">${texto} <span style="color: var(--text-muted);">${escapeHTML(codigo)}</span></div>`;
+}
+
+/* Lista "quem foi pago" de um giro do robô. `pagos` = { uid: valor } (cron/manual)
+   ou { uid: { valor, em } } (pagos ao abrir o app). */
+function htmlListaPagos(pagos, usuarios) {
+    const itens = Object.entries(pagos || {})
+        .map(([uid, v]) => ({
+            nome: nomeDoUsuario(usuarios, uid),
+            valor: (v && typeof v === 'object') ? Number(v.valor) || 0 : Number(v) || 0,
+        }))
+        .filter((item) => item.valor > 0)
+        .sort((a, b) => b.valor - a.valor || String(a.nome).localeCompare(String(b.nome), 'pt-BR'));
+
+    if (!itens.length) return '';
+
+    const total = itens.reduce((soma, item) => soma + item.valor, 0);
+    const linhas = itens.map((item) => `
+        <li>
+            <span class="robo-lista__nome">${escapeHTML(item.nome)}</span>
+            <strong class="robo-lista__valor">${formatadorMoeda.format(item.valor)}</strong>
+        </li>`).join('');
+
+    return `
+        <details class="robo-lista">
+            <summary>Ver quem foi pago <span class="robo-lista__total">${formatadorMoeda.format(total)} no total</span></summary>
+            <ul class="robo-lista__itens">${linhas}</ul>
+        </details>`;
 }
 
 function badgeStatus(status) {
@@ -367,6 +395,52 @@ function garantirEstiloPlanos() {
     const estilo = document.createElement('style');
     estilo.id = 'estiloPlanosAdmin';
     estilo.textContent = `
+        /* ---------- Cartões do robô: lista de quem foi pago ---------- */
+        .admin-page .robo-lista { margin-top: 12px; }
+        .admin-page .robo-lista > summary {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            cursor: pointer;
+            list-style: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary, #d4a853);
+        }
+        .admin-page .robo-lista > summary::-webkit-details-marker { display: none; }
+        .admin-page .robo-lista > summary::after {
+            content: "";
+            flex: 0 0 auto;
+            width: 7px;
+            height: 7px;
+            margin-left: 4px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transition: transform 0.2s ease;
+        }
+        .admin-page .robo-lista[open] > summary::after { transform: rotate(-135deg); }
+        .admin-page .robo-lista__total { margin-left: auto; font-weight: 500; color: var(--text-muted); }
+        .admin-page .robo-lista__itens {
+            list-style: none;
+            margin: 10px 0 0;
+            padding: 0;
+            max-height: 240px;
+            overflow-y: auto;
+            border-top: 1px solid var(--border-color);
+        }
+        .admin-page .robo-lista__itens li {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.82rem;
+        }
+        .admin-page .robo-lista__nome { min-width: 0; overflow-wrap: anywhere; }
+        .admin-page .robo-lista__valor { flex: 0 0 auto; color: var(--success, #10b981); white-space: nowrap; }
+
         /* ---------- Planos encerrados (finalizado / cancelado): riscados e esmaecidos ---------- */
         .admin-page .pl-v { text-decoration: none; }
         .admin-page tr.plano-linha--encerrado td:not(.pl-status) { opacity: 0.55; }
@@ -517,6 +591,13 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
     if (elInfoRobo) {
         const montarCard = (classe, icone, titulo, execucao) => {
             const total = execucao.usuariosCreditados || 0;
+            const listaPagos = htmlListaPagos(execucao.pagos, usuarios);
+            let avisoLista = '';
+            if (!listaPagos && total === 0) {
+                avisoLista = '<span class="robo-status__obs">Ninguém tinha rendimento pendente neste giro. Quem abre o app já recebe na hora.</span>';
+            } else if (!listaPagos && total > 0) {
+                avisoLista = '<span class="robo-status__obs">Os nomes aparecem a partir do próximo giro.</span>';
+            }
             const obs = execucao.observacao
                 ? `<span class="robo-status__obs">${escapeHTML(execucao.observacao)}</span>`
                 : '';
@@ -538,7 +619,9 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
                     <div class="robo-status__foot">
                         <span class="robo-status__meta"><strong>${total}</strong> ${total === 1 ? 'cliente pago' : 'clientes pagos'}</span>
                         ${obs}
+                        ${avisoLista}
                     </div>
+                    ${listaPagos}
                 </div>
             `;
         };
@@ -552,6 +635,24 @@ function renderizarTabelaPlanosAdmin(planosPorUsuario, usuarios, execucoesRendim
         }
         if (ultimoManual?.data) {
             cards.push(montarCard('robo-status__card--manual', ICONE_ROBO_MANUAL, 'Último giro manual', ultimoManual));
+        }
+
+        // Rendimentos pagos na hora em que o cliente abre o site/app (acumulado do dia)
+        const aoAbrir = execucoesRendimentos?.aoAbrir;
+        if (aoAbrir?.atualizadoEm && aoAbrir.pagos) {
+            const hojeBrasilia = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+            const [ano, mes, dia] = String(aoAbrir.dia || '').split('-');
+            const rotuloDia = aoAbrir.dia === hojeBrasilia ? 'hoje' : (dia && mes ? `dia ${dia}/${mes}` : '');
+            cards.push(montarCard(
+                'robo-status__card--app',
+                ICONE_ROBO_APP,
+                `Pagos ao abrir o app${rotuloDia ? ` (${rotuloDia})` : ''}`,
+                {
+                    data: aoAbrir.atualizadoEm,
+                    usuariosCreditados: Object.keys(aoAbrir.pagos).length,
+                    pagos: aoAbrir.pagos,
+                }
+            ));
         }
 
         elInfoRobo.innerHTML = cards.length
