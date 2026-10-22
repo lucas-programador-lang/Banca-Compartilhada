@@ -931,7 +931,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    if (btnConfirmarModalDep) {
+        if (btnConfirmarModalDep) {
         btnConfirmarModalDep.addEventListener('click', async function() {
             const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
             const valorAtual = parseFloat(modalInput ? modalInput.value : 0);
@@ -948,7 +948,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (areaQrCodePix && !areaQrCodePix.classList.contains('ativo')) {
-                if (!userIdAtual) {
+                if (!userIdAtual || !userAtual) {
                     mostrarToast('❌ Você precisa estar logado para solicitar um depósito.', 'error');
                     return;
                 }
@@ -967,19 +967,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     const novoDepositoRef = push(depositosRef);
                     const depositoId = novoDepositoRef.key;
 
+                    // O valor do plano é gravado aqui e o servidor lê dele, não do corpo da chamada
                     await set(novoDepositoRef, {
                         valorPlano: valorAtual,
                         status: 'pendente',
                         dataSolicitacao: new Date().toISOString(),
                     });
 
+                    const idToken = await userAtual.getIdToken();
+
                     const respostaPix = await fetch(`${CONFIG.WORKER_BASE_URL}/api/pix/criar`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`,
+                        },
                         body: JSON.stringify({
-                            uid: userIdAtual,
                             depositoId,
-                            valorPlano: valorAtual,
                             nome: nomeUsuarioAtual || 'Cliente',
                             email: emailUsuarioAtual || '',
                             telefone,
