@@ -4370,13 +4370,15 @@ body:not(.admin-page) .sidebar {
     overflow: hidden;
     border-radius: 12px;
     margin-bottom: 14px;
+    background: #0b0704;
 }
 
 .plan-card__photo {
     display: block;
     width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 /* Reflexo de luz que passa pela foto */
