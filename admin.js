@@ -1002,6 +1002,7 @@ function renderizarHistoricoRendimentos(historico, usuarios) {
                 </span>
             </li>`;
     }).join('') + (registros.length > LIMITE ? `<li class="hist-rend__vazio">Mostrando os ${LIMITE} mais recentes. Use a busca para achar um cliente.</li>` : '');
+}
 
 function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, planosObj, filtro) {
     const tbody = document.getElementById('tabelaUsuariosAdmin');
