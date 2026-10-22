@@ -4439,3 +4439,9 @@ body:not(.admin-page) .sidebar {
         filter: drop-shadow(0 0 12px rgba(242, 206, 151, 0.5));
     }
 }
+
+/* Sem linha ao redor da área do QR Code no modal de depósito */
+.qr-area {
+    border: none;
+    background: transparent;
+}
