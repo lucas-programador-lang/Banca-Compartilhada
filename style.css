@@ -4350,7 +4350,9 @@ body:not(.admin-page) .sidebar {
 }
 
 
-/* ===== Planos com foto e brilho ===== */
+/* ===== Planos com foto e brilho (versão final) ===== */
+
+/* Card: sombra dourada pulsando */
 .plan-card--glow {
     position: relative;
     animation: planoBrilho 3s ease-in-out infinite;
@@ -4372,6 +4374,8 @@ body:not(.admin-page) .sidebar {
     }
 }
 
+/* Wrapper da foto: o filtro fica aqui. O overflow corta só o conteúdo
+   interno (a faixa de luz), não a sombra externa do drop-shadow */
 .plan-card__photo-wrap {
     position: relative;
     overflow: hidden;
@@ -4390,7 +4394,6 @@ body:not(.admin-page) .sidebar {
     border-radius: 14px;
 }
 
-/* O brilho fica no wrapper, fora do overflow:hidden, então não é cortado */
 @keyframes fotoBrilho {
     0%, 100% {
         filter: brightness(1) drop-shadow(0 0 6px rgba(242, 206, 151, 0.35));
@@ -4416,10 +4419,23 @@ body:not(.admin-page) .sidebar {
     60%, 100% { transform: translateX(120%); }
 }
 
+/* Quem tem "reduzir movimento" ativo vê o brilho fixo, sem animação.
+   Fica por último para vencer a regra geral do .card */
 @media (prefers-reduced-motion: reduce) {
     .plan-card--glow,
     .plan-card__photo-wrap,
     .plan-card__photo-wrap::after {
-        animation: none;
+        animation: none !important;
+    }
+
+    .plan-card--glow {
+        box-shadow:
+            0 24px 50px -24px rgba(0, 0, 0, 0.75),
+            0 0 22px rgba(242, 206, 151, 0.4),
+            0 0 0 1px rgba(242, 206, 151, 0.3);
+    }
+
+    .plan-card__photo-wrap {
+        filter: drop-shadow(0 0 12px rgba(242, 206, 151, 0.5));
     }
 }
