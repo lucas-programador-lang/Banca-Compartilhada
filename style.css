@@ -4358,10 +4358,17 @@ body:not(.admin-page) .sidebar {
 
 @keyframes planoBrilho {
     0%, 100% {
-        box-shadow: 0 0 12px rgba(242, 206, 151, 0.2);
+        box-shadow:
+            0 24px 50px -24px rgba(0, 0, 0, 0.75),
+            0 0 14px rgba(242, 206, 151, 0.25),
+            0 0 0 1px rgba(242, 206, 151, 0.15);
     }
     50% {
-        box-shadow: 0 0 26px rgba(242, 206, 151, 0.5);
+        box-shadow:
+            0 24px 50px -24px rgba(0, 0, 0, 0.75),
+            0 0 30px rgba(242, 206, 151, 0.6),
+            0 0 60px rgba(196, 136, 73, 0.35),
+            0 0 0 1px rgba(242, 206, 151, 0.4);
     }
 }
 
@@ -4371,6 +4378,7 @@ body:not(.admin-page) .sidebar {
     border-radius: 14px;
     margin-bottom: 14px;
     background: #0b0704;
+    animation: fotoBrilho 3s ease-in-out infinite;
 }
 
 .plan-card__photo {
@@ -4380,10 +4388,9 @@ body:not(.admin-page) .sidebar {
     max-width: 100%;
     object-fit: contain;
     border-radius: 14px;
-    animation: fotoBrilho 3s ease-in-out infinite;
 }
 
-/* A foto pulsa entre mais clara e mais dourada */
+/* O brilho fica no wrapper, fora do overflow:hidden, então não é cortado */
 @keyframes fotoBrilho {
     0%, 100% {
         filter: brightness(1) drop-shadow(0 0 6px rgba(242, 206, 151, 0.35));
@@ -4411,7 +4418,7 @@ body:not(.admin-page) .sidebar {
 
 @media (prefers-reduced-motion: reduce) {
     .plan-card--glow,
-    .plan-card__photo,
+    .plan-card__photo-wrap,
     .plan-card__photo-wrap::after {
         animation: none;
     }
