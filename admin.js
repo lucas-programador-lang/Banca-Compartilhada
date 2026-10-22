@@ -394,13 +394,16 @@ function garantirEstiloPlanos() {
     const estilo = document.createElement('style');
     estilo.id = 'estiloPlanosAdmin';
     estilo.textContent = `
-        /* ---------- Histórico de rendimentos pagos ---------- */
+                /* ---------- Histórico de rendimentos pagos ---------- */
         .admin-page .hist-rend {
             margin: 0 0 var(--space-md, 16px);
-            padding: var(--space-md, 16px);
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md, 12px);
+            padding: 18px 20px 14px;
+            background:
+                radial-gradient(90% 60% at 100% 0%, rgba(196, 136, 73, 0.10), transparent 65%),
+                var(--card-bg);
+            border: 1px solid rgba(196, 136, 73, 0.22);
+            border-radius: 20px;
+            box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(242, 206, 151, 0.08);
         }
         .admin-page .hist-rend__head {
             display: flex;
@@ -408,81 +411,148 @@ function garantirEstiloPlanos() {
             align-items: center;
             justify-content: space-between;
             gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(196, 136, 73, 0.16);
         }
-        .admin-page .hist-rend__titulo { margin: 0; font-size: 1rem; }
+        .admin-page .hist-rend__titulo {
+            margin: 0;
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-hover);
+        }
         .admin-page .hist-rend__filtros { display: flex; flex-wrap: wrap; gap: 8px; }
         .admin-page .hist-rend__filtros select,
         .admin-page .hist-rend__filtros input {
             min-width: 0;
             margin: 0;
-            padding: 9px 12px;
+            height: 40px;
+            padding: 0 14px;
             font-size: 0.85rem;
-            background-color: var(--bg-color-elevated);
+            background: #0f0a06;
             color: var(--text-main);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm, 8px);
+            border: 1px solid rgba(196, 136, 73, 0.25);
+            border-radius: 12px;
             color-scheme: dark;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
         .admin-page .hist-rend__filtros select:hover,
-        .admin-page .hist-rend__filtros input:hover { border-color: var(--border-color-strong); }
+        .admin-page .hist-rend__filtros input:hover { border-color: rgba(196, 136, 73, 0.45); }
         .admin-page .hist-rend__filtros select:focus,
         .admin-page .hist-rend__filtros input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-soft);
+            border-color: var(--primary-hover);
+            box-shadow: 0 0 0 3px rgba(196, 136, 73, 0.18);
         }
         .admin-page .hist-rend__filtros input::placeholder { color: var(--text-faint); }
-        .admin-page .hist-rend__resumo { margin: 12px 0 4px; font-size: 0.85rem; color: var(--text-muted); }
-        .admin-page .hist-rend__resumo strong { color: var(--text-main, inherit); }
+        .admin-page .hist-rend__resumo {
+            margin: 14px 0 10px;
+            padding: 10px 14px;
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            background: rgba(196, 136, 73, 0.07);
+            border: 1px solid rgba(196, 136, 73, 0.18);
+            border-radius: 12px;
+        }
+        .admin-page .hist-rend__resumo:empty { display: none; }
+        .admin-page .hist-rend__resumo strong { color: var(--primary-hover); font-weight: 700; }
         .admin-page .hist-rend__lista {
             list-style: none;
-            margin: 8px 0 0;
+            margin: 0;
             padding: 0;
             max-height: 420px;
             overflow-y: auto;
-            border-top: 1px solid var(--border-color);
         }
         .admin-page .hist-rend__item {
             display: grid;
-            grid-template-columns: 52px minmax(0, 1fr) auto 90px;
+            grid-template-columns: 56px minmax(0, 1fr) auto 104px;
             align-items: center;
-            gap: 12px;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.86rem;
+            gap: 14px;
+            padding: 12px 10px;
+            margin: 0 -10px;
+            border-radius: 12px;
+            border-bottom: 1px solid rgba(196, 136, 73, 0.10);
+            font-size: 0.88rem;
+            transition: background-color 0.2s ease;
         }
-        .admin-page .hist-rend__hora { color: var(--text-muted); font-variant-numeric: tabular-nums; }
-        .admin-page .hist-rend__nome { min-width: 0; overflow-wrap: anywhere; }
-        .admin-page .hist-rend__valor { text-align: right; color: var(--success, #10b981); white-space: nowrap; }
-        .admin-page .hist-rend__origem {
-            padding: 2px 9px;
-            border-radius: 999px;
-            border: 1px solid var(--border-color);
-            font-size: 0.7rem;
+        .admin-page .hist-rend__item:last-child { border-bottom: 0; }
+        .admin-page .hist-rend__item:hover { background: rgba(196, 136, 73, 0.06); }
+        .admin-page .hist-rend__hora {
+            color: var(--text-faint);
+            font-size: 0.8rem;
+            font-variant-numeric: tabular-nums;
+        }
+        .admin-page .hist-rend__nome {
+            min-width: 0;
             font-weight: 600;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .admin-page .hist-rend__valor {
+            text-align: right;
+            font-family: var(--font-display);
+            font-size: 0.98rem;
+            font-weight: 700;
+            color: #5ef0a4;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+        .admin-page .hist-rend__origem {
+            justify-self: start;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
             white-space: nowrap;
             color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
-        .admin-page .hist-rend__origem--cron { color: var(--success, #10b981); border-color: currentColor; }
-        .admin-page .hist-rend__origem--manual { color: var(--warning, #f59e0b); border-color: currentColor; }
-        .admin-page .hist-rend__origem--app { color: var(--primary, #d4a853); border-color: currentColor; }
-        .admin-page .hist-rend__vazio { padding: 14px 0; text-align: center; color: var(--text-muted); font-size: 0.85rem; }
+        .admin-page .hist-rend__origem--cron {
+            color: var(--success-hover);
+            background: var(--success-soft);
+            border-color: rgba(34, 176, 107, 0.35);
+        }
+        .admin-page .hist-rend__origem--manual {
+            color: var(--warning);
+            background: var(--warning-soft);
+            border-color: rgba(220, 172, 77, 0.35);
+        }
+        .admin-page .hist-rend__origem--app {
+            color: var(--primary-hover);
+            background: rgba(196, 136, 73, 0.12);
+            border-color: rgba(196, 136, 73, 0.35);
+        }
+        .admin-page .hist-rend__vazio {
+            padding: 22px 16px;
+            text-align: center;
+            color: var(--text-faint);
+            font-size: 0.86rem;
+            border: 1px dashed rgba(196, 136, 73, 0.25);
+            border-radius: 14px;
+            list-style: none;
+        }
         @media (max-width: 600px) {
+            .admin-page .hist-rend { padding: 14px 14px 10px; border-radius: 16px; }
             .admin-page .hist-rend__filtros { width: 100%; }
             .admin-page .hist-rend__filtros select,
             .admin-page .hist-rend__filtros input { flex: 1 1 100%; width: 100%; }
             .admin-page .hist-rend__item {
                 grid-template-columns: minmax(0, 1fr) auto;
                 grid-template-areas: "nome valor" "hora origem";
-                gap: 4px 12px;
+                gap: 6px 12px;
+                margin: 0 -4px;
+                padding: 12px 4px;
             }
-            .admin-page .hist-rend__nome { grid-area: nome; font-weight: 600; }
+            .admin-page .hist-rend__nome { grid-area: nome; }
             .admin-page .hist-rend__valor { grid-area: valor; }
-            .admin-page .hist-rend__hora { grid-area: hora; font-size: 0.78rem; }
+            .admin-page .hist-rend__hora { grid-area: hora; }
             .admin-page .hist-rend__origem { grid-area: origem; justify-self: end; }
         }
-
+        
         /* ---------- Cartões do robô: lista de quem foi pago ---------- */
         .admin-page .robo-lista { margin-top: 12px; }
         .admin-page .robo-lista > summary {
