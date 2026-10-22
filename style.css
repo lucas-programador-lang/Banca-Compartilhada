@@ -4455,3 +4455,134 @@ body:not(.admin-page) .sidebar {
 .modal-card {
     border: 1px solid rgba(196, 136, 73, 0.22);
 }
+
+
+/* ==========================================================================
+   Modais de Depósito e Saque: visual refinado
+   ========================================================================== */
+
+/* Fundo escurecido com desfoque */
+.modal-overlay {
+    background: rgba(4, 2, 1, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Cartão do modal */
+.modal-card {
+    max-width: 440px;
+    padding: 28px 26px 24px;
+    border-radius: 24px;
+    background:
+        radial-gradient(90% 60% at 100% 0%, rgba(196, 136, 73, 0.16), transparent 65%),
+        linear-gradient(170deg, #201710, #0b0704 88%);
+    border: 1px solid rgba(196, 136, 73, 0.28);
+    box-shadow:
+        0 40px 80px -30px rgba(0, 0, 0, 0.9),
+        0 0 40px -10px rgba(196, 136, 73, 0.25),
+        inset 0 1px 0 rgba(242, 206, 151, 0.12);
+}
+
+.modal-card--wide {
+    max-width: 460px;
+}
+
+/* Título e subtítulo */
+.modal-card h3 {
+    font-size: 1.45rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+    color: var(--primary-hover);
+}
+
+.modal-lead {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    color: var(--text-muted);
+}
+
+/* Botão de fechar, mais discreto e com área de toque maior */
+.modal-close {
+    top: 18px;
+    right: 18px;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(196, 136, 73, 0.2);
+    font-size: 1.2rem;
+    transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: rgba(196, 136, 73, 0.14);
+    border-color: rgba(196, 136, 73, 0.45);
+    color: var(--primary-hover);
+}
+
+/* Caixas de informação (valor mínimo, taxa, saldo) */
+.modal-info-box {
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(196, 136, 73, 0.18);
+    border-radius: 16px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+
+.modal-info-row {
+    align-items: center;
+    font-size: 0.88rem;
+}
+
+.modal-info-row + .modal-info-row {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(196, 136, 73, 0.18);
+}
+
+.modal-info-row strong {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+}
+
+/* Saldo disponível dentro do modal de saque */
+.modal-balance-box {
+    padding: 14px 18px;
+}
+
+.modal-balance-box strong {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    color: #5ef0a4;
+}
+
+/* Chave PIX de recebimento */
+.modal-info-box--key {
+    padding: 14px 16px;
+}
+
+.modal-info-box--key .modal-info-row__label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+}
+
+/* Campos do formulário dentro dos modais */
+.modal-card .input-group label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.modal-card .input-group input,
+.modal-card .input-group select {
+    padding: 14px
