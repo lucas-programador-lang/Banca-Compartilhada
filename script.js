@@ -804,10 +804,25 @@ document.addEventListener('DOMContentLoaded', function() {
     let nomeUsuarioAtual = '';
     let emailUsuarioAtual = '';
 
+    // Guarda todas as opções de plano antes de qualquer alteração no select
+    const selectPlanoModal = document.getElementById('modalValorPlano');
+    const todasOpcoesPlano = selectPlanoModal
+        ? Array.from(selectPlanoModal.options).map(function(opt) { return opt.cloneNode(true); })
+        : [];
+
+    // Ao clicar em um plano, o modal mostra somente esse plano
     const botoesPlanos = document.querySelectorAll('.btn-escolher-plano');
     for (let i = 0; i < botoesPlanos.length; i++) {
         botoesPlanos[i].addEventListener('click', function() {
             const valor = this.getAttribute('data-valor');
+
+            if (selectPlanoModal) {
+                const opcaoDoPlano = todasOpcoesPlano.find(function(opt) { return opt.value === valor; });
+                selectPlanoModal.innerHTML = '';
+                if (opcaoDoPlano) selectPlanoModal.appendChild(opcaoDoPlano.cloneNode(true));
+                selectPlanoModal.value = valor;
+            }
+
             const inputPlano = document.getElementById('valorPlano');
             if (inputPlano) inputPlano.value = valor;
 
@@ -1298,9 +1313,9 @@ document.addEventListener('DOMContentLoaded', function() {
         btnAcessoHistorico.addEventListener('click', function() { irParaAba('view-extrato'); });
     }
 
-     const btnAcessoCiclos = document.getElementById('btnAcessoCiclos');
+    const btnAcessoCiclos = document.getElementById('btnAcessoCiclos');
     if (btnAcessoCiclos) {
-    btnAcessoCiclos.addEventListener('click', function() { irParaAba('view-ciclos'); });
+        btnAcessoCiclos.addEventListener('click', function() { irParaAba('view-ciclos'); });
     }
 
     const btnAcessoCupons = document.getElementById('btnAcessoCupons');
