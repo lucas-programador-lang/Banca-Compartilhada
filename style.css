@@ -4358,17 +4358,17 @@ body:not(.admin-page) .sidebar {
 
 @keyframes planoBrilho {
     0%, 100% {
-        box-shadow: 0 0 10px rgba(55, 187, 254, 0.25);
+        box-shadow: 0 0 12px rgba(242, 206, 151, 0.2);
     }
     50% {
-        box-shadow: 0 0 24px rgba(55, 187, 254, 0.6);
+        box-shadow: 0 0 26px rgba(242, 206, 151, 0.5);
     }
 }
 
 .plan-card__photo-wrap {
     position: relative;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 14px;
     margin-bottom: 14px;
     background: #0b0704;
 }
@@ -4379,14 +4379,26 @@ body:not(.admin-page) .sidebar {
     height: auto;
     max-width: 100%;
     object-fit: contain;
+    border-radius: 14px;
+    animation: fotoBrilho 3s ease-in-out infinite;
 }
 
-/* Reflexo de luz que passa pela foto */
+/* A foto pulsa entre mais clara e mais dourada */
+@keyframes fotoBrilho {
+    0%, 100% {
+        filter: brightness(1) drop-shadow(0 0 6px rgba(242, 206, 151, 0.35));
+    }
+    50% {
+        filter: brightness(1.12) drop-shadow(0 0 18px rgba(242, 206, 151, 0.75));
+    }
+}
+
+/* Faixa de luz que atravessa a foto */
 .plan-card__photo-wrap::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
+    background: linear-gradient(115deg, transparent 35%, rgba(255, 240, 200, 0.55) 50%, transparent 65%);
     transform: translateX(-120%);
     animation: planoReflexo 3.5s ease-in-out infinite;
     pointer-events: none;
@@ -4399,6 +4411,7 @@ body:not(.admin-page) .sidebar {
 
 @media (prefers-reduced-motion: reduce) {
     .plan-card--glow,
+    .plan-card__photo,
     .plan-card__photo-wrap::after {
         animation: none;
     }
