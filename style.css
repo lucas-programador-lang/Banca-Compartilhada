@@ -4348,3 +4348,56 @@ body:not(.admin-page) .sidebar {
     #view-extrato .table-container th:nth-child(4) { width: 15%; }
     #view-extrato .table-container th:nth-child(5) { width: 22%; }
 }
+
+
+/* ===== Planos com foto e brilho ===== */
+.plan-card--glow {
+    position: relative;
+    animation: planoBrilho 3s ease-in-out infinite;
+}
+
+@keyframes planoBrilho {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(55, 187, 254, 0.25);
+    }
+    50% {
+        box-shadow: 0 0 24px rgba(55, 187, 254, 0.6);
+    }
+}
+
+.plan-card__photo-wrap {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    margin-bottom: 14px;
+}
+
+.plan-card__photo {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+/* Reflexo de luz que passa pela foto */
+.plan-card__photo-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.45) 50%, transparent 65%);
+    transform: translateX(-120%);
+    animation: planoReflexo 3.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes planoReflexo {
+    0% { transform: translateX(-120%); }
+    60%, 100% { transform: translateX(120%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .plan-card--glow,
+    .plan-card__photo-wrap::after {
+        animation: none;
+    }
+}
