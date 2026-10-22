@@ -387,14 +387,13 @@ function renderizarTabelaDepositos(depositos, usuarios) {
    ========================================================================== */
 const ICONE_AGUARDANDO = '<svg class="pl-ico" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
 
-// Estilo da tabela de planos: risca os planos encerrados, mostra o texto inteiro no
-// computador e vira lista de cartões organizada no celular.
+// Estilo do painel admin: histórico de rendimentos, cartões do robô e tabela de planos.
 function garantirEstiloPlanos() {
     if (document.getElementById('estiloPlanosAdmin')) return;
     const estilo = document.createElement('style');
     estilo.id = 'estiloPlanosAdmin';
     estilo.textContent = `
-                /* ---------- Histórico de rendimentos pagos ---------- */
+        /* ---------- Histórico de rendimentos pagos ---------- */
         .admin-page .hist-rend {
             margin: 0 0 var(--space-md, 16px);
             padding: 18px 20px 14px;
@@ -465,25 +464,27 @@ function garantirEstiloPlanos() {
         }
         .admin-page .hist-rend__item {
             display: grid;
-            grid-template-columns: 56px minmax(0, 1fr) auto 104px;
+            grid-template-columns: 64px minmax(0, 1fr) 132px 116px;
             align-items: center;
-            gap: 14px;
-            padding: 12px 10px;
-            margin: 0 -10px;
+            gap: 18px;
+            padding: 12px 14px;
+            margin: 0 -14px;
             border-radius: 12px;
-            border-bottom: 1px solid rgba(196, 136, 73, 0.10);
+            border-bottom: 0;
             font-size: 0.88rem;
             transition: background-color 0.2s ease;
         }
-        .admin-page .hist-rend__item:last-child { border-bottom: 0; }
+        .admin-page .hist-rend__item:nth-child(odd) { background: rgba(255, 255, 255, 0.018); }
+        .admin-page .hist-rend__item + .hist-rend__item { margin-top: 2px; }
         .admin-page .hist-rend__item:hover { background: rgba(196, 136, 73, 0.06); }
         .admin-page .hist-rend__hora {
-            color: var(--text-faint);
-            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
             font-variant-numeric: tabular-nums;
         }
         .admin-page .hist-rend__nome {
             min-width: 0;
+            font-size: 0.95rem;
             font-weight: 600;
             color: var(--text-main);
             overflow: hidden;
@@ -493,19 +494,23 @@ function garantirEstiloPlanos() {
         .admin-page .hist-rend__valor {
             text-align: right;
             font-family: var(--font-display);
-            font-size: 0.98rem;
+            font-size: 1.08rem;
             font-weight: 700;
+            line-height: 1.2;
             color: #5ef0a4;
             white-space: nowrap;
             font-variant-numeric: tabular-nums;
         }
         .admin-page .hist-rend__origem {
-            justify-self: start;
-            padding: 3px 10px;
+            display: inline-flex;
+            justify-content: center;
+            min-width: 112px;
+            padding: 4px 10px;
             border-radius: 999px;
             font-size: 0.68rem;
             font-weight: 700;
             letter-spacing: 0.03em;
+            line-height: 1.2;
             white-space: nowrap;
             color: var(--text-muted);
             background: rgba(255, 255, 255, 0.04);
@@ -521,7 +526,7 @@ function garantirEstiloPlanos() {
             background: var(--warning-soft);
             border-color: rgba(220, 172, 77, 0.35);
         }
-               .admin-page .hist-rend__origem--app {
+        .admin-page .hist-rend__origem--app {
             color: var(--primary-hover);
             background: rgba(196, 136, 73, 0.12);
             border-color: rgba(196, 136, 73, 0.35);
@@ -538,19 +543,19 @@ function garantirEstiloPlanos() {
         .admin-page .hist-rend__campo {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 5px;
             min-width: 0;
         }
+        .admin-page .hist-rend__campo:nth-child(3) { align-items: center; }
+        .admin-page .hist-rend__campo--valor { align-items: flex-end; }
         .admin-page .hist-rend__rotulo {
-            font-size: 0.66rem;
+            font-size: 0.6rem;
             font-weight: 700;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.14em;
             text-transform: uppercase;
             color: var(--text-faint);
+            opacity: 0.85;
         }
-        .admin-page .hist-rend__campo--valor { align-items: flex-end; }
-        .admin-page .hist-rend__campo--nome { min-width: 0; }
-        .admin-page .hist-rend__item { align-items: center; }
         @media (max-width: 600px) {
             .admin-page .hist-rend { padding: 14px 14px 10px; border-radius: 16px; }
             .admin-page .hist-rend__filtros { width: 100%; }
@@ -568,10 +573,11 @@ function garantirEstiloPlanos() {
             }
             .admin-page .hist-rend__campo:nth-child(1) { grid-area: hora; }
             .admin-page .hist-rend__campo--nome { grid-area: nome; }
-            .admin-page .hist-rend__campo:nth-child(3) { grid-area: origem; }
+            .admin-page .hist-rend__campo:nth-child(3) { grid-area: origem; align-items: flex-start; }
             .admin-page .hist-rend__campo--valor { grid-area: valor; align-items: flex-end; }
+            .admin-page .hist-rend__origem { min-width: 0; }
         }
-       
+
         /* ---------- Cartões do robô: lista de quem foi pago ---------- */
         .admin-page .robo-lista { margin-top: 12px; }
         .admin-page .robo-lista > summary {
@@ -978,7 +984,7 @@ function renderizarHistoricoRendimentos(historico, usuarios) {
         return;
     }
 
-       const LIMITE = 300;
+    const LIMITE = 300;
     listaEl.innerHTML = registros.slice(0, LIMITE).map((r) => {
         const hora = formatarDataHora(r.em).split(', ')[1] || '';
         const origem = ORIGENS_RENDIMENTO[r.origem] || 'Outro';
