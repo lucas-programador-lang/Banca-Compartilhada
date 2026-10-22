@@ -365,13 +365,20 @@ function renderizarTabelaCarteira(planosObj) {
     const linhasRendimento = [];
     const linhasCiclos = [];
 
-    planos.forEach(function(plano) {
+        planos.forEach(function(plano) {
         const valor = parseFloat(plano.valor || 0);
         const estado = calcularEstadoPlano(plano);
 
+        // Os totais somam TODOS os planos, inclusive os antigos que não aparecem na lista
         if (!estado.cancelado) {
             totalInvestido += valor;
             totalRendimento += estado.rendimentoAcumulado;
+        }
+
+        // Finalizados ou cancelados há mais de 30 dias saem só da lista visível
+        if (estado.finalizado || estado.cancelado) {
+            const terminoIso = calcularTerminoPrevisto(plano) || plano.dataExpiracao || plano.dataAtivacao;
+            if (!estaNoPrazoExibicao(terminoIso)) return;
         }
 
         const linha = montarLinhaPlano(plano, estado);
