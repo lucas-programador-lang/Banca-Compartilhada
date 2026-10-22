@@ -149,16 +149,16 @@
                     </div>
                 </div>
 
-                <!-- Acesso rápido: Cupons / Depositar / Sacar / Rendimento / Histórico -->
+                <!-- Acesso rápido: Cupons / Ciclos / Sacar / Rendimento / Histórico -->
                 <div class="action-row">
                     <button class="btn" id="btnAcessoCupons" type="button">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5A4.8 4.8 0 0 1 12 8a4.8 4.8 0 0 1 4.5-5 2.5 2.5 0 0 1 0 5"/></svg>
                         Cupons
                     </button>
-                   <button class="btn" id="btnAcessoCiclos" type="button">
+                    <button class="btn" id="btnAcessoCiclos" type="button">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-15.5-6.2L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 15.5 6.2L21 16"/><path d="M16 16h5v5"/></svg>
                         Ciclos
-                </button>
+                    </button>
                     <button class="btn" id="btnAbrirSaqueModal" type="button">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
                         Sacar
@@ -209,8 +209,11 @@
                 <!-- Grid de Planos -->
                 <div class="grid-planos">
 
-                    <!-- Plano: R$ 30 (Antigo) -->
-                    <div class="card plan-card">
+                    <!-- Plano: R$ 30 -->
+                    <div class="card plan-card plan-card--glow">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/banca-starter.jpg" alt="Banca Starter">
+                        </div>
                         <h3 class="plan-card__title">Banca Starter</h3>
                         <span class="plan-badge">R$ 0,90 / dia útil (3% por dia útil)</span>
                         <div class="plan-row">
@@ -228,8 +231,11 @@
                         <button class="btn btn-escolher-plano" data-valor="30">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano: R$ 50 (Antigo) -->
-                    <div class="card plan-card">
+                    <!-- Plano: R$ 50 -->
+                    <div class="card plan-card plan-card--glow">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/banca-bronze.jpg" alt="Banca Bronze">
+                        </div>
                         <h3 class="plan-card__title">Banca Bronze</h3>
                         <span class="plan-badge">R$ 1,50 / dia útil (3% por dia útil)</span>
                         <div class="plan-row">
@@ -247,8 +253,11 @@
                         <button class="btn btn-escolher-plano" data-valor="50">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano: R$ 100 (Antigo) -->
-                    <div class="card plan-card">
+                    <!-- Plano: R$ 100 -->
+                    <div class="card plan-card plan-card--glow">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/banca-prata.jpg" alt="Banca Prata">
+                        </div>
                         <h3 class="plan-card__title">Banca Prata</h3>
                         <span class="plan-badge">R$ 2,00 / dia útil (2% por dia útil)</span>
                         <div class="plan-row">
@@ -266,8 +275,11 @@
                         <button class="btn btn-escolher-plano" data-valor="100">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano: R$ 300 (Antigo) -->
-                    <div class="card plan-card">
+                    <!-- Plano: R$ 300 -->
+                    <div class="card plan-card plan-card--glow">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/banca-ouro.jpg" alt="Banca Ouro">
+                        </div>
                         <h3 class="plan-card__title">Banca Ouro</h3>
                         <span class="plan-badge">R$ 6,00 / dia útil (2% por dia útil)</span>
                         <div class="plan-row">
@@ -285,8 +297,11 @@
                         <button class="btn btn-escolher-plano" data-valor="300">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano: R$ 500 (Antigo) -->
-                    <div class="card plan-card">
+                    <!-- Plano: R$ 500 -->
+                    <div class="card plan-card plan-card--glow">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/banca-platinum.jpg" alt="Banca Platinum">
+                        </div>
                         <h3 class="plan-card__title">Banca Platinum</h3>
                         <span class="plan-badge">R$ 10,00 / dia útil (2% por dia útil)</span>
                         <div class="plan-row">
@@ -304,8 +319,11 @@
                         <button class="btn btn-escolher-plano" data-valor="500">APLICAR AGORA</button>
                     </div>
 
-                    <!-- Plano: R$ 1.000 (Antigo) -->
-                    <div class="card plan-card">
+                    <!-- Plano: R$ 1.000 -->
+                    <div class="card plan-card plan-card--glow">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/banca-master.jpg" alt="Banca Master">
+                        </div>
                         <h3 class="plan-card__title">Banca Master</h3>
                         <span class="plan-badge">R$ 20,00 / dia útil (2% por dia útil)</span>
                         <div class="plan-row">
@@ -338,8 +356,11 @@
                 <div class="grid-planos">
 
                     <!-- Plano: R$ 10 (48h) -->
-                    <div class="card plan-card" style="border: 2px solid var(--primary);">
-                        <h3 class="plan-card__title">Ciclo Express Starter</h3>
+                    <div class="card plan-card plan-card--glow" style="border: 2px solid var(--primary);">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/ciclo-express.jpg" alt="Ciclo Express">
+                        </div>
+                        <h3 class="plan-card__title">Ciclo Express</h3>
                         <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo Rápido (48 horas)</span>
                         <div class="plan-row">
                             <span class="plan-row__label">Aporte:</span>
@@ -357,7 +378,10 @@
                     </div>
 
                     <!-- Plano: R$ 15 (40 dias) - ILIMITADO -->
-                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                    <div class="card plan-card plan-card--glow" style="border: 2px solid var(--primary);">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/ciclo-medio-15.jpg" alt="Ciclo Médio 15">
+                        </div>
                         <h3 class="plan-card__title">Ciclo Médio 15</h3>
                         <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (40 dias)</span>
                         <div class="plan-row">
@@ -380,7 +404,10 @@
                     </div>
 
                     <!-- Plano: R$ 60 (40 dias) - ILIMITADO -->
-                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                    <div class="card plan-card plan-card--glow" style="border: 2px solid var(--primary);">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/ciclo-medio-60.jpg" alt="Ciclo Médio 60">
+                        </div>
                         <h3 class="plan-card__title">Ciclo Médio 60</h3>
                         <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (40 dias)</span>
                         <div class="plan-row">
@@ -403,7 +430,10 @@
                     </div>
 
                     <!-- Plano: R$ 150 (40 dias) - ILIMITADO -->
-                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                    <div class="card plan-card plan-card--glow" style="border: 2px solid var(--primary);">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/ciclo-medio-150.jpg" alt="Ciclo Médio 150">
+                        </div>
                         <h3 class="plan-card__title">Ciclo Médio 150</h3>
                         <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (40 dias)</span>
                         <div class="plan-row">
@@ -426,7 +456,10 @@
                     </div>
 
                     <!-- Plano: R$ 200 (40 dias) - ILIMITADO -->
-                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                    <div class="card plan-card plan-card--glow" style="border: 2px solid var(--primary);">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/ciclo-medio-200.jpg" alt="Ciclo Médio 200">
+                        </div>
                         <h3 class="plan-card__title">Ciclo Médio 200</h3>
                         <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (40 dias)</span>
                         <div class="plan-row">
@@ -449,7 +482,10 @@
                     </div>
 
                     <!-- Plano: R$ 450 (60 dias) - ILIMITADO -->
-                    <div class="card plan-card" style="border: 2px solid var(--primary);">
+                    <div class="card plan-card plan-card--glow" style="border: 2px solid var(--primary);">
+                        <div class="plan-card__photo-wrap">
+                            <img class="plan-card__photo" src="img/planos/ciclo-longo-450.jpg" alt="Ciclo Longo 450">
+                        </div>
                         <h3 class="plan-card__title">Ciclo Longo 450</h3>
                         <span class="plan-badge" style="background: var(--primary); color: white;">Ciclo (60 dias)</span>
                         <div class="plan-row">
@@ -779,7 +815,7 @@
             <div class="input-group">
                 <label>Valor do Plano / Depósito (R$)</label>
                 <select id="modalValorPlano">
-                    <option value="10">R$ 10,00 — Ciclo Express Starter (48h)</option>
+                    <option value="10">R$ 10,00 — Ciclo Express (48h)</option>
                     <option value="15">R$ 15,00 — Ciclo Médio 15 (40 dias)</option>
                     <option value="30">R$ 30,00 — Banca Starter</option>
                     <option value="50">R$ 50,00 — Banca Bronze</option>
