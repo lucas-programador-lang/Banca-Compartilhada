@@ -521,7 +521,7 @@ function garantirEstiloPlanos() {
             background: var(--warning-soft);
             border-color: rgba(220, 172, 77, 0.35);
         }
-        .admin-page .hist-rend__origem--app {
+               .admin-page .hist-rend__origem--app {
             color: var(--primary-hover);
             background: rgba(196, 136, 73, 0.12);
             border-color: rgba(196, 136, 73, 0.35);
@@ -535,24 +535,43 @@ function garantirEstiloPlanos() {
             border-radius: 14px;
             list-style: none;
         }
+        .admin-page .hist-rend__campo {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .admin-page .hist-rend__rotulo {
+            font-size: 0.66rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-faint);
+        }
+        .admin-page .hist-rend__campo--valor { align-items: flex-end; }
+        .admin-page .hist-rend__campo--nome { min-width: 0; }
+        .admin-page .hist-rend__item { align-items: center; }
         @media (max-width: 600px) {
             .admin-page .hist-rend { padding: 14px 14px 10px; border-radius: 16px; }
             .admin-page .hist-rend__filtros { width: 100%; }
             .admin-page .hist-rend__filtros select,
             .admin-page .hist-rend__filtros input { flex: 1 1 100%; width: 100%; }
             .admin-page .hist-rend__item {
-                grid-template-columns: minmax(0, 1fr) auto;
-                grid-template-areas: "nome valor" "hora origem";
-                gap: 6px 12px;
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas:
+                    "hora  valor"
+                    "nome  nome"
+                    "origem origem";
+                gap: 10px 12px;
                 margin: 0 -4px;
                 padding: 12px 4px;
             }
-            .admin-page .hist-rend__nome { grid-area: nome; }
-            .admin-page .hist-rend__valor { grid-area: valor; }
-            .admin-page .hist-rend__hora { grid-area: hora; }
-            .admin-page .hist-rend__origem { grid-area: origem; justify-self: end; }
+            .admin-page .hist-rend__campo:nth-child(1) { grid-area: hora; }
+            .admin-page .hist-rend__campo--nome { grid-area: nome; }
+            .admin-page .hist-rend__campo:nth-child(3) { grid-area: origem; }
+            .admin-page .hist-rend__campo--valor { grid-area: valor; align-items: flex-end; }
         }
-        
+       
         /* ---------- Cartões do robô: lista de quem foi pago ---------- */
         .admin-page .robo-lista { margin-top: 12px; }
         .admin-page .robo-lista > summary {
@@ -959,19 +978,30 @@ function renderizarHistoricoRendimentos(historico, usuarios) {
         return;
     }
 
-    const LIMITE = 300;
+       const LIMITE = 300;
     listaEl.innerHTML = registros.slice(0, LIMITE).map((r) => {
         const hora = formatarDataHora(r.em).split(', ')[1] || '';
         const origem = ORIGENS_RENDIMENTO[r.origem] || 'Outro';
         return `
             <li class="hist-rend__item">
-                <span class="hist-rend__hora">${escapeHTML(hora)}</span>
-                <span class="hist-rend__nome">${escapeHTML(r.nome)}</span>
-                <span class="hist-rend__origem hist-rend__origem--${escapeHTML(r.origem || 'outro')}">${origem}</span>
-                <strong class="hist-rend__valor">${formatadorMoeda.format(Number(r.valor))}</strong>
+                <span class="hist-rend__campo">
+                    <span class="hist-rend__rotulo">Hora:</span>
+                    <span class="hist-rend__hora">${escapeHTML(hora)}</span>
+                </span>
+                <span class="hist-rend__campo hist-rend__campo--nome">
+                    <span class="hist-rend__rotulo">Nome:</span>
+                    <span class="hist-rend__nome">${escapeHTML(r.nome)}</span>
+                </span>
+                <span class="hist-rend__campo">
+                    <span class="hist-rend__rotulo">Origem:</span>
+                    <span class="hist-rend__origem hist-rend__origem--${escapeHTML(r.origem || 'outro')}">${origem}</span>
+                </span>
+                <span class="hist-rend__campo hist-rend__campo--valor">
+                    <span class="hist-rend__rotulo">Valor:</span>
+                    <strong class="hist-rend__valor">${formatadorMoeda.format(Number(r.valor))}</strong>
+                </span>
             </li>`;
     }).join('') + (registros.length > LIMITE ? `<li class="hist-rend__vazio">Mostrando os ${LIMITE} mais recentes. Use a busca para achar um cliente.</li>` : '');
-}
 
 function renderizarTabelaUsuarios(usuariosObj, financeiroObj, depositosObj, saquesObj, planosObj, filtro) {
     const tbody = document.getElementById('tabelaUsuariosAdmin');
