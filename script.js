@@ -306,6 +306,14 @@ async function sincronizarRendimentosComSaldoDisponivel(planosObj) {
     }
 }
 
+const DIAS_EXIBIR_HISTORICO = 30;
+
+function estaNoPrazoExibicao(data) {
+    const d = data instanceof Date ? data : new Date(data || 0);
+    if (isNaN(d.getTime())) return true;
+    return d.getTime() >= Date.now() - DIAS_EXIBIR_HISTORICO * 24 * 60 * 60 * 1000;
+}
+
 function montarLinhaPlano(plano, estado) {
     const valor = parseFloat(plano.valor || 0);
 
@@ -539,14 +547,18 @@ function inicializarExtratoUsuario(userId) {
         `;
     }
 
-    function preencher(tbody, itens, montar, vazio) {
+       function preencher(tbody, itens, montar, vazio) {
         if (!tbody) return;
-        itens.sort(function(a, b) { return b.data - a.data; });
-        tbody.innerHTML = itens.length
-            ? itens.map(montar).join('')
+        // Mostra os lançamentos recentes, e também os pendentes/em processamento (classe status-pendente)
+        const visiveis = itens.filter(function(item) {
+            return item.statusHtml.includes('status-pendente') || estaNoPrazoExibicao(item.data);
+        });
+        visiveis.sort(function(a, b) { return b.data - a.data; });
+        tbody.innerHTML = visiveis.length
+            ? visiveis.map(montar).join('')
             : `<tr><td colspan="5" class="table-empty">${vazio}</td></tr>`;
     }
-
+    
     function renderizar() {
         const rendimento = [];
         const ciclos = [];
