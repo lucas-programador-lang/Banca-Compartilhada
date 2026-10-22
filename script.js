@@ -931,7 +931,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-        if (btnConfirmarModalDep) {
+    if (btnConfirmarModalDep) {
         btnConfirmarModalDep.addEventListener('click', async function() {
             const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
             const valorAtual = parseFloat(modalInput ? modalInput.value : 0);
@@ -1043,9 +1043,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (elNome) elNome.value = nomePerfil;
         if (elTipo) elTipo.value = tipoPixPerfil;
+
+        // ALTERADO: texto neutro + botão "Cadastrar chave PIX" quando não há chave
+        const btnIrPerfil = document.getElementById('btnIrPerfilChave');
         if (elChave) {
-            elChave.textContent = chavePixPerfil || 'Nenhuma chave cadastrada — vá em Perfil e cadastre uma.';
-            elChave.classList.toggle('is-missing', !chavePixPerfil);
+            if (chavePixPerfil) {
+                elChave.textContent = chavePixPerfil;
+                elChave.classList.remove('is-missing');
+                if (btnIrPerfil) btnIrPerfil.style.display = 'none';
+            } else {
+                elChave.textContent = 'Nenhuma chave cadastrada.';
+                elChave.classList.add('is-missing');
+                if (btnIrPerfil) btnIrPerfil.style.display = 'inline-flex';
+            }
         }
 
         let boxSaldoModal = document.getElementById('boxSaldoDisponivelModal');
@@ -1093,6 +1103,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const btnCancelarSaque = document.getElementById('btnCancelarModalSaque');
     if (btnCancelarSaque) btnCancelarSaque.addEventListener('click', fecharModalSaque);
+
+    // ALTERADO: botão "Cadastrar chave PIX" fecha o modal e abre a aba Perfil
+    const btnIrPerfilChave = document.getElementById('btnIrPerfilChave');
+    if (btnIrPerfilChave) {
+        btnIrPerfilChave.addEventListener('click', function() {
+            fecharModalSaque();
+            const navPerfil = document.querySelector('.sidebar-nav .nav-item[data-target="view-perfil"]');
+            if (navPerfil) navPerfil.click();
+        });
+    }
 
     if (modalSaque) {
         modalSaque.addEventListener('click', function(e) {
