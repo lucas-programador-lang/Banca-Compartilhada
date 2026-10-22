@@ -4445,3 +4445,13 @@ body:not(.admin-page) .sidebar {
     border: none;
     background: transparent;
 }
+
+/* Remove a moldura decorativa dos modais de depósito e saque (só desktop) */
+.modal-card::after,
+.modal-card::before {
+    display: none !important;
+}
+
+.modal-card {
+    border: 1px solid rgba(196, 136, 73, 0.22);
+}
