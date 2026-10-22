@@ -1298,6 +1298,11 @@ document.addEventListener('DOMContentLoaded', function() {
         btnAcessoHistorico.addEventListener('click', function() { irParaAba('view-extrato'); });
     }
 
+     const btnAcessoCiclos = document.getElementById('btnAcessoCiclos');
+    if (btnAcessoCiclos) {
+    btnAcessoCiclos.addEventListener('click', function() { irParaAba('view-ciclos'); });
+    }
+
     const btnAcessoCupons = document.getElementById('btnAcessoCupons');
     if (btnAcessoCupons) {
         btnAcessoCupons.addEventListener('click', function() {
