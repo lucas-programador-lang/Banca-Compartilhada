@@ -6,3 +6,4 @@
   X-XSS-Protection: 1; mode=block
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: camera=(), microphone=(), geolocation=()
+Content-Security-Policy: default-src 'self'; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://app.vizzionpay.com.br https://*.workers.dev; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://app.vizzionpay.com.br;
