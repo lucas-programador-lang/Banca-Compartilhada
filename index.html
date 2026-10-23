@@ -943,14 +943,33 @@
             
             <div id="resumoValorLiquido" class="amount-note"></div>
 
-            <div class="modal-actions">
+                       <div class="modal-actions">
                 <button class="btn btn-outline" id="btnCancelarModalSaque">Cancelar</button>
                 <button class="btn" id="btnConfirmarModalSacar">Solicitar Saque</button>
             </div>
         </div>
     </div>
 
-    <!-- Esconde o botão de download dentro do próprio app e no iPhone (o APK só funciona no Android) -->
+    <!-- ================= MODAL DE CUPOM ================= -->
+    <div id="modalCupom" class="modal-overlay">
+        <div class="card modal-card">
+            <button id="btnFecharCupom" class="modal-close" aria-label="Fechar" type="button">&times;</button>
+
+            <h3>🎁 Resgatar cupom</h3>
+            <p class="modal-lead">Digite o código que saiu no Telegram. Ele vale por 3 minutos e é de uso único.</p>
+
+            <div class="input-group">
+                <label>Código do cupom</label>
+                <input type="text" id="inputCodigoCupom" placeholder="ABCD-EFGH" maxlength="12" autocomplete="off" autocapitalize="characters" style="text-transform: uppercase;">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn" id="btnConfirmarCupom" type="button">Resgatar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Esconde o botão de download dentro do próprio app e no iPhone ... -->
     <script>
         (function () {
             var btn = document.getElementById('btnBaixarAppSidebar');
