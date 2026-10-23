@@ -4644,3 +4644,51 @@ body:not(.admin-page) .sidebar {
 .sidebar-footer .btn-sair {
     margin-top: 2px;
 }
+
+
+
+/* ==========================================================================
+   Desempenho: rolagem fluida nos planos (sem perder o visual)
+   ========================================================================== */
+
+/* Cada card vira uma camada própria: o navegador não redesenha a página inteira */
+.plan-card--glow,
+.plan-card__photo-wrap,
+.plan-card__photo {
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+/* O filtro animado da foto é o item mais pesado: troca por sombra fixa,
+   e o pulso fica só no brilho da borda do card */
+.plan-card__photo {
+    filter: drop-shadow(0 0 10px rgba(242, 206, 151, 0.35));
+    animation: none;
+}
+
+/* Cards fora da tela não são pintados até chegarem (economiza muito ao rolar) */
+.grid-planos > .plan-card {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 520px;
+}
+
+/* O modal só aplica o desfoque quando está aberto */
+.modal-overlay {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+.modal-overlay.ativo,
+.modal-overlay[style*="flex"] {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Para o pulso e o reflexo quando a aba não está visível (tela desligada, outra aba) */
+body.pagina-oculta .plan-card--glow,
+body.pagina-oculta .plan-card--glow::before,
+body.pagina-oculta .plan-card__photo-wrap,
+body.pagina-oculta .plan-card__photo-wrap::after {
+    animation-play-state: paused;
+}
