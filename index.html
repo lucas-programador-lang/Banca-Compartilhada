@@ -950,25 +950,43 @@
         </div>
     </div>
 
-    <!-- ================= MODAL DE CUPOM ================= -->
-    <div id="modalCupom" class="modal-overlay">
-        <div class="card modal-card">
-            <button id="btnFecharCupom" class="modal-close" aria-label="Fechar" type="button">&times;</button>
+   <!-- ================= MODAL DE CUPOM ================= -->
+<div id="modalCupom" class="modal-overlay">
+    <div class="card modal-card cupom-modal">
+        <button id="btnFecharCupom" class="modal-close" aria-label="Fechar" type="button">&times;</button>
 
-            <h3>🎁 Resgatar cupom</h3>
-            <p class="modal-lead">Digite o código que saiu no Telegram. Ele vale por 3 minutos e é de uso único.</p>
-
-            <div class="input-group">
-                <label>Código do cupom</label>
-                <input type="text" id="inputCodigoCupom" placeholder="ABCD-EFGH" maxlength="12" autocomplete="off" autocapitalize="characters" style="text-transform: uppercase;">
+        <div class="cupom-banner">
+            <div class="cupom-banner__texto">
+                <span class="cupom-banner__tag">⚡ 3 MINUTOS</span>
+                <strong class="cupom-banner__titulo">Cupom Premiado</strong>
+                <small class="cupom-banner__sub">Seja mais rápido que o grupo</small>
             </div>
+            <svg class="cupom-banner__cavalo" viewBox="0 0 100 100" aria-hidden="true">
+                <defs>
+                    <linearGradient id="cvGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffe29a"/><stop offset="1" stop-color="#b8782f"/></linearGradient>
+                    <linearGradient id="cvMane" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d9993f"/><stop offset="1" stop-color="#7a4a1c"/></linearGradient>
+                </defs>
+                <path fill="url(#cvMane)" d="M38 10 C30 22 22 34 15 50 C9 64 8 80 10 96 L28 96 C28 80 30 64 36 50 C40 40 42 30 42 20 Z"/>
+                <path fill="none" stroke="#1a1109" stroke-width="1.2" stroke-linecap="round" opacity=".6" d="M33 30 C26 40 20 52 17 66 M36 44 C30 54 26 66 25 80"/>
+                <path fill="url(#cvGold)" d="M28 96 C28 78 31 60 38 46 C41 40 41 34 40 28 L42 10 L50 22 C55 24 60 28 65 34 C73 42 83 54 90 66 C93 71 91 77 86 78 C81 79 77 77 73 74 C67 72 63 78 61 86 C60 90 60 93 61 96 Z"/>
+                <path fill="#1a1109" d="M62 46 C64 43 68 43 70 45 C68 48 64 48 62 46z"/>
+                <circle cx="85" cy="69" r="1.6" fill="#1a1109"/>
+                <path fill="none" stroke="#1a1109" stroke-width="1.2" stroke-linecap="round" opacity=".45" d="M50 30 C52 40 56 50 62 58"/>
+            </svg>
+        </div>
 
-            <div class="modal-actions">
-                <button class="btn" id="btnConfirmarCupom" type="button">Resgatar</button>
-            </div>
+        <p class="modal-lead">Digite o código que saiu no Telegram. Ele vale por 3 minutos e é de uso único.</p>
+
+        <div class="input-group">
+            <label>Código do cupom</label>
+            <input type="text" id="inputCodigoCupom" class="cupom-input" placeholder="ABCD-EFGH" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn" id="btnConfirmarCupom" type="button">🎁 Resgatar agora</button>
         </div>
     </div>
-
+</div>
     <!-- Esconde o botão de download dentro do próprio app e no iPhone ... -->
     <script>
         (function () {
