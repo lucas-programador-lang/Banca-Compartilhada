@@ -6,17 +6,17 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
+/
+  Cache-Control: no-cache
+
 /*.html
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache
 
 /*.js
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache
 
 /*.css
-  Cache-Control: no-cache, no-store, must-revalidate
-
-/
-  Cache-Control: no-cache, no-store, must-revalidate
+  Cache-Control: no-cache
 
 /img/*
-  Cache-Control: public, max-age=86400
+  Cache-Control: public, max-age=604800
