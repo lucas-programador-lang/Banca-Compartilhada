@@ -87,26 +87,43 @@
                     <span>Baixar o aplicativo</span>
                 </a>
 
-                <!-- Botão do Grupo Oficial do Telegram -->
-                <a
-                    href="https://t.me/bancacompartilhadajazzz"
-                    target="_blank"
-                    rel="noopener"
-                    class="sidebar-telegram-group-btn"
-                >
-                    <svg viewBox="0 0 240 240" width="22" height="22" style="flex-shrink: 0;">
-                        <defs>
-                            <linearGradient id="tgGroupGrad" x1="0.5" y1="0" x2="0.5" y2="1">
-                                <stop offset="0" stop-color="#37BBFE"/>
-                                <stop offset="1" stop-color="#007DBB"/>
-                            </linearGradient>
-                        </defs>
-                        <circle cx="120" cy="120" r="120" fill="url(#tgGroupGrad)"/>
-                        <path fill="#FFFFFF" d="M67.34 128.36l114.6-44.16c5.35-1.95 10.03 1.3 8.5 9l-19.73 92.99c-1.48 6.63-5.37 8.28-10.88 5.15l-30-22.12-14.48 13.94c-1.6 1.6-2.94 2.94-6.02 2.94l2.15-30.5 55.5-50.14c2.41-2.15-.53-3.35-3.74-1.2l-68.6 43.2-29.55-9.24c-6.42-2.01-6.55-6.42 1.34-9.5z"/>
-                    </svg>
-                    <span>Grupo Oficial (Telegram)</span>
-                </a>
-            </div>
+                                <!-- Bloco de grupos da comunidade -->
+                <div class="sidebar-grupos">
+                    <span class="sidebar-grupos__titulo">Comunidade</span>
+
+                    <a href="https://t.me/bancacompartilhadajazzz" target="_blank" rel="noopener" class="grupo-card grupo-card--telegram">
+                        <span class="grupo-card__logo" aria-hidden="true">
+                            <svg viewBox="0 0 240 240">
+                                <defs>
+                                    <linearGradient id="tgGradGrupo" x1="0.5" y1="0" x2="0.5" y2="1">
+                                        <stop offset="0" stop-color="#37BBFE"/>
+                                        <stop offset="1" stop-color="#007DBB"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle cx="120" cy="120" r="120" fill="url(#tgGradGrupo)"/>
+                                <path fill="#FFFFFF" d="M67.34 128.36l114.6-44.16c5.35-1.95 10.03 1.3 8.5 9l-19.73 92.99c-1.48 6.63-5.37 8.28-10.88 5.15l-30-22.12-14.48 13.94c-1.6 1.6-2.94 2.94-6.02 2.94l2.15-30.5 55.5-50.14c2.41-2.15-.53-3.35-3.74-1.2l-68.6 43.2-29.55-9.24c-6.42-2.01-6.55-6.42 1.34-9.5z"/>
+                            </svg>
+                        </span>
+                        <span class="grupo-card__texto">
+                            <strong>Telegram</strong>
+                            <small>Grupo oficial</small>
+                        </span>
+                    </a>
+
+                    <a href="https://chat.whatsapp.com/DkXCkqhQyBR4V0pPcebNvf?s=cl&p=a&mlu=4&ilr=4" target="_blank" rel="noopener" class="grupo-card grupo-card--whatsapp">
+                        <span class="grupo-card__logo" aria-hidden="true">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="12" fill="#25D366"/>
+                                <path fill="#FFFFFF" d="M12 4.6a7.4 7.4 0 0 0-6.4 11.1L4.6 19.4l3.8-1a7.4 7.4 0 1 0 3.6-13.8z"/>
+                                <path fill="#25D366" d="M9.2 8.4c.2-.4.5-.4.7-.4h.5c.2 0 .4.1.5.4l.6 1.4c.1.2.1.4 0 .6l-.4.6c.5 1 1.3 1.8 2.3 2.3l.6-.4c.2-.1.4-.1.6 0l1.4.6c.3.1.4.3.4.5v.5c0 .2 0 .5-.4.7-.4.3-1 .6-1.6.5-1.1-.2-2.5-.9-3.8-2.2-1.3-1.3-2-2.7-2.2-3.8-.1-.6.2-1.2.5-1.6z"/>
+                            </svg>
+                        </span>
+                        <span class="grupo-card__texto">
+                            <strong>WhatsApp</strong>
+                            <small>Grupo da comunidade</small>
+                        </span>
+                    </a>
+                </div>
             
             <!-- Rodapé da Sidebar com dados do usuário -->
             <div class="sidebar-footer">
