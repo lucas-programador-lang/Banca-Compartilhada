@@ -4498,3 +4498,114 @@ body:not(.admin-page) .sidebar {
     background: rgba(196, 136, 73, 0.22);
     border-color: var(--primary-hover);
 }
+
+
+/* ==========================================================================
+   Sidebar: bloco de grupos da comunidade (Telegram e WhatsApp)
+   ========================================================================== */
+.sidebar-grupos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: var(--space-md);
+}
+
+.sidebar-grupos__titulo {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    padding-left: 4px;
+}
+
+.grupo-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid;
+    text-decoration: none;
+    color: #fff;
+    overflow: hidden;
+    isolation: isolate;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+/* Brilho suave no canto, dando efeito de banner */
+.grupo-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: radial-gradient(90% 120% at 100% 0%, rgba(255, 255, 255, 0.12), transparent 60%);
+    pointer-events: none;
+}
+
+.grupo-card--telegram {
+    background: linear-gradient(135deg, #0e3a57, #0a2236);
+    border-color: rgba(55, 187, 254, 0.4);
+}
+
+.grupo-card--whatsapp {
+    background: linear-gradient(135deg, #0d3b26, #08241a);
+    border-color: rgba(37, 211, 102, 0.4);
+}
+
+.grupo-card:hover {
+    transform: translateY(-2px);
+}
+
+.grupo-card--telegram:hover {
+    border-color: #37BBFE;
+    box-shadow: 0 10px 24px -10px rgba(55, 187, 254, 0.55);
+}
+
+.grupo-card--whatsapp:hover {
+    border-color: #25D366;
+    box-shadow: 0 10px 24px -10px rgba(37, 211, 102, 0.55);
+}
+
+.grupo-card__logo {
+    flex: 0 0 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.grupo-card__logo svg {
+    width: 30px;
+    height: 30px;
+    display: block;
+}
+
+.grupo-card__texto {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.grupo-card__texto strong {
+    font-size: 0.95rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.grupo-card__texto small {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-top: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .grupo-card,
+    .grupo-card:hover {
+        transition: none;
+        transform: none;
+    }
+}
