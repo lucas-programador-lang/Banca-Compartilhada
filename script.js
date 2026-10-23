@@ -2,6 +2,7 @@ import { auth, db, mostrarToast } from './auth.js';
 import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { calcularTerminoPrevisto } from './termino-plano.js';
 import { signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 32.50,
     DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo (Padrão)
@@ -9,6 +10,8 @@ const CONFIG = {
     VALORES_PLANOS_PERMITIDOS: [10, 15, 30, 50, 60, 100, 150, 200, 300, 450, 500, 1000],
     PLANOS_DE_CICLO: [10, 15, 60, 150, 200, 450],
     WORKER_BASE_URL: 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev',
+    // NOVO: worker separado de cupons
+    CUPONS_WORKER_URL: 'https://banca-cupons.lucas-dev-programador.workers.dev',
 };
 
 const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
@@ -81,10 +84,10 @@ function atualizarPainel(dados) {
 
 function cpfValidoNoSite(cpf) {
     if (!cpf || cpf.length !== 11) return false;
-    if (cpf === '00000000000' || cpf === '11111111111' || cpf === '22222222222' || 
-        cpf === '33333333333' || cpf === '44444444444' || cpf === '55555555555' || 
+    if (cpf === '00000000000' || cpf === '11111111111' || cpf === '22222222222' ||
+        cpf === '33333333333' || cpf === '44444444444' || cpf === '55555555555' ||
         cpf === '66666666666' || cpf === '77777777777' || cpf === '88888888888' || cpf === '99999999999') return false;
-        
+
     const digito = function(quantidade) {
         let soma = 0;
         for (let i = 0; i < quantidade; i++) soma += Number(cpf[i]) * (quantidade + 1 - i);
@@ -372,7 +375,7 @@ function renderizarTabelaCarteira(planosObj) {
     const linhasRendimento = [];
     const linhasCiclos = [];
 
-        planos.forEach(function(plano) {
+    planos.forEach(function(plano) {
         const valor = parseFloat(plano.valor || 0);
         const estado = calcularEstadoPlano(plano);
 
@@ -422,7 +425,7 @@ function inicializarCarteiraUsuario(userId) {
 
 function atualizarDisponibilidadePlanos(planosObj) {
     const planos = planosObj ? Object.values(planosObj) : [];
-    
+
     const ativos = planos.filter(function(p) {
         return p.status !== 'finalizado' && p.status !== 'cancelado_pelo_admin';
     });
@@ -434,7 +437,7 @@ function atualizarDisponibilidadePlanos(planosObj) {
     for (let i = 0; i < botoes.length; i++) {
         const btn = botoes[i];
         const valor = parseFloat(btn.getAttribute('data-valor'));
-        
+
         if (planosIlimitados.includes(valor)) {
             btn.disabled = false;
             btn.textContent = 'APLICAR AGORA';
@@ -458,6 +461,7 @@ const CATEGORIAS_CONTA = [
     { chave: 'deposito', rotulo: 'Depósito', regex: /deposit/ },
     { chave: 'comissao', rotulo: 'Comissão', regex: /comiss/ },
     { chave: 'missao',   rotulo: 'Missão',   regex: /missao|missoes/ },
+    { chave: 'cupom',    rotulo: 'Cupom',    regex: /cupom|cupon/ }, // NOVO
     { chave: 'ajuste',   rotulo: 'Ajuste',   regex: /administra|ajuste/ },
 ];
 
@@ -546,7 +550,7 @@ function inicializarExtratoUsuario(userId) {
         `;
     }
 
-       function preencher(tbody, itens, montar, vazio) {
+    function preencher(tbody, itens, montar, vazio) {
         if (!tbody) return;
         // Mostra os lançamentos recentes, e também os pendentes/em processamento (classe status-pendente)
         const visiveis = itens.filter(function(item) {
@@ -557,7 +561,7 @@ function inicializarExtratoUsuario(userId) {
             ? visiveis.map(montar).join('')
             : `<tr><td colspan="5" class="table-empty">${vazio}</td></tr>`;
     }
-    
+
     function renderizar() {
         const rendimento = [];
         const ciclos = [];
@@ -718,7 +722,7 @@ function inicializarBloqueioBiometrico() {
 function inicializarEquipeUsuario(userId) {
     const inputLink = getEl('linkIndicacao');
     const btnCopiar = getEl('btnCopiarLinkIndicacao');
-    
+
     if (btnCopiar && !btnCopiar.dataset.listenerAtivo) {
         btnCopiar.addEventListener('click', async function() {
             const link = inputLink ? inputLink.value : '';
@@ -800,7 +804,7 @@ function inicializarEquipeUsuario(userId) {
             const dataCad = membro.dataCadastro ? formatadorDataHoraCurto.format(new Date(membro.dataCadastro)) : '—';
             const nomeStr = escapeHTML(membro.nome) || '—';
             const emailStr = escapeHTML(membro.email) || '—';
-            
+
             return `
                 <tr>
                     <td>${dataCad}</td>
@@ -812,6 +816,112 @@ function inicializarEquipeUsuario(userId) {
     }, function(error) {
         console.error('Erro ao carregar indicados:', error);
     });
+}
+
+/* ==========================================================================
+   NOVO: Cupons (resgate dos códigos que saem no Telegram)
+   Usa o #modalCupom do HTML se existir; se não existir, cria o modal sozinho.
+   ========================================================================== */
+function garantirModalCupom() {
+    let modal = document.getElementById('modalCupom');
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'modalCupom';
+    modal.className = 'modal-overlay';
+    modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);padding:16px;';
+    modal.innerHTML = `
+        <div class="modal-card" style="max-width:380px;width:100%;padding:24px;border-radius:14px;background:#fff;color:#111;box-shadow:0 10px 40px rgba(0,0,0,0.35);">
+            <h3 style="margin:0 0 8px 0;">🎁 Resgatar cupom</h3>
+            <p style="margin:0 0 14px 0;font-size:0.9rem;opacity:0.8;">Digite o código que saiu no Telegram. Ele vale por 3 minutos e é de uso único.</p>
+            <input id="inputCodigoCupom" type="text" maxlength="12" placeholder="ABCD-EFGH" autocomplete="off" autocapitalize="characters"
+                style="width:100%;box-sizing:border-box;padding:12px;font-size:1.1rem;letter-spacing:2px;text-transform:uppercase;text-align:center;border:1px solid #ccc;border-radius:8px;margin-bottom:12px;">
+            <div style="display:flex;gap:8px;">
+                <button id="btnFecharCupom" type="button" class="btn-secondary" style="flex:1;padding:12px;border-radius:8px;border:1px solid #ccc;background:#f3f3f3;cursor:pointer;">Fechar</button>
+                <button id="btnConfirmarCupom" type="button" class="btn-primary" style="flex:1;padding:12px;border-radius:8px;border:none;background:#16a34a;color:#fff;font-weight:600;cursor:pointer;">Resgatar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+}
+
+function inicializarCupons() {
+    const btnAcessoCupons = document.getElementById('btnAcessoCupons');
+    if (!btnAcessoCupons || btnAcessoCupons.dataset.listenerCupom) return;
+
+    const modalCupom = garantirModalCupom();
+    const inputCupom = document.getElementById('inputCodigoCupom');
+    const btnConfirmarCupom = document.getElementById('btnConfirmarCupom');
+    const btnFecharCupom = document.getElementById('btnFecharCupom');
+
+    function abrirModalCupom() {
+        modalCupom.style.display = 'flex';
+        if (inputCupom) inputCupom.focus();
+    }
+
+    function fecharModalCupom() {
+        modalCupom.style.display = 'none';
+    }
+
+    async function resgatarCupom() {
+        const codigo = inputCupom ? inputCupom.value.trim() : '';
+        if (!codigo) {
+            mostrarToast('Digite o código do cupom.', 'warning');
+            return;
+        }
+
+        const usuario = auth.currentUser;
+        if (!usuario) {
+            mostrarToast('Faça login para resgatar cupons.', 'error');
+            return;
+        }
+
+        setBotaoCarregando(btnConfirmarCupom, true, 'Resgatando...');
+        try {
+            const idToken = await usuario.getIdToken();
+            const resposta = await fetch(`${CONFIG.CUPONS_WORKER_URL}/api/cupom/resgatar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`,
+                },
+                body: JSON.stringify({ codigo }),
+            });
+
+            const dados = await resposta.json().catch(function() { return {}; });
+            if (!resposta.ok) throw new Error(dados.error || 'Não foi possível resgatar o cupom.');
+
+            mostrarToast('🎁 Cupom resgatado! Você ganhou ' + formatadorMoeda.format(dados.valor || 0) + '.', 'success');
+            if (inputCupom) inputCupom.value = '';
+            fecharModalCupom();
+        } catch (erro) {
+            console.error('Erro ao resgatar cupom:', erro);
+            mostrarToast('❌ ' + erro.message, 'error');
+        } finally {
+            setBotaoCarregando(btnConfirmarCupom, false);
+        }
+    }
+
+    btnAcessoCupons.addEventListener('click', function(e) {
+        e.preventDefault();
+        abrirModalCupom();
+    });
+    if (btnFecharCupom) btnFecharCupom.addEventListener('click', fecharModalCupom);
+    if (btnConfirmarCupom) btnConfirmarCupom.addEventListener('click', resgatarCupom);
+    if (inputCupom) {
+        inputCupom.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                resgatarCupom();
+            }
+        });
+    }
+    modalCupom.addEventListener('click', function(e) {
+        if (e.target === modalCupom) fecharModalCupom();
+    });
+
+    btnAcessoCupons.dataset.listenerCupom = 'true';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -827,7 +937,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ? Array.from(selectPlanoModal.options).map(function(opt) { return opt.cloneNode(true); })
         : [];
 
-        // Ao clicar em um plano, o modal mostra somente esse plano
+    // Ao clicar em um plano, o modal mostra somente esse plano
     const botoesPlanos = document.querySelectorAll('.btn-escolher-plano');
     for (let i = 0; i < botoesPlanos.length; i++) {
         botoesPlanos[i].addEventListener('click', function() {
@@ -925,7 +1035,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (modalDep) modalDep.style.display = 'flex';
     }
 
-       function fecharModalDeposito() {
+    function fecharModalDeposito() {
         if (modalDep) modalDep.style.display = 'none';
         pararEscutaConfirmacaoPagamento();
         document.querySelectorAll('.plan-card--selected').forEach(function(card) {
@@ -935,10 +1045,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const fecharX = document.getElementById('fecharModalDepX');
     if (fecharX) fecharX.addEventListener('click', fecharModalDeposito);
-    
+
     const btnFechar = document.getElementById('fecharModalDeposito');
     if (btnFechar) btnFechar.addEventListener('click', fecharModalDeposito);
-    
+
     const btnCancelar = document.getElementById('btnCancelarModalDep');
     if (btnCancelar) btnCancelar.addEventListener('click', fecharModalDeposito);
 
@@ -1049,7 +1159,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const perfNome = document.getElementById('perfilNome');
         const perfTipo = document.getElementById('perfilTipoPix');
         const perfChave = document.getElementById('perfilChavePix');
-        
+
         const nomePerfil = (perfNome ? perfNome.value : null) || localStorage.getItem('usuarioNome') || 'Não informado';
         const tipoPixPerfil = (perfTipo ? perfTipo.value : null) || 'CPF';
         const chavePixPerfil = (perfChave ? perfChave.value : null) || localStorage.getItem('usuarioChavePix') || '';
@@ -1061,7 +1171,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (elNome) elNome.value = nomePerfil;
         if (elTipo) elTipo.value = tipoPixPerfil;
 
-        // ALTERADO: texto neutro + botão "Cadastrar chave PIX" quando não há chave
+        // Texto neutro + botão "Cadastrar chave PIX" quando não há chave
         const btnIrPerfil = document.getElementById('btnIrPerfilChave');
         if (elChave) {
             if (chavePixPerfil) {
@@ -1114,14 +1224,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const fecharSaqueX = document.getElementById('fecharModalSaqueX');
     if (fecharSaqueX) fecharSaqueX.addEventListener('click', fecharModalSaque);
-    
+
     const btnFecharSaque = document.getElementById('fecharModalSaque');
     if (btnFecharSaque) btnFecharSaque.addEventListener('click', fecharModalSaque);
-    
+
     const btnCancelarSaque = document.getElementById('btnCancelarModalSaque');
     if (btnCancelarSaque) btnCancelarSaque.addEventListener('click', fecharModalSaque);
 
-        // ALTERADO: botão "Cadastrar chave PIX" fecha o modal e abre a aba Perfil
+    // Botão "Cadastrar chave PIX" fecha o modal e abre a aba Perfil
     const btnIrPerfilChave = document.getElementById('btnIrPerfilChave');
     if (btnIrPerfilChave) {
         btnIrPerfilChave.addEventListener('click', function() {
@@ -1153,7 +1263,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-        const btnAlterarSenha = document.getElementById('btnAlterarSenha');
+    const btnAlterarSenha = document.getElementById('btnAlterarSenha');
     if (btnAlterarSenha) {
         btnAlterarSenha.addEventListener('click', async function() {
             const campoAtual = document.getElementById('senhaAtual');
@@ -1328,7 +1438,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-        auth.onAuthStateChanged(function(user) {
+    auth.onAuthStateChanged(function(user) {
         if (!user) return;
         const userId = user.uid;
         userIdAtual = userId;
@@ -1453,15 +1563,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnAcessoCiclos = document.getElementById('btnAcessoCiclos');
     if (btnAcessoCiclos) btnAcessoCiclos.addEventListener('click', function() { irParaAba('view-ciclos'); });
 
-    const btnAcessoCupons = document.getElementById('btnAcessoCupons');
-    if (btnAcessoCupons) {
-        btnAcessoCupons.addEventListener('click', function() {
-            mostrarToast('🎁 Cupons em breve!', 'warning');
-        });
-    }
+    // ALTERADO: o botão de cupons agora abre o modal de resgate (antes mostrava "Cupons em breve!")
+    inicializarCupons();
 
-
-        // Telegram no Android: abre o app direto, sem passar pelo navegador
+    // Telegram no Android: abre o app direto, sem passar pelo navegador
     const cardTelegram = document.querySelector('.grupo-card--telegram');
     if (cardTelegram && /Android/i.test(navigator.userAgent)) {
         cardTelegram.href = 'intent://resolve?domain=bancacompartilhadajazzz#Intent;scheme=tg;package=org.telegram.messenger;S.browser_fallback_url=https%3A%2F%2Ft.me%2Fbancacompartilhadajazzz;end';
@@ -1480,11 +1585,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-        // Abre a aba certa ao carregar (ex.: link direto para #/ciclos)
+    // Abre a aba certa ao carregar (ex.: link direto para #/ciclos)
     mostrarAba(abaDoHash());
 });
 
 document.addEventListener('visibilitychange', function() {
     document.body.classList.toggle('pagina-oculta', document.hidden);
 });
-
