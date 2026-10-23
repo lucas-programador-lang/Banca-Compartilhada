@@ -1461,36 +1461,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-
-        // Telegram: abre o app se estiver instalado; se não, abre o link web
-    document.querySelectorAll('a[data-app-link]').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            const linkWeb = this.getAttribute('href');
-            const linkApp = this.getAttribute('data-app-link');
-            e.preventDefault();
-
-            // Dentro do app Android, o link web já é tratado pelo MainActivity (abre o Telegram)
-            if (typeof window.Android !== 'undefined') {
-                window.location.href = linkWeb;
-                return;
-            }
-
-            // No navegador: tenta o app e, se ele não abrir em instantes, vai para o link web
-            let abriuApp = false;
-            const aoEsconder = function() { abriuApp = true; };
-            document.addEventListener('visibilitychange', aoEsconder, { once: true });
-
-            window.location.href = linkApp;
-
-            setTimeout(function() {
-                document.removeEventListener('visibilitychange', aoEsconder);
-                if (!abriuApp && document.visibilityState === 'visible') {
-                    window.open(linkWeb, '_blank', 'noopener');
-                }
-            }, 1200);
-        });
-    });
-
     if (btnSair) {
         btnSair.addEventListener('click', async function() {
             btnSair.disabled = true;
