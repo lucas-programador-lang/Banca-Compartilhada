@@ -1480,6 +1480,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Abre a aba certa ao carregar (ex.: link direto para #/ciclos)
+        // Abre a aba certa ao carregar (ex.: link direto para #/ciclos)
     mostrarAba(abaDoHash());
 });
+
+document.addEventListener('visibilitychange', function() {
+    document.body.classList.toggle('pagina-oculta', document.hidden);
+});
+
