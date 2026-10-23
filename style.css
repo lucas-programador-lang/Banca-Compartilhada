@@ -4708,88 +4708,164 @@ body.pagina-oculta .plan-card__photo-wrap::after {
 }
 
 
-/* ===== Modal de cupom ===== */
-.cupom-banner {
+/* ===== Modal de cupom (arte dourada) ===== */
+.modal-overlay .cupom-modal {
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    min-height: 120px;
-    margin: 4px 0 16px;
-    padding: 16px 12px 0 18px;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid rgba(232, 178, 90, 0.35);
-    background:
-        radial-gradient(circle at 78% 55%, rgba(255, 200, 100, 0.35), transparent 55%),
-        linear-gradient(135deg, #2a1a0c 0%, #140c06 100%);
+    width: calc(100% - 24px);
+    max-width: 420px;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 0 !important;
+    background: #0b0805 !important;
+    border: 1px solid rgba(255, 200, 90, 0.55) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 0 40px rgba(255, 170, 40, 0.35);
 }
 
-.cupom-banner__texto {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    padding-bottom: 14px;
-    z-index: 1;
-}
-
-.cupom-banner__tag {
-    align-self: flex-start;
-    padding: 3px 9px;
-    border-radius: 999px;
-    font-size: 0.68rem;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: #1a1109;
-    background: linear-gradient(135deg, #ffe29a, #d9993f);
-}
-
-.cupom-banner__titulo {
-    font-family: 'Fraunces', serif;
-    font-size: 1.45rem;
-    line-height: 1.1;
+.cupom-modal .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 3;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
     color: #ffd98a;
 }
 
-.cupom-banner__sub {
+.cupom-modal__topo {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-bottom: -16px;
+    -webkit-mask-image: linear-gradient(#000 88%, transparent);
+    mask-image: linear-gradient(#000 88%, transparent);
+}
+
+.cupom-modal__corpo {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 16px;
+}
+
+.cupom-aviso,
+.cupom-campo {
+    padding: 14px;
+    border-radius: 16px;
+    border: 1.5px solid rgba(255, 200, 90, 0.6);
+    background: linear-gradient(180deg, rgba(30, 20, 6, 0.92), rgba(10, 7, 3, 0.92));
+    box-shadow: inset 0 0 14px rgba(255, 180, 50, 0.12), 0 0 14px rgba(255, 170, 40, 0.18);
+}
+
+.cupom-aviso {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #fff;
+}
+
+.cupom-aviso__icone {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.cupom-aviso p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.cupom-aviso strong,
+.cupom-aviso b {
+    color: #ffd54a;
+}
+
+.cupom-aviso small {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.cupom-campo label {
+    display: block;
     font-size: 0.78rem;
-    opacity: 0.75;
-}
-
-.cupom-banner__cavalo {
-    flex-shrink: 0;
-    width: 120px;
-    height: 120px;
-    margin-bottom: -6px;
-    filter: drop-shadow(0 6px 14px rgba(255, 190, 90, 0.35));
-    animation: cupomCavaloEntra 0.6s ease-out both;
-}
-
-@keyframes cupomCavaloEntra {
-    from { transform: translateX(24px); opacity: 0; }
-    to   { transform: translateX(0);    opacity: 1; }
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #fff;
 }
 
 .cupom-input {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0 12px;
+    padding: 14px;
     text-align: center;
     text-transform: uppercase;
     font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-    font-size: 1.35rem;
+    font-size: 1.4rem;
     font-weight: 700;
-    letter-spacing: 4px;
+    letter-spacing: 5px;
+    color: #ffe08a;
+    background: #120c04;
+    border: 2px solid #f2b640;
+    border-radius: 14px;
+    box-shadow: 0 0 14px rgba(255, 190, 60, 0.3);
+    outline: none;
+}
+
+.cupom-input:focus {
+    box-shadow: 0 0 22px rgba(255, 200, 70, 0.6);
 }
 
 .cupom-input::placeholder {
     letter-spacing: 3px;
-    opacity: 0.35;
+    color: rgba(255, 224, 138, 0.3);
 }
 
-.cupom-modal .modal-actions .btn {
+.cupom-botao {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #1a1004;
+    background: linear-gradient(180deg, #ffe58a 0%, #f5b82e 55%, #d9962a 100%);
+    box-shadow: 0 0 18px rgba(255, 190, 60, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.55);
+    cursor: pointer;
 }
 
-.tipo-badge--cupom {
-    background: rgba(245, 158, 11, 0.15);
-    color: #f5b04c;
+.cupom-botao::before {
+    content: '%';
+    display: inline-grid;
+    place-items: center;
+    width: 30px;
+    height: 24px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    color: #ffd54a;
+    background: #1a1004;
+    transform: rotate(-8deg);
+}
+
+.cupom-botao:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+.cupom-modal__base {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: -6px;
 }
