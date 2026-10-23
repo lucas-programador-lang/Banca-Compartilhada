@@ -4707,8 +4707,7 @@ body.pagina-oculta .plan-card__photo-wrap::after {
     opacity: 0.6;
 }
 
-
-/* ===== Modal de cupom (arte dourada) ===== */
+/* ===== Modal de cupom: arte inteira com campo e botão reais por cima ===== */
 .modal-overlay .cupom-modal {
     position: relative;
     width: calc(100% - 24px);
@@ -4734,138 +4733,52 @@ body.pagina-oculta .plan-card__photo-wrap::after {
     color: #ffd98a;
 }
 
-.cupom-modal__topo {
+.cupom-modal .cupom-tela {
+    position: relative;
+    width: 100%;
+    container-type: inline-size;
+}
+
+.cupom-modal .cupom-tela img {
     display: block;
     width: 100%;
     height: auto;
-    margin-bottom: -16px;
-    -webkit-mask-image: linear-gradient(#000 88%, transparent);
-    mask-image: linear-gradient(#000 88%, transparent);
 }
 
-.cupom-modal__corpo {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 0 16px;
-}
-
-.cupom-aviso,
-.cupom-campo {
-    padding: 14px;
-    border-radius: 16px;
-    border: 1.5px solid rgba(255, 200, 90, 0.6);
-    background: linear-gradient(180deg, rgba(30, 20, 6, 0.92), rgba(10, 7, 3, 0.92));
-    box-shadow: inset 0 0 14px rgba(255, 180, 50, 0.12), 0 0 14px rgba(255, 170, 40, 0.18);
-}
-
-.cupom-aviso {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: #fff;
-}
-
-.cupom-aviso__icone {
-    font-size: 2rem;
-    line-height: 1;
-}
-
-.cupom-aviso p {
+/* campo: cobre o "Código do cupom" desenhado na arte */
+.cupom-modal .cupom-input {
+    position: absolute;
+    left: 21%;
+    top: 62.9%;
+    width: 58%;
+    height: 6.4%;
     margin: 0;
-    font-size: 1rem;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-.cupom-aviso strong,
-.cupom-aviso b {
-    color: #ffd54a;
-}
-
-.cupom-aviso small {
-    display: block;
-    margin-top: 4px;
-    font-size: 0.82rem;
-    font-weight: 500;
-}
-
-.cupom-campo label {
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    color: #fff;
-}
-
-.cupom-input {
-    width: 100%;
+    padding: 0 8px;
     box-sizing: border-box;
-    margin: 8px 0 12px;
-    padding: 14px;
     text-align: center;
     text-transform: uppercase;
     font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
-    font-size: 1.4rem;
+    font-size: 5cqw;
     font-weight: 700;
-    letter-spacing: 5px;
-    color: #ffe08a;
-    background: #120c04;
+    letter-spacing: 0.5cqw;
+    color: #3a2a08;
+    background: #f4e9c3;
     border: 2px solid #f2b640;
-    border-radius: 14px;
-    box-shadow: 0 0 14px rgba(255, 190, 60, 0.3);
+    border-radius: 2.5cqw;
     outline: none;
 }
 
-.cupom-input:focus {
-    box-shadow: 0 0 22px rgba(255, 200, 70, 0.6);
+.cupom-modal .cupom-input:focus {
+    box-shadow: 0 0 2cqw rgba(255, 190, 60, 0.8);
 }
 
-.cupom-input::placeholder {
-    letter-spacing: 3px;
-    color: rgba(255, 224, 138, 0.3);
+.cupom-modal .cupom-input::placeholder {
+    letter-spacing: 0.3cqw;
+    color: rgba(58, 42, 8, 0.4);
 }
 
-.cupom-botao {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 16px;
-    font-size: 1.35rem;
-    font-weight: 800;
-    color: #1a1004;
-    background: linear-gradient(180deg, #ffe58a 0%, #f5b82e 55%, #d9962a 100%);
-    box-shadow: 0 0 18px rgba(255, 190, 60, 0.5), inset 0 2px 0 rgba(255, 255, 255, 0.55);
-    cursor: pointer;
-}
-
-.cupom-botao::before {
-    content: '%';
-    display: inline-grid;
-    place-items: center;
-    width: 30px;
-    height: 24px;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    color: #ffd54a;
-    background: #1a1004;
-    transform: rotate(-8deg);
-}
-
-.cupom-botao:disabled {
-    opacity: 0.7;
-    cursor: wait;
-}
-
-.cupom-modal__base {
-    display: block;
-    width: 100%;
-    height: auto;
-    margin-top: -6px;
-}
+/* botão: cobre o "Abrir" desenhado na arte */
+.cupom-modal .cupom-botao {
+    position: absolute;
+    left: 20.7%;
+    top: 69.6%;
