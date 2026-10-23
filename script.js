@@ -827,7 +827,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ? Array.from(selectPlanoModal.options).map(function(opt) { return opt.cloneNode(true); })
         : [];
 
-    // Ao clicar em um plano, o modal mostra somente esse plano
+        // Ao clicar em um plano, o modal mostra somente esse plano
     const botoesPlanos = document.querySelectorAll('.btn-escolher-plano');
     for (let i = 0; i < botoesPlanos.length; i++) {
         botoesPlanos[i].addEventListener('click', function() {
@@ -853,14 +853,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardDoPlano = this.closest('.plan-card');
             if (cardDoPlano) cardDoPlano.classList.add('plan-card--selected');
 
-            abrirModalDeposito();
-
-    const btnAbrirDep = document.getElementById('btnAbrirDeposito');
-    if (btnAbrirDep) {
-        btnAbrirDep.addEventListener('click', function() {
-            const inputPlano = document.getElementById('valorPlano');
-            const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
-            if (modalInput && inputPlano) modalInput.value = inputPlano.value || "10";
             abrirModalDeposito();
         });
     }
