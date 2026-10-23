@@ -950,12 +950,14 @@
         </div>
     </div>
 
- <!-- ================= MODAL DE CUPOM ================= -->
+<!-- ================= MODAL DE CUPOM ================= -->
 <div id="modalCupom" class="modal-overlay">
     <div class="card modal-card cupom-modal">
         <button id="btnFecharCupom" class="modal-close" aria-label="Fechar" type="button">&times;</button>
 
-        <img class="cupom-modal__topo" src="cupom-topo.webp" alt="Resgatar cupom" width="900" height="632">
+        <div class="cupom-arte cupom-arte--topo">
+            <img src="cupons-banner.webp" alt="Banca Compartilhada: receba cupons para investir" width="1024" height="1536">
+        </div>
 
         <div class="cupom-modal__corpo">
             <div class="cupom-aviso">
@@ -973,7 +975,9 @@
             </div>
         </div>
 
-        <img class="cupom-modal__base" src="cupom-base.webp" alt="" width="900" height="394" loading="lazy">
+        <div class="cupom-arte cupom-arte--base" aria-hidden="true">
+            <img src="cupons-banner.webp" alt="" width="1024" height="1536" loading="lazy">
+        </div>
     </div>
 </div>
     <!-- Esconde o botão de download dentro do próprio app e no iPhone ... -->
