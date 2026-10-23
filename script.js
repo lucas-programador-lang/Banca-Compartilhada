@@ -1155,6 +1155,71 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+        const btnAlterarSenha = document.getElementById('btnAlterarSenha');
+    if (btnAlterarSenha) {
+        btnAlterarSenha.addEventListener('click', async function() {
+            const campoAtual = document.getElementById('senhaAtual');
+            const campoNova = document.getElementById('senhaNova');
+            const campoConfirma = document.getElementById('senhaNovaConfirma');
+
+            const senhaAtual = campoAtual ? campoAtual.value : '';
+            const senhaNova = campoNova ? campoNova.value : '';
+            const senhaConfirma = campoConfirma ? campoConfirma.value : '';
+
+            const usuario = auth.currentUser;
+            if (!usuario || !usuario.email) {
+                mostrarToast('Faça login novamente para alterar a senha.', 'error');
+                return;
+            }
+            if (!senhaAtual) {
+                mostrarToast('Informe a senha atual.', 'warning');
+                return;
+            }
+            if (senhaNova.length < 6) {
+                mostrarToast('A nova senha precisa ter pelo menos 6 caracteres.', 'warning');
+                return;
+            }
+            if (senhaNova !== senhaConfirma) {
+                mostrarToast('A confirmação não é igual à nova senha.', 'warning');
+                return;
+            }
+            if (senhaNova === senhaAtual) {
+                mostrarToast('A nova senha precisa ser diferente da atual.', 'warning');
+                return;
+            }
+
+            setBotaoCarregando(btnAlterarSenha, true, 'Alterando...');
+            try {
+                // Confirma a identidade com a senha atual antes de trocar
+                const credencial = EmailAuthProvider.credential(usuario.email, senhaAtual);
+                await reauthenticateWithCredential(usuario, credencial);
+
+                await updatePassword(usuario, senhaNova);
+
+                if (campoAtual) campoAtual.value = '';
+                if (campoNova) campoNova.value = '';
+                if (campoConfirma) campoConfirma.value = '';
+                mostrarToast('Senha alterada com sucesso!', 'success');
+            } catch (error) {
+                console.error('Erro ao alterar a senha:', error);
+                const codigo = error && error.code ? error.code : '';
+                let mensagem = 'Não foi possível alterar a senha agora. Tente de novo.';
+                if (codigo === 'auth/wrong-password' || codigo === 'auth/invalid-credential') {
+                    mensagem = 'A senha atual está incorreta.';
+                } else if (codigo === 'auth/weak-password') {
+                    mensagem = 'A nova senha é fraca. Use pelo menos 6 caracteres.';
+                } else if (codigo === 'auth/requires-recent-login') {
+                    mensagem = 'Por segurança, saia da conta, entre de novo e tente alterar a senha.';
+                } else if (codigo === 'auth/too-many-requests') {
+                    mensagem = 'Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.';
+                }
+                mostrarToast(mensagem, 'error');
+            } finally {
+                setBotaoCarregando(btnAlterarSenha, false);
+            }
+        });
+    }
+
     if (modalSaque) {
         modalSaque.addEventListener('click', function(e) {
             if (e.target === modalSaque) fecharModalSaque();
