@@ -748,7 +748,7 @@
                 </div>
             </section>
 
-            <!-- ================= ABA PERFIL ================= -->
+           <!-- ================= ABA PERFIL ================= -->
             <section id="view-perfil" class="view-section" style="display: none;">
                 <h2>Configurações de Perfil</h2>
                 <p class="section-lead">Gerencie suas informações de cadastro e dados para recebimento via PIX.</p>
@@ -759,8 +759,19 @@
                         <label>Nome Completo</label>
                         <input type="text" id="perfilNome" placeholder="Digite seu nome completo" maxlength="80">
                     </div>
+                    <div class="input-group">
+                        <label>E-mail da conta</label>
+                        <input type="email" id="perfilEmail" readonly>
+                        <p class="section-lead" style="margin-top: 6px; font-size: 0.8rem;">Este é o e-mail usado para entrar. Ele não pode ser alterado aqui.</p>
+                    </div>
                 </div>
 
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3>Segurança da conta</h3>
+                    <p class="section-lead" style="margin-bottom: 15px;">Enviamos um link para o seu e-mail. Abra o link e escolha uma nova senha.</p>
+                    <button class="btn btn-outline" id="btnRedefinirSenha" type="button">Enviar e-mail para redefinir a senha</button>
+                </div>
+                
                 <div class="card">
                     <h3>Chave PIX Padrão para Saques</h3>
                     <p class="section-lead" style="margin-bottom: 15px;">Estes dados serão preenchidos automaticamente na solicitação de saque.</p>
