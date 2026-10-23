@@ -4666,11 +4666,7 @@ body:not(.admin-page) .sidebar {
     backface-visibility: hidden;
 }
 
-/* Pulso da foto SOMENTE no card selecionado.
-   Troque NOME_DA_SUA_ANIMACAO_DA_FOTO pelo @keyframes que já pulsava o drop-shadow,
-   e deixe só a classe que o seu JavaScript realmente usa. */
-.plan-card.selecionado .plan-card__photo,
-.plan-card.selected .plan-card__photo,
+/* Pulso da foto SOMENTE no card selecionado (classe adicionada pelo JS ao clicar) */
 .plan-card--selected .plan-card__photo {
     animation: NOME_DA_SUA_ANIMACAO_DA_FOTO 2.4s ease-in-out infinite;
     will-change: filter;
