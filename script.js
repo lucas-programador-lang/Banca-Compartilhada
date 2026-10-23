@@ -1387,10 +1387,49 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnAbrirMenuMobile = document.getElementById('btnAbrirMenuMobile');
     const btnSair = document.getElementById('btnSair');
 
+    const ABA_PADRAO = 'view-inicio';
+
     function fecharMenuMobile() {
         if (sidebar) sidebar.classList.remove('aberta');
         if (overlay) overlay.classList.remove('ativo');
     }
+
+    // Converte "#/carteira" em "view-carteira" (e vice-versa)
+    function abaDoHash() {
+        const hash = window.location.hash.replace(/^#\/?/, '');
+        const id = hash ? 'view-' + hash : ABA_PADRAO;
+        return document.getElementById(id) ? id : ABA_PADRAO;
+    }
+
+    function mostrarAba(targetId) {
+        navItems.forEach(function(item) {
+            item.classList.toggle('active', item.getAttribute('data-target') === targetId);
+        });
+        sections.forEach(function(sec) {
+            sec.style.display = sec.id === targetId ? 'block' : 'none';
+        });
+        fecharMenuMobile();
+    }
+
+    // Clique no menu: troca o hash (isso já dispara o hashchange abaixo)
+    navItems.forEach(function(item) {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('data-target');
+            if (!targetId) return;
+            const novoHash = '#/' + targetId.replace(/^view-/, '');
+            if (window.location.hash === novoHash) {
+                mostrarAba(targetId);
+            } else {
+                window.location.hash = novoHash;
+            }
+        });
+    });
+
+    // Botão voltar, link direto e troca de hash caem aqui
+    window.addEventListener('hashchange', function() {
+        mostrarAba(abaDoHash());
+    });
 
     if (btnAbrirMenuMobile) {
         btnAbrirMenuMobile.addEventListener('click', function() {
@@ -1398,57 +1437,22 @@ document.addEventListener('DOMContentLoaded', function() {
             if (overlay) overlay.classList.toggle('ativo');
         });
     }
+    if (overlay) overlay.addEventListener('click', fecharMenuMobile);
 
-    if (overlay) {
-        overlay.addEventListener('click', fecharMenuMobile);
-    }
-
-    for (let i = 0; i < navItems.length; i++) {
-        navItems[i].addEventListener('click', function(e) {
-            e.preventDefault();
-
-            for (let j = 0; j < navItems.length; j++) {
-                navItems[j].classList.remove('active');
-            }
-            this.classList.add('active');
-
-            const targetId = this.getAttribute('data-target');
-            if (targetId) {
-                for (let k = 0; k < sections.length; k++) {
-                    const sec = sections[k];
-                    if (sec.id === targetId) {
-                        sec.style.display = 'block';
-                    } else {
-                        sec.style.display = 'none';
-                    }
-                }
-            }
-
-            fecharMenuMobile();
-        });
-    }
-
-    // Acesso rápido da aba Início: leva para a aba correspondente do menu lateral
+    // Atalhos da aba Início (Rendimento, Histórico, Ciclos)
     function irParaAba(targetId) {
-        const item = document.querySelector('.sidebar-nav .nav-item[data-target="' + targetId + '"]');
-        if (item) item.click();
+        window.location.hash = '#/' + targetId.replace(/^view-/, '');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     const btnAcessoRendimento = document.getElementById('btnAcessoRendimento');
-    if (btnAcessoRendimento) {
-        btnAcessoRendimento.addEventListener('click', function() { irParaAba('view-investir'); });
-    }
+    if (btnAcessoRendimento) btnAcessoRendimento.addEventListener('click', function() { irParaAba('view-investir'); });
 
     const btnAcessoHistorico = document.getElementById('btnAcessoHistorico');
-    if (btnAcessoHistorico) {
-        btnAcessoHistorico.addEventListener('click', function() { irParaAba('view-extrato'); });
-    }
+    if (btnAcessoHistorico) btnAcessoHistorico.addEventListener('click', function() { irParaAba('view-extrato'); });
 
     const btnAcessoCiclos = document.getElementById('btnAcessoCiclos');
-    if (btnAcessoCiclos) {
-        btnAcessoCiclos.addEventListener('click', function() { irParaAba('view-ciclos'); });
-    }
+    if (btnAcessoCiclos) btnAcessoCiclos.addEventListener('click', function() { irParaAba('view-ciclos'); });
 
     const btnAcessoCupons = document.getElementById('btnAcessoCupons');
     if (btnAcessoCupons) {
@@ -1469,4 +1473,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Abre a aba certa ao carregar (ex.: link direto para #/ciclos)
+    mostrarAba(abaDoHash());
 });
