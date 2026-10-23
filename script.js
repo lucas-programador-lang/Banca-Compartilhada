@@ -1,6 +1,5 @@
 import { auth, db, mostrarToast } from './auth.js';
 import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { calcularTerminoPrevisto } from './termino-plano.js';
 import { signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithCredential, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 const CONFIG = {
