@@ -4611,3 +4611,36 @@ body:not(.admin-page) .sidebar {
         transform: none;
     }
 }
+
+
+/* ==========================================================================
+   Espaçamento da sidebar: respiro entre grupos, usuário e botão Sair
+   ========================================================================== */
+.sidebar-top {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sidebar-grupos {
+    margin-top: 18px;
+    gap: 12px;
+    padding-bottom: 4px;
+}
+
+.sidebar-grupos__titulo {
+    margin-bottom: 2px;
+}
+
+.sidebar-footer {
+    margin-top: 18px;
+    gap: 14px;
+}
+
+.sidebar-user {
+    margin-bottom: 2px;
+}
+
+.sidebar-footer .btn-sair {
+    margin-top: 2px;
+}
