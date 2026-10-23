@@ -4706,3 +4706,90 @@ body.pagina-oculta .plan-card__photo-wrap::after {
     animation: none;
     opacity: 0.6;
 }
+
+
+/* ===== Modal de cupom ===== */
+.cupom-banner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-height: 120px;
+    margin: 4px 0 16px;
+    padding: 16px 12px 0 18px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(232, 178, 90, 0.35);
+    background:
+        radial-gradient(circle at 78% 55%, rgba(255, 200, 100, 0.35), transparent 55%),
+        linear-gradient(135deg, #2a1a0c 0%, #140c06 100%);
+}
+
+.cupom-banner__texto {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 14px;
+    z-index: 1;
+}
+
+.cupom-banner__tag {
+    align-self: flex-start;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #1a1109;
+    background: linear-gradient(135deg, #ffe29a, #d9993f);
+}
+
+.cupom-banner__titulo {
+    font-family: 'Fraunces', serif;
+    font-size: 1.45rem;
+    line-height: 1.1;
+    color: #ffd98a;
+}
+
+.cupom-banner__sub {
+    font-size: 0.78rem;
+    opacity: 0.75;
+}
+
+.cupom-banner__cavalo {
+    flex-shrink: 0;
+    width: 120px;
+    height: 120px;
+    margin-bottom: -6px;
+    filter: drop-shadow(0 6px 14px rgba(255, 190, 90, 0.35));
+    animation: cupomCavaloEntra 0.6s ease-out both;
+}
+
+@keyframes cupomCavaloEntra {
+    from { transform: translateX(24px); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+
+.cupom-input {
+    text-align: center;
+    text-transform: uppercase;
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+}
+
+.cupom-input::placeholder {
+    letter-spacing: 3px;
+    opacity: 0.35;
+}
+
+.cupom-modal .modal-actions .btn {
+    width: 100%;
+}
+
+.tipo-badge--cupom {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f5b04c;
+}
