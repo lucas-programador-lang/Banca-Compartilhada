@@ -4653,24 +4653,35 @@ body:not(.admin-page) .sidebar {
 
 /* Cada card vira uma camada própria: o navegador não redesenha a página inteira */
 .plan-card--glow,
-.plan-card__photo-wrap,
-.plan-card__photo {
+.plan-card__photo-wrap {
     will-change: transform;
     backface-visibility: hidden;
     transform: translateZ(0);
 }
 
-/* O filtro animado da foto é o item mais pesado: troca por sombra fixa,
-   e o pulso fica só no brilho da borda do card */
+/* Foto: brilho fixo em todos os cards (barato, sem animação) */
 .plan-card__photo {
     filter: drop-shadow(0 0 10px rgba(242, 206, 151, 0.35));
     animation: none;
+    backface-visibility: hidden;
 }
 
-/* Cards fora da tela não são pintados até chegarem (economiza muito ao rolar) */
+/* Pulso da foto SOMENTE no card selecionado.
+   Troque NOME_DA_SUA_ANIMACAO_DA_FOTO pelo @keyframes que já pulsava o drop-shadow,
+   e deixe só a classe que o seu JavaScript realmente usa. */
+.plan-card.selecionado .plan-card__photo,
+.plan-card.selected .plan-card__photo,
+.plan-card--selected .plan-card__photo {
+    animation: NOME_DA_SUA_ANIMACAO_DA_FOTO 2.4s ease-in-out infinite;
+    will-change: filter;
+}
+
+/* Cards fora da tela não são pintados até chegarem (economiza muito ao rolar).
+   ATENÇÃO: isso corta o brilho que vaza para fora da borda do card.
+   Se o glow ficar cortado, apague este bloco. */
 .grid-planos > .plan-card {
     content-visibility: auto;
-    contain-intrinsic-size: 1px 520px;
+    contain-intrinsic-size: auto 520px;
 }
 
 /* O modal só aplica o desfoque quando está aberto */
@@ -4689,6 +4700,7 @@ body:not(.admin-page) .sidebar {
 body.pagina-oculta .plan-card--glow,
 body.pagina-oculta .plan-card--glow::before,
 body.pagina-oculta .plan-card__photo-wrap,
-body.pagina-oculta .plan-card__photo-wrap::after {
+body.pagina-oculta .plan-card__photo-wrap::after,
+body.pagina-oculta .plan-card__photo {
     animation-play-state: paused;
 }
