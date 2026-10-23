@@ -846,9 +846,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const modalInput = document.getElementById('modalValorDepInput') || document.getElementById('modalValorPlano');
             if (modalInput) modalInput.value = valor;
 
+            // Marca só este card como selecionado
+            document.querySelectorAll('.plan-card--selected').forEach(function(card) {
+                card.classList.remove('plan-card--selected');
+            });
+            const cardDoPlano = this.closest('.plan-card');
+            if (cardDoPlano) cardDoPlano.classList.add('plan-card--selected');
+
             abrirModalDeposito();
-        });
-    }
 
     const btnAbrirDep = document.getElementById('btnAbrirDeposito');
     if (btnAbrirDep) {
@@ -928,9 +933,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (modalDep) modalDep.style.display = 'flex';
     }
 
-    function fecharModalDeposito() {
+       function fecharModalDeposito() {
         if (modalDep) modalDep.style.display = 'none';
         pararEscutaConfirmacaoPagamento();
+        document.querySelectorAll('.plan-card--selected').forEach(function(card) {
+            card.classList.remove('plan-card--selected');
+        });
     }
 
     const fecharX = document.getElementById('fecharModalDepX');
