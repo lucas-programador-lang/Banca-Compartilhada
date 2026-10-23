@@ -4651,7 +4651,7 @@ body:not(.admin-page) .sidebar {
    Desempenho: rolagem fluida nos planos (sem perder o visual)
    ========================================================================== */
 
-/* Cada card vira uma camada própria: o navegador não redesenha a página inteira */
+/* Cada card e cada moldura de foto viram uma camada própria */
 .plan-card--glow,
 .plan-card__photo-wrap {
     will-change: transform;
@@ -4659,25 +4659,16 @@ body:not(.admin-page) .sidebar {
     transform: translateZ(0);
 }
 
-/* Foto: brilho fixo em todos os cards (barato, sem animação) */
-.plan-card__photo {
-    filter: drop-shadow(0 0 10px rgba(242, 206, 151, 0.35));
+/* Moldura da foto: brilho FIXO em todos os cards (barato, sem animação) */
+.plan-card__photo-wrap {
     animation: none;
-    backface-visibility: hidden;
+    filter: drop-shadow(0 0 10px rgba(242, 206, 151, 0.4));
 }
 
 /* Pulso da foto SOMENTE no card selecionado (classe adicionada pelo JS ao clicar) */
-.plan-card--selected .plan-card__photo {
-    animation: NOME_DA_SUA_ANIMACAO_DA_FOTO 2.4s ease-in-out infinite;
-    will-change: filter;
-}
-
-/* Cards fora da tela não são pintados até chegarem (economiza muito ao rolar).
-   ATENÇÃO: isso corta o brilho que vaza para fora da borda do card.
-   Se o glow ficar cortado, apague este bloco. */
-.grid-planos > .plan-card {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 520px;
+.plan-card--selected .plan-card__photo-wrap {
+    animation: fotoBrilho 3.2s ease-in-out infinite;
+    will-change: filter, transform;
 }
 
 /* O modal só aplica o desfoque quando está aberto */
@@ -4692,11 +4683,26 @@ body:not(.admin-page) .sidebar {
     -webkit-backdrop-filter: blur(8px);
 }
 
-/* Para o pulso e o reflexo quando a aba não está visível (tela desligada, outra aba) */
+/* Para brilho, anel e reflexo quando a aba não está visível */
 body.pagina-oculta .plan-card--glow,
 body.pagina-oculta .plan-card--glow::before,
 body.pagina-oculta .plan-card__photo-wrap,
-body.pagina-oculta .plan-card__photo-wrap::after,
-body.pagina-oculta .plan-card__photo {
+body.pagina-oculta .plan-card__photo-wrap::after {
     animation-play-state: paused;
+}
+
+
+
+/* Opcional: brilho pulsante do card só no selecionado; os outros ficam com brilho fixo */
+.plan-card--glow:not(.plan-card--selected) {
+    animation: none;
+    box-shadow:
+        0 24px 50px -24px rgba(0, 0, 0, 0.75),
+        0 0 24px rgba(242, 206, 151, 0.3),
+        0 0 0 1px rgba(242, 206, 151, 0.25);
+}
+
+.plan-card--glow:not(.plan-card--selected)::before {
+    animation: none;
+    opacity: 0.6;
 }
