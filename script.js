@@ -1461,6 +1461,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+
+        // Telegram no Android: abre o app direto, sem passar pelo navegador
+    const cardTelegram = document.querySelector('.grupo-card--telegram');
+    if (cardTelegram && /Android/i.test(navigator.userAgent)) {
+        cardTelegram.href = 'intent://resolve?domain=bancacompartilhadajazzz#Intent;scheme=tg;package=org.telegram.messenger;S.browser_fallback_url=https%3A%2F%2Ft.me%2Fbancacompartilhadajazzz;end';
+    }
+
     if (btnSair) {
         btnSair.addEventListener('click', async function() {
             btnSair.disabled = true;
