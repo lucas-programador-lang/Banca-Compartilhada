@@ -4350,39 +4350,61 @@ body:not(.admin-page) .sidebar {
 }
 
 
-/* ===== Planos com foto e brilho (versão final) ===== */
+/* ===== Planos com foto e brilho (versão melhorada) ===== */
 
-/* Card: sombra dourada pulsando */
+/* Card: borda e halo dourados pulsando */
 .plan-card--glow {
     position: relative;
-    animation: planoBrilho 3s ease-in-out infinite;
+    isolation: isolate;
+    animation: planoBrilho 3.2s ease-in-out infinite;
+}
+
+/* Anel de luz em volta do card, que aparece e some suavemente */
+.plan-card--glow::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(255, 233, 176, 0.9), rgba(196, 136, 73, 0.2) 40%, rgba(255, 233, 176, 0.9));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.35;
+    animation: anelBrilho 3.2s ease-in-out infinite;
+    pointer-events: none;
+    z-index: -1;
 }
 
 @keyframes planoBrilho {
     0%, 100% {
         box-shadow:
             0 24px 50px -24px rgba(0, 0, 0, 0.75),
-            0 0 14px rgba(242, 206, 151, 0.25),
-            0 0 0 1px rgba(242, 206, 151, 0.15);
+            0 0 18px rgba(242, 206, 151, 0.22),
+            0 0 0 1px rgba(242, 206, 151, 0.18);
     }
     50% {
         box-shadow:
             0 24px 50px -24px rgba(0, 0, 0, 0.75),
-            0 0 30px rgba(242, 206, 151, 0.6),
-            0 0 60px rgba(196, 136, 73, 0.35),
-            0 0 0 1px rgba(242, 206, 151, 0.4);
+            0 0 40px rgba(242, 206, 151, 0.55),
+            0 0 80px rgba(196, 136, 73, 0.3),
+            0 0 0 1px rgba(255, 233, 176, 0.45);
     }
 }
 
-/* Wrapper da foto: o filtro fica aqui. O overflow corta só o conteúdo
-   interno (a faixa de luz), não a sombra externa do drop-shadow */
+@keyframes anelBrilho {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+}
+
+/* Wrapper da foto: o brilho da foto fica aqui */
 .plan-card__photo-wrap {
     position: relative;
     overflow: hidden;
     border-radius: 14px;
     margin-bottom: 14px;
     background: #0b0704;
-    animation: fotoBrilho 3s ease-in-out infinite;
+    animation: fotoBrilho 3.2s ease-in-out infinite;
 }
 
 .plan-card__photo {
@@ -4396,21 +4418,21 @@ body:not(.admin-page) .sidebar {
 
 @keyframes fotoBrilho {
     0%, 100% {
-        filter: brightness(1) drop-shadow(0 0 6px rgba(242, 206, 151, 0.35));
+        filter: brightness(1) drop-shadow(0 0 8px rgba(242, 206, 151, 0.4));
     }
     50% {
-        filter: brightness(1.12) drop-shadow(0 0 18px rgba(242, 206, 151, 0.75));
+        filter: brightness(1.18) drop-shadow(0 0 22px rgba(255, 233, 176, 0.85));
     }
 }
 
-/* Faixa de luz que atravessa a foto */
+/* Faixa de luz que atravessa a foto, mais forte que antes */
 .plan-card__photo-wrap::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(115deg, transparent 35%, rgba(255, 240, 200, 0.55) 50%, transparent 65%);
+    background: linear-gradient(115deg, transparent 30%, rgba(255, 246, 214, 0.7) 50%, transparent 70%);
     transform: translateX(-120%);
-    animation: planoReflexo 3.5s ease-in-out infinite;
+    animation: planoReflexo 3.6s ease-in-out infinite;
     pointer-events: none;
 }
 
@@ -4419,10 +4441,9 @@ body:not(.admin-page) .sidebar {
     60%, 100% { transform: translateX(120%); }
 }
 
-/* Quem tem "reduzir movimento" ativo vê o brilho fixo, sem animação.
-   Fica por último para vencer a regra geral do .card */
 @media (prefers-reduced-motion: reduce) {
     .plan-card--glow,
+    .plan-card--glow::before,
     .plan-card__photo-wrap,
     .plan-card__photo-wrap::after {
         animation: none !important;
@@ -4431,7 +4452,7 @@ body:not(.admin-page) .sidebar {
     .plan-card--glow {
         box-shadow:
             0 24px 50px -24px rgba(0, 0, 0, 0.75),
-            0 0 22px rgba(242, 206, 151, 0.4),
+            0 0 26px rgba(242, 206, 151, 0.4),
             0 0 0 1px rgba(242, 206, 151, 0.3);
     }
 
