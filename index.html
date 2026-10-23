@@ -768,10 +768,30 @@
 
                 <div class="card" style="margin-bottom: 20px;">
                     <h3>Segurança da conta</h3>
-                    <p class="section-lead" style="margin-bottom: 15px;">Enviamos um link para o seu e-mail. Abra o link e escolha uma nova senha.</p>
+                    <p class="section-lead" style="margin-bottom: 15px;">Esqueceu a senha? Enviamos um link para o seu e-mail. Abra o link e escolha uma nova senha.</p>
                     <button class="btn btn-outline" id="btnRedefinirSenha" type="button">Enviar e-mail para redefinir a senha</button>
                 </div>
-                
+
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3>Alterar senha</h3>
+                    <p class="section-lead" style="margin-bottom: 15px;">Para trocar a senha, confirme a senha atual.</p>
+
+                    <div class="input-group">
+                        <label>Senha atual</label>
+                        <input type="password" id="senhaAtual" autocomplete="current-password" placeholder="Digite a senha atual">
+                    </div>
+                    <div class="input-group">
+                        <label>Nova senha</label>
+                        <input type="password" id="senhaNova" autocomplete="new-password" placeholder="Mínimo de 6 caracteres">
+                    </div>
+                    <div class="input-group">
+                        <label>Confirmar nova senha</label>
+                        <input type="password" id="senhaNovaConfirma" autocomplete="new-password" placeholder="Digite a nova senha de novo">
+                    </div>
+
+                    <button class="btn" id="btnAlterarSenha" type="button">Alterar senha</button>
+                </div>
+
                 <div class="card">
                     <h3>Chave PIX Padrão para Saques</h3>
                     <p class="section-lead" style="margin-bottom: 15px;">Estes dados serão preenchidos automaticamente na solicitação de saque.</p>
@@ -810,9 +830,6 @@
                     </label>
                 </div>
             </section>
-
-        </main>
-    </div>
 
     <!-- ================= MODAL DE DEPÓSITO ================= -->
     <div id="modalDepositoSistema" class="modal-overlay">
