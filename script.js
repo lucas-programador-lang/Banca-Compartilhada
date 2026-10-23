@@ -2,6 +2,7 @@ import { auth, db, mostrarToast } from './auth.js';
 import { ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { calcularTerminoPrevisto } from './termino-plano.js';
+import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 32.50,
@@ -1123,13 +1124,35 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnCancelarSaque = document.getElementById('btnCancelarModalSaque');
     if (btnCancelarSaque) btnCancelarSaque.addEventListener('click', fecharModalSaque);
 
-    // ALTERADO: botão "Cadastrar chave PIX" fecha o modal e abre a aba Perfil
+        // ALTERADO: botão "Cadastrar chave PIX" fecha o modal e abre a aba Perfil
     const btnIrPerfilChave = document.getElementById('btnIrPerfilChave');
     if (btnIrPerfilChave) {
         btnIrPerfilChave.addEventListener('click', function() {
             fecharModalSaque();
             const navPerfil = document.querySelector('.sidebar-nav .nav-item[data-target="view-perfil"]');
             if (navPerfil) navPerfil.click();
+        });
+    }
+
+    const btnRedefinirSenha = document.getElementById('btnRedefinirSenha');
+    if (btnRedefinirSenha) {
+        btnRedefinirSenha.addEventListener('click', async function() {
+            const email = auth.currentUser?.email;
+            if (!email) {
+                mostrarToast('Não foi possível identificar o seu e-mail.', 'error');
+                return;
+            }
+
+            setBotaoCarregando(btnRedefinirSenha, true, 'Enviando...');
+            try {
+                await sendPasswordResetEmail(auth, email);
+                mostrarToast('Enviamos o link para ' + email + '. Verifique também o spam.', 'success');
+            } catch (error) {
+                console.error('Erro ao enviar redefinição de senha:', error);
+                mostrarToast('Não foi possível enviar o e-mail agora. Tente de novo em instantes.', 'error');
+            } finally {
+                setBotaoCarregando(btnRedefinirSenha, false);
+            }
         });
     }
 
@@ -1243,12 +1266,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    auth.onAuthStateChanged(function(user) {
+        auth.onAuthStateChanged(function(user) {
         if (!user) return;
         const userId = user.uid;
         userIdAtual = userId;
         userAtual = user;
         emailUsuarioAtual = user.email || '';
+
+        const campoEmail = document.getElementById('perfilEmail');
+        if (campoEmail) campoEmail.value = user.email || '';
 
         const userRef = ref(db, 'usuarios/' + userId);
         onValue(userRef, function(snapshot) {
