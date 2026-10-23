@@ -669,8 +669,7 @@ function gerarCodigoAleatorioCurto(tamanho) {
 }
 
 function gerarLinkIndicacao(codigoIndicacao) {
-    const baseUrl = window.location.href.split('index.html')[0].replace(/\/$/, '');
-    return baseUrl + '/register.html?ref=' + codigoIndicacao;
+    return window.location.origin + '/register.html?ref=' + codigoIndicacao;
 }
 
 function atualizarLinkIndicacao(codigoIndicacao) {
