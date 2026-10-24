@@ -4012,6 +4012,11 @@ body.cmp-aberto { overflow: hidden; }
 .bolao__panel[hidden] { display: none; }
 .bolao__vazio { margin: 0; padding: 18px 0; text-align: center; color: var(--text-faint); font-size: 0.9rem; }
 
+.bolao__lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-height: 320px; overflow-y: auto; }
+.bolao__lista li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 10px 12px; border-radius: 12px; background: rgba(0, 0, 0, 0.28); border: 1px solid rgba(196, 136, 73, 0.18); font-size: 0.9rem; color: var(--text-main); }
+.bolao__lista li strong { color: var(--primary-hover); font-variant-numeric: tabular-nums; }
+.bolao__lista li small { grid-column: 1 / -1; color: var(--text-muted); letter-spacing: 0.08em; }
+
 .bolao__escolha-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .bolao__escolha-head h4 { margin: 0; font-size: 0.95rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-main); }
 .bolao__escolha-head p { margin: 2px 0 0; font-size: 0.8rem; color: var(--text-muted); }
