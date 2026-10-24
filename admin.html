@@ -404,7 +404,7 @@
 
     // Ao escolher uma aba no celular, o menu fecha sozinho
     nav.addEventListener('click', function (e) {
-        if (e.target.closest('[data-aba]') && telaPequena()) fecharMenu();
+        if (e.target.closest('[data-aba]')) fecharMenu();
     }, true);
 
     nav.addEventListener('click', function (e) {
