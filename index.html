@@ -931,61 +931,103 @@
     </div>
 
     <!-- ================= MODAL DE SAQUE ================= -->
+    <!-- Visual novo (teclado numérico + 2 etapas). A lógica de saque continua no script.js;
+         o saque-modal.js cuida só do teclado, das etapas e da tela de revisão. -->
     <div id="modalSaqueSistema" class="modal-overlay">
-        <div class="card modal-card modal-card--wide modal-premium modal-ouro">
+        <div class="card modal-card modal-ouro saque-v2" role="dialog" aria-modal="true" aria-labelledby="saqueTitulo" data-etapa="1">
 
-            <header class="mo-header">
-                <button id="fecharModalSaque" class="modal-close" aria-label="Voltar" type="button">&lsaquo;</button>
-                <svg class="mo-header__icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H16l2 2.2M4 7.5V17a2.5 2.5 0 0 0 2.5 2.5h11A2.5 2.5 0 0 0 20 17V9.7A2.5 2.5 0 0 0 17.5 7.2H6.5A2.5 2.5 0 0 1 4 7.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16.5" cy="13.4" r="1.2" fill="currentColor"/></svg>
-                <div class="mo-header__texto">
-                    <h3>Carteira</h3>
-                    <p class="modal-lead">Gerencie seu saldo e solicite saques</p>
-                </div>
+            <header class="sv-header">
+                <button id="fecharModalSaque" class="modal-close" aria-label="Fechar" type="button">&times;</button>
+                <h3 id="saqueTitulo">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H16l2 2.2M4 7.5V17a2.5 2.5 0 0 0 2.5 2.5h11A2.5 2.5 0 0 0 20 17V9.7A2.5 2.5 0 0 0 17.5 7.2H6.5A2.5 2.5 0 0 1 4 7.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16.5" cy="13.4" r="1.2" fill="currentColor"/></svg>
+                    Solicitar saque
+                </h3>
+                <span class="sv-header__espaco" aria-hidden="true"></span>
             </header>
 
-            <div class="mo-banner"><img src="modal-banner.webp" alt="Banca Compartilhada" width="800" height="334"></div>
+            <ol class="sv-passos" aria-label="Etapas do saque">
+                <li class="sv-passo is-ativo" data-passo="1"><span class="sv-passo__num">1</span>Valor</li>
+                <li class="sv-passos__linha" aria-hidden="true"></li>
+                <li class="sv-passo" data-passo="2"><span class="sv-passo__num">2</span>Revisar</li>
+            </ol>
 
-            <!-- O saldo disponível é inserido aqui pelo script.js -->
+            <!-- O script.js preenche este box com o saldo disponível -->
+            <div id="boxSaldoDisponivelModal" class="sv-saldo"><span>Saldo Disponível:</span> <strong>R$ 0,00</strong></div>
 
-            <div class="mo-painel">
-                <p class="modal-lead modal-lead--warning">Saques liberados apenas aos domingos</p>
+            <p id="saqueAviso" class="sv-aviso" hidden></p>
 
-                <div class="modal-info-box">
-                    <div class="modal-info-row">
-                        <span>Valor Mínimo:</span>
-                        <strong>R$ 32,50</strong>
-                    </div>
-                    <div class="modal-info-row">
-                        <span>Taxa de Saque:</span>
-                        <strong>14%</strong>
-                    </div>
-                </div>
+            <!-- ===== ETAPA 1: VALOR ===== -->
+            <section class="sv-etapa" data-painel="1">
+                <p class="sv-pergunta">Quanto você quer sacar?</p>
+                <div id="saqueDisplay" class="sv-valor is-vazio" aria-live="polite">R$ 0,00</div>
+                <p id="saqueRegra" class="sv-regra">Mínimo R$ 32,50 · taxa de serviço 14%</p>
 
-                <h4 class="mo-passo">Passo 1: Destino do Pix</h4>
-                <div id="saqueChaveInfo" class="modal-info-box modal-info-box--key">
-                    <span class="modal-info-row__label">Chave PIX de recebimento:</span>
-                    <strong id="saqueChavePix">—</strong>
-                    <button type="button" id="btnIrPerfilChave" class="btn-ir-perfil" style="display: none;">Cadastrar chave PIX</button>
-                </div>
-
-                <h4 class="mo-passo">Passo 2: Valor do saque</h4>
-                <div class="input-group">
-                    <input type="number" id="modalValorSaque" placeholder="32.50" min="32.50" step="0.01" aria-label="Valor do saque (R$)">
-                </div>
-                <div class="mo-rapidos" id="saqueRapidos">
-                    <button type="button" data-valor="min">R$ 32,50</button>
+                <div class="mo-rapidos sv-rapidos" id="saqueRapidos">
+                    <button type="button" data-valor="min">Mínimo</button>
                     <button type="button" data-valor="50">R$ 50</button>
                     <button type="button" data-valor="100">R$ 100</button>
-                    <button type="button" data-valor="max">Máximo</button>
+                    <button type="button" data-valor="max">Tudo</button>
                 </div>
 
-                <div id="resumoValorLiquido" class="amount-note"></div>
-
-                <div class="modal-actions">
-                    <button class="btn btn-outline" id="btnCancelarModalSaque">Cancelar</button>
-                    <button class="btn" id="btnConfirmarModalSacar">Solicitar Saque</button>
+                <div class="sv-teclado" id="saqueTeclado">
+                    <button type="button" data-tecla="1">1</button>
+                    <button type="button" data-tecla="2">2</button>
+                    <button type="button" data-tecla="3">3</button>
+                    <button type="button" data-tecla="4">4</button>
+                    <button type="button" data-tecla="5">5</button>
+                    <button type="button" data-tecla="6">6</button>
+                    <button type="button" data-tecla="7">7</button>
+                    <button type="button" data-tecla="8">8</button>
+                    <button type="button" data-tecla="9">9</button>
+                    <button type="button" data-tecla=",">,</button>
+                    <button type="button" data-tecla="0">0</button>
+                    <button type="button" data-tecla="apagar" aria-label="Apagar">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m12.5 9.5 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                    </button>
                 </div>
-            </div>
+
+                <div class="sv-resumo">
+                    <div class="sv-resumo__esq"><span>Você recebe</span><strong id="saqueLiquido">R$ 0,00</strong></div>
+                    <div class="sv-resumo__dir"><span id="saqueTaxaRotulo">Taxa (14%)</span><strong id="saqueTaxa">- R$ 0,00</strong></div>
+                </div>
+
+                <button type="button" id="saquePixCard" class="sv-pix">
+                    <span class="sv-pix__icone" aria-hidden="true">
+                        <svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="3.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m10.8 12.4 7.7-7.7m-3 3 2.6 2.6m-5.2 0 1.8 1.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+                    </span>
+                    <span class="sv-pix__texto"><small>Receber na chave PIX</small><strong id="saquePixTexto">—</strong></span>
+                    <svg class="sv-pix__seta" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+
+                <div class="sv-rodape">
+                    <button type="button" id="btnRevisarSaque" class="sv-btn sv-btn--principal" disabled>
+                        Revisar saque
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ===== ETAPA 2: REVISAR ===== -->
+            <section class="sv-etapa" data-painel="2" hidden>
+                <p class="sv-pergunta">Confira os dados do saque</p>
+                <div class="sv-revisao">
+                    <div class="sv-revisao__linha"><span>Valor solicitado</span><strong id="revValor">R$ 0,00</strong></div>
+                    <div class="sv-revisao__linha sv-revisao__linha--taxa"><span id="revTaxaRotulo">Taxa (14%)</span><strong id="revTaxa">- R$ 0,00</strong></div>
+                    <div class="sv-revisao__linha sv-revisao__linha--total"><span>Você recebe</span><strong id="revLiquido">R$ 0,00</strong></div>
+                </div>
+                <div class="sv-revisao sv-revisao--pix">
+                    <div class="sv-revisao__linha"><span>Chave PIX</span><strong id="revPix">—</strong></div>
+                </div>
+                <p class="sv-nota">O valor é enviado para a chave acima. Confira antes de confirmar.</p>
+
+                <div class="sv-rodape sv-rodape--duplo">
+                    <button type="button" id="btnVoltarSaque" class="sv-btn sv-btn--secundario">Voltar</button>
+                    <button type="button" id="btnConfirmarModalSacar" class="sv-btn sv-btn--principal">Confirmar saque</button>
+                </div>
+            </section>
+
+            <!-- Campo oculto: o script.js lê o valor daqui (mesmo id de antes) -->
+            <input type="hidden" id="modalValorSaque" value="">
         </div>
     </div>
 
@@ -1022,5 +1064,6 @@
     <script src="update-modal.js" defer></script>
     <script type="module" src="inicio-extras.js"></script>
     <script src="sons-modais.js" defer></script>
+    <script src="saque-modal.js" defer></script>
 </body>
 </html>
