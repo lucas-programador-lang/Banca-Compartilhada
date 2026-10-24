@@ -1,30 +1,25 @@
 /* ==========================================================================
    Bolão Lotofácil (aba Início) — substitui o antigo Simulador de lucro.
 
-   ATENÇÃO: este arquivo é só interface. Os números abaixo são EXEMPLOS fixos
-   e o botão "Depositar e participar" NÃO cobra nem grava nada. Para valer de
-   verdade, o concurso, as cotas vendidas e as participações precisam vir do
-   servidor (Firebase RTDB com regras de segurança / função de backend), nunca
-   do navegador. Quando a participação estiver pronta, escute o evento
-   "bolao:participar" (detail = { numeros, cotas, total }).
+   Lê o concurso de bolao/atual e envia a compra para o Worker
+   (POST /api/bolao/participar). Ver bolao-backend/README.md.
    ========================================================================== */
+import { auth, db, mostrarToast } from './auth.js';
+import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js';
+import { ref, onValue } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+var WORKER_BASE_URL = 'https://apidabancacompartilhada.lucas-dev-programador.workers.dev';
+
 (function () {
     'use strict';
 
     var raiz = document.getElementById('bolaoLotofacil');
     if (!raiz) return;
 
-    // ---- Dados de exemplo: troque pelos dados reais do concurso ----
-    var BOLAO = {
-        concurso: 3235,
-        sorteio: '2026-10-27',   // AAAA-MM-DD
-        premio: 382750,
-        valorCota: 5,
-        cotasTotal: 1000,
-        cotasVendidas: 426,
-        qtdNumeros: 15,
-        maxPorCompra: 20
-    };
+    // Preenchido por bolao/atual (Firebase). Sem esse nó, o painel fica escondido.
+    var BOLAO = { concurso: 0, sorteio: '1970-01-01', premio: 0, valorCota: 0,
+                  cotasTotal: 0, cotasVendidas: 0, qtdNumeros: 15, maxPorCompra: 20 };
+    raiz.hidden = true;
 
     var BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
     var $ = function (id) { return document.getElementById(id); };
@@ -50,6 +45,7 @@
     var disponiveis = Math.max(BOLAO.cotasTotal - BOLAO.cotasVendidas, 0);
     var encerrado = diasAte(BOLAO.sorteio) < 0;
 
+    function preencherTextos() {
     $('bolPremio').textContent = BRL.format(BOLAO.premio);
     $('bolEstimado').textContent = BRL.format(BOLAO.premio);
     $('bolConcurso').textContent = textoSorteio();
@@ -58,6 +54,7 @@
     $('bolValorCota').textContent = BRL.format(BOLAO.valorCota);
     $('bolDisponiveis').textContent = disponiveis;
     $('bolMeta').textContent = BOLAO.qtdNumeros;
+    }
 
     function atualizar() {
         var cheio = escolhidos.length >= BOLAO.qtdNumeros;
@@ -115,15 +112,109 @@
         });
     });
 
-    // Participar: só emite o evento. Nada é cobrado ou gravado aqui.
-    $('bolParticipar').addEventListener('click', function () {
-        var detalhe = {
-            numeros: escolhidos.slice().sort(function (a, b) { return a - b; }),
-            cotas: qtd,
-            total: qtd * BOLAO.valorCota
-        };
-        document.dispatchEvent(new CustomEvent('bolao:participar', { detail: detalhe }));
-        $('bolAviso').textContent = 'Participação ainda não habilitada. Nada foi cobrado.';
+    // Dados reais: bolao/atual (somente leitura para o navegador)
+    onValue(ref(db, 'bolao/atual'), function (snap) {
+        var d = snap.val();
+        if (!d) { raiz.hidden = true; return; }
+        raiz.hidden = false;
+        BOLAO.concurso = d.concurso; BOLAO.premio = d.premio; BOLAO.valorCota = d.valorCota;
+        BOLAO.cotasTotal = d.cotasTotal; BOLAO.cotasVendidas = d.cotasVendidas;
+        BOLAO.qtdNumeros = d.qtdNumeros; BOLAO.maxPorCompra = d.maxPorCompra;
+        var dt = new Date(d.encerraEm);
+        BOLAO.sorteio = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+        encerrado = d.status !== 'aberto' || Date.now() >= d.encerraEm;
+        disponiveis = Math.max(d.cotasTotal - d.cotasVendidas, 0);
+        preencherTextos();
+        atualizar();
+        assinarAbas();
+    });
+
+    // ---- Abas Participantes e Extrato (leitura; tudo via textContent, nunca innerHTML) ----
+    var unsubPart = null, unsubMinhas = null, concursoAssinado = null, uidAssinado = null;
+
+    function preencherLista(painel, linhas, vazio) {
+        var alvo = raiz.querySelector('[data-panel="' + painel + '"]');
+        alvo.textContent = '';
+        if (!linhas.length) {
+            var p = document.createElement('p');
+            p.className = 'bolao__vazio';
+            p.textContent = vazio;
+            alvo.appendChild(p);
+            return;
+        }
+        var ul = document.createElement('ul');
+        ul.className = 'bolao__lista';
+        linhas.forEach(function (l) {
+            var li = document.createElement('li');
+            var a = document.createElement('span'); a.textContent = l.esq;
+            var b = document.createElement('strong'); b.textContent = l.dir;
+            li.appendChild(a); li.appendChild(b);
+            if (l.sub) { var c = document.createElement('small'); c.textContent = l.sub; li.appendChild(c); }
+            ul.appendChild(li);
+        });
+        alvo.appendChild(ul);
+    }
+
+    function assinarAbas() {
+        var c = BOLAO.concurso, uid = auth.currentUser && auth.currentUser.uid;
+        if (c && c !== concursoAssinado) {
+            if (unsubPart) unsubPart();
+            concursoAssinado = c;
+            unsubPart = onValue(ref(db, 'bolaoParticipantes/' + c), function (snap) {
+                var v = snap.val() || {};
+                var linhas = Object.keys(v).map(function (k) { return v[k]; })
+                    .sort(function (a, b) { return (b.cotas || 0) - (a.cotas || 0); })
+                    .map(function (x) { return { esq: String(x.nome || 'Participante'), dir: (x.cotas || 0) + ' cota' + (x.cotas > 1 ? 's' : '') }; });
+                preencherLista('participantes', linhas, 'Nenhum participante para mostrar ainda.');
+            }, function () { preencherLista('participantes', [], 'Não foi possível carregar os participantes.'); });
+        }
+        if (c && uid && (c !== concursoAssinado || uid !== uidAssinado || !unsubMinhas)) {
+            if (unsubMinhas) unsubMinhas();
+            uidAssinado = uid;
+            unsubMinhas = onValue(ref(db, 'bolaoMinhas/' + uid + '/' + c), function (snap) {
+                var v = snap.val() || {};
+                var linhas = Object.keys(v).map(function (k) { return v[k]; })
+                    .sort(function (a, b) { return (b.criadoEm || 0) - (a.criadoEm || 0); })
+                    .map(function (x) {
+                        return {
+                            esq: (x.cotas || 0) + ' cota' + (x.cotas > 1 ? 's' : '') + ' · ' + BRL.format(x.valor || 0),
+                            dir: new Date(x.criadoEm || 0).toLocaleDateString('pt-BR'),
+                            sub: (x.numeros || []).map(function (n) { return String(n).padStart(2, '0'); }).join(' ')
+                        };
+                    });
+                preencherLista('extrato', linhas, 'Você ainda não tem participações neste bolão.');
+            }, function () { preencherLista('extrato', [], 'Não foi possível carregar seu extrato.'); });
+        }
+    }
+    onAuthStateChanged(auth, assinarAbas);
+
+    // Participar: o servidor decide tudo (preço, saldo, cotas). Aqui só enviamos o pedido.
+    var chaveCompra = null;
+    $('bolParticipar').addEventListener('click', async function () {
+        var btn = $('bolParticipar');
+        if (btn.disabled || !auth.currentUser) return;
+        btn.disabled = true;
+        chaveCompra = chaveCompra || (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));
+        $('bolAviso').textContent = 'Processando...';
+        try {
+            var token = await auth.currentUser.getIdToken();
+            var r = await fetch(WORKER_BASE_URL + '/api/bolao/participar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ numeros: escolhidos, cotas: qtd, chave: chaveCompra })
+            });
+            var d = await r.json().catch(function () { return {}; });
+            if (!r.ok) throw new Error(d.erro || 'Não foi possível participar.');
+            chaveCompra = null;
+            escolhidos = []; qtd = 1;
+            $('bolAviso').textContent = 'Participação confirmada!';
+            mostrarToast('Participação confirmada no bolão.', 'success');
+        } catch (e) {
+            // mantém a mesma chave: se a resposta se perdeu, repetir não cobra duas vezes
+            $('bolAviso').textContent = e.message;
+            mostrarToast(e.message, 'warning');
+        }
+        atualizar();
     });
 
     atualizar();
