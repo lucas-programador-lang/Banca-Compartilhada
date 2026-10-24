@@ -5802,3 +5802,47 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
         flex: none;
     }
 }
+
+
+
+/* ==========================================================================
+   Painel admin no celular: abas em faixa horizontal rolável no topo
+   ========================================================================== */
+@media (max-width: 991px) {
+    .admin-page .admin-layout,
+    .admin-page .admin-layout > .admin-sidebar,
+    .admin-page .admin-layout {
+        display: block;
+    }
+
+    .admin-page .admin-sidebar {
+        display: flex !important;
+        flex-direction: row !important;
+        position: static !important;
+        gap: 8px;
+        padding: 8px;
+        margin-bottom: 14px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+    }
+
+    .admin-page .admin-sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .admin-page .admin-sidebar .admin-tab {
+        flex: 0 0 auto;
+        width: auto !important;
+        white-space: nowrap;
+        scroll-snap-align: start;
+        padding: 9px 14px;
+        font-size: 0.85rem;
+    }
+
+    .admin-page .admin-main {
+        width: 100%;
+    }
+}
