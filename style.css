@@ -5210,7 +5210,9 @@ body:not(.admin-page) .modal-card.modal-ouro {
 .modal-ouro #btnCancelarModalDep { flex: 1; }
 .modal-ouro #btnConfirmarModalDepositar::before {
     content: "";
-    flex: 0 0 20px;
+    display: inline-block;
+    vertical-align: middle;
+    margin: -3px 7px 0 0;
     width: 20px;
     height: 20px;
     background: currentColor;
