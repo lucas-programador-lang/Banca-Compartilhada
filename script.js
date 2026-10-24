@@ -1196,7 +1196,7 @@ document.addEventListener('DOMContentLoaded', function() {
             else if (containerInsercao) containerInsercao.prepend(boxSaldoModal);
         }
         if (boxSaldoModal) {
-            boxSaldoModal.innerHTML = `<span>Saldo Disponível:</span> <strong>${formatadorMoeda.format(saldoAtualUsuario)}</strong>`;
+            boxSaldoModal.innerHTML = `<span>Saldo Disponível</span> <strong>${formatadorMoeda.format(saldoAtualUsuario)}</strong>`;
         }
 
         const diaHoje = obterDiaSemanaBrasilia();
@@ -1210,11 +1210,25 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // Interface nova do modal (saque-modal.js): teclado, etapas e resumo
+        if (window.SaqueUI) {
+            window.SaqueUI.abrir({
+                saldo: saldoAtualUsuario,
+                minimo: CONFIG.VALOR_SAQUE_MINIMO,
+                taxa: CONFIG.TAXA_SAQUE_PERCENTUAL,
+                diaPermitido: CONFIG.DIA_SAQUE_PERMITIDO,
+                saquePermitido: diaHoje === CONFIG.DIA_SAQUE_PERMITIDO,
+                chave: chavePixPerfil,
+                tipoPix: tipoPixPerfil
+            });
+        }
+
         if (modalSaque) modalSaque.style.display = 'flex';
     }
 
     function fecharModalSaque() {
         if (modalSaque) modalSaque.style.display = 'none';
+        if (window.SaqueUI) window.SaqueUI.fechar();
     }
 
     if (btnAbrirSaqueModal) {
