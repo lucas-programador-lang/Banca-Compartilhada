@@ -5196,3 +5196,32 @@ body:not(.admin-page) .modal-card.modal-premium.modal-arte {
         flex-direction: column-reverse;
     }
 }
+
+
+/* A arte sempre no topo (o JS injeta o "Saldo Disponível" antes dela) */
+.modal-arte {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-arte > * {
+    flex-shrink: 0;   /* impede o conteúdo de ser espremido quando o modal rola */
+}
+
+.modal-arte > .modal-arte__topo {
+    order: -1;
+}
+
+/* Saldo Disponível logo abaixo da arte */
+.modal-arte > .modal-balance-box,
+.modal-arte > .modal-info-box.modal-balance-box {
+    order: 0;
+    margin-top: 0;
+}
+
+/* Botões do rodapé: texto cabe em uma linha */
+.modal-arte .modal-actions .btn {
+    font-size: 0.92rem;
+    padding: 0 8px;
+    white-space: nowrap;
+}
