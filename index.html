@@ -860,107 +860,131 @@
 
     <!-- ================= MODAL DE DEPÓSITO ================= -->
     <div id="modalDepositoSistema" class="modal-overlay">
-        
-        <div class="card modal-card modal-card--wide modal-premium modal-arte">
+
+        <div class="card modal-card modal-card--wide modal-premium modal-ouro">
 
             <div id="modalToast" class="modal-alert">
                 O valor mínimo para depósito é R$ 10,00!
             </div>
 
-            <button id="fecharModalDeposito" class="modal-close" aria-label="Fechar">&times;</button>
-
-            <div class="modal-arte__topo"></div>
-
-            <h3>Realizar Depósito</h3>
-            <p class="modal-lead">Selecione o plano desejado e gere o seu QR Code Pix.</p>
-            
-           <div class="input-group">
-                <label>Valor do Plano / Depósito (R$)</label>
-                <select id="modalValorPlano">
-                    <option value="10">R$ 10,00 — Ciclo Express (48h)</option>
-                    <option value="15">R$ 15,00 — Ciclo Médio 15 (40 dias)</option>
-                    <option value="30">R$ 30,00 — Banca Starter</option>
-                    <option value="50">R$ 50,00 — Banca Bronze</option>
-                    <option value="60">R$ 60,00 — Ciclo Médio 60 (40 dias)</option>
-                    <option value="100">R$ 100,00 — Banca Prata</option>
-                    <option value="150">R$ 150,00 — Ciclo Médio 150 (40 dias)</option>
-                    <option value="200">R$ 200,00 — Ciclo Médio 200 (40 dias)</option>
-                    <option value="300">R$ 300,00 — Banca Ouro</option>
-                    <option value="450">R$ 450,00 — Ciclo Longo 450 (60 dias)</option>
-                    <option value="500">R$ 500,00 — Banca Platinum</option>
-                    <option value="1000">R$ 1.000,00 — Banca Master</option>
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label>CPF (obrigatório para gerar o Pix)</label>
-                <input type="text" id="modalDepositoCpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14">
-            </div>
-
-            <div class="input-group">
-                <label>Telefone (obrigatório para gerar o Pix)</label>
-                <input type="text" id="modalDepositoTelefone" placeholder="(11) 99999-9999" inputmode="tel" maxlength="20">
-            </div>
-
-            <p id="statusPagamentoPix" style="display: none; text-align: center; font-size: 13px; font-weight: 600; margin-top: 12px;">
-                ⏳ Aguardando confirmação do pagamento...
-            </p>
-
-            <div id="areaQrCodePix" class="qr-area">
-                <div class="qr-area__hint">Escaneie o QR Code abaixo para pagar:</div>
-                <div class="qr-area__frame">
-                    <img id="imgQrCode" src="" alt="QR Code Pix">
+            <header class="mo-header">
+                <button id="fecharModalDeposito" class="modal-close" aria-label="Voltar" type="button">&lsaquo;</button>
+                <svg class="mo-header__icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H16l2 2.2M4 7.5V17a2.5 2.5 0 0 0 2.5 2.5h11A2.5 2.5 0 0 0 20 17V9.7A2.5 2.5 0 0 0 17.5 7.2H6.5A2.5 2.5 0 0 1 4 7.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="18" cy="17" r="4.2" fill="#1a1005" stroke="currentColor" stroke-width="1.6"/><path d="M18 15v4M16 17h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <div class="mo-header__texto">
+                    <h3>Depósito</h3>
+                    <p class="modal-lead">Adicione saldo para investir e gerar lucros</p>
                 </div>
-                <div class="qr-area__code" id="txtChaveCopiaCola">
-                    00020126580014br.gov.bcb.pix...
-                </div>
-                <button class="btn btn-outline" id="btnCopiarPix" type="button">Copiar código Pix</button>
-            </div>
+            </header>
 
-            <div class="modal-actions">
-                <button class="btn btn-outline" id="btnCancelarModalDep">Cancelar</button>
-                <button class="btn" id="btnConfirmarModalDepositar">Gerar QR Code Pix</button>
+            <div class="mo-banner"><img src="modal-banner.webp" alt="Banca Compartilhada" width="800" height="334"></div>
+
+            <div class="mo-painel">
+                <div class="input-group">
+                    <label>Valor do plano / Depósito (R$)</label>
+                    <select id="modalValorPlano">
+                        <option value="10">R$ 10,00 — Ciclo Express (48h)</option>
+                        <option value="15">R$ 15,00 — Ciclo Médio 15 (40 dias)</option>
+                        <option value="30">R$ 30,00 — Banca Starter</option>
+                        <option value="50">R$ 50,00 — Banca Bronze</option>
+                        <option value="60">R$ 60,00 — Ciclo Médio 60 (40 dias)</option>
+                        <option value="100">R$ 100,00 — Banca Prata</option>
+                        <option value="150">R$ 150,00 — Ciclo Médio 150 (40 dias)</option>
+                        <option value="200">R$ 200,00 — Ciclo Médio 200 (40 dias)</option>
+                        <option value="300">R$ 300,00 — Banca Ouro</option>
+                        <option value="450">R$ 450,00 — Ciclo Longo 450 (60 dias)</option>
+                        <option value="500">R$ 500,00 — Banca Platinum</option>
+                        <option value="1000">R$ 1.000,00 — Banca Master</option>
+                    </select>
+                </div>
+
+                <div class="input-group input-group--cpf">
+                    <label>CPF (obrigatório para gerar o Pix)</label>
+                    <input type="text" id="modalDepositoCpf" placeholder="000.000.000-00" inputmode="numeric" maxlength="14" autocomplete="off">
+                </div>
+
+                <div class="input-group input-group--tel">
+                    <label>Telefone (obrigatório para gerar o Pix)</label>
+                    <input type="text" id="modalDepositoTelefone" placeholder="(11) 99999-9999" inputmode="tel" maxlength="20" autocomplete="off">
+                </div>
+
+                <p id="statusPagamentoPix" style="display: none; text-align: center; font-size: 13px; font-weight: 600; margin-top: 12px;">
+                    ⏳ Aguardando confirmação do pagamento...
+                </p>
+
+                <div id="areaQrCodePix" class="qr-area">
+                    <div class="qr-area__hint">Escaneie o QR Code abaixo para pagar:</div>
+                    <div class="qr-area__frame">
+                        <img id="imgQrCode" src="" alt="QR Code Pix">
+                    </div>
+                    <div class="qr-area__code" id="txtChaveCopiaCola">
+                        00020126580014br.gov.bcb.pix...
+                    </div>
+                    <button class="btn btn-outline" id="btnCopiarPix" type="button">Copiar código Pix</button>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-outline" id="btnCancelarModalDep">Cancelar</button>
+                    <button class="btn" id="btnConfirmarModalDepositar">Gerar QR Code Pix</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- ================= MODAL DE SAQUE ================= -->
     <div id="modalSaqueSistema" class="modal-overlay">
-            <div class="card modal-card modal-card--wide modal-premium modal-arte">
-            <button id="fecharModalSaque" class="modal-close" aria-label="Fechar">&times;</button>
+        <div class="card modal-card modal-card--wide modal-premium modal-ouro">
 
-            <div class="modal-arte__topo"></div>
-
-            <h3>Solicitar Saque</h3>
-            <p class="modal-lead modal-lead--warning">Liberado apenas aos Domingos</p>
-            
-            <div class="modal-info-box">
-                <div class="modal-info-row">
-                    <span>Valor Mínimo:</span>
-                    <strong>R$ 32,50</strong>
+            <header class="mo-header">
+                <button id="fecharModalSaque" class="modal-close" aria-label="Voltar" type="button">&lsaquo;</button>
+                <svg class="mo-header__icone" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H16l2 2.2M4 7.5V17a2.5 2.5 0 0 0 2.5 2.5h11A2.5 2.5 0 0 0 20 17V9.7A2.5 2.5 0 0 0 17.5 7.2H6.5A2.5 2.5 0 0 1 4 7.5Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="16.5" cy="13.4" r="1.2" fill="currentColor"/></svg>
+                <div class="mo-header__texto">
+                    <h3>Carteira</h3>
+                    <p class="modal-lead">Gerencie seu saldo e solicite saques</p>
                 </div>
-                <div class="modal-info-row">
-                    <span>Taxa de Saque:</span>
-                    <strong>14%</strong>
+            </header>
+
+            <div class="mo-banner"><img src="modal-banner.webp" alt="Banca Compartilhada" width="800" height="334"></div>
+
+            <!-- O saldo disponível é inserido aqui pelo script.js -->
+
+            <div class="mo-painel">
+                <p class="modal-lead modal-lead--warning">Saques liberados apenas aos domingos</p>
+
+                <div class="modal-info-box">
+                    <div class="modal-info-row">
+                        <span>Valor Mínimo:</span>
+                        <strong>R$ 32,50</strong>
+                    </div>
+                    <div class="modal-info-row">
+                        <span>Taxa de Saque:</span>
+                        <strong>14%</strong>
+                    </div>
                 </div>
-            </div>
 
-            <div id="saqueChaveInfo" class="modal-info-box modal-info-box--key">
-                <span class="modal-info-row__label">Chave PIX de recebimento:</span>
-                <strong id="saqueChavePix">—</strong>
-              <button type="button" id="btnIrPerfilChave" class="btn-ir-perfil" style="display: none;">Cadastrar chave PIX</button>
-            </div>
+                <h4 class="mo-passo">Passo 1: Destino do Pix</h4>
+                <div id="saqueChaveInfo" class="modal-info-box modal-info-box--key">
+                    <span class="modal-info-row__label">Chave PIX de recebimento:</span>
+                    <strong id="saqueChavePix">—</strong>
+                    <button type="button" id="btnIrPerfilChave" class="btn-ir-perfil" style="display: none;">Cadastrar chave PIX</button>
+                </div>
 
-            <div class="input-group">
-                <label>Valor do Saque (R$)</label>
-                <input type="number" id="modalValorSaque" placeholder="32.50" min="32.50" step="0.01">
-            </div>
-            
-            <div id="resumoValorLiquido" class="amount-note"></div>
+                <h4 class="mo-passo">Passo 2: Valor do saque</h4>
+                <div class="input-group">
+                    <input type="number" id="modalValorSaque" placeholder="32.50" min="32.50" step="0.01" aria-label="Valor do saque (R$)">
+                </div>
+                <div class="mo-rapidos" id="saqueRapidos">
+                    <button type="button" data-valor="min">R$ 32,50</button>
+                    <button type="button" data-valor="50">R$ 50</button>
+                    <button type="button" data-valor="100">R$ 100</button>
+                    <button type="button" data-valor="max">Máximo</button>
+                </div>
 
-                       <div class="modal-actions">
-                <button class="btn btn-outline" id="btnCancelarModalSaque">Cancelar</button>
-                <button class="btn" id="btnConfirmarModalSacar">Solicitar Saque</button>
+                <div id="resumoValorLiquido" class="amount-note"></div>
+
+                <div class="modal-actions">
+                    <button class="btn btn-outline" id="btnCancelarModalSaque">Cancelar</button>
+                    <button class="btn" id="btnConfirmarModalSacar">Solicitar Saque</button>
+                </div>
             </div>
         </div>
     </div>
@@ -997,5 +1021,6 @@
     <script type="module" src="simulador-lucro.js"></script>
     <script src="update-modal.js" defer></script>
     <script type="module" src="inicio-extras.js"></script>
+    <script src="sons-modais.js" defer></script>
 </body>
 </html>
