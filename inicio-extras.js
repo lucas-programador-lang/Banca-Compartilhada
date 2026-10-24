@@ -62,28 +62,39 @@ function renderProjecao() {
     const p = planoSelecionado();
     const serie = serieDe(p);
     const dias = serie.length - 1;
+    const lucro = lucroDe(p);
+    const unidade = p.dias ? 'dias' : 'dias úteis';
 
-    const linhas = PLANOS.map((q) => `
-        <tr class="${q.v === p.v ? 'ix-sel' : ''}">
-            <td>${q.n}</td>
-            <td>${moeda.format(q.v)}</td>
-            <td>${diasDe(q)} ${q.dias ? 'dias' : 'dias úteis'}</td>
-            <td>${moeda.format(lucroDe(q))}</td>
-        </tr>`).join('');
+    // Barras: lucro em % sobre o aporte (compara planos de valores diferentes)
+    const maxPct = Math.max(...PLANOS.map((q) => lucroDe(q) / q.v));
+    const barras = PLANOS.map((q) => {
+        const pct = (lucroDe(q) / q.v) * 100;
+        const larg = Math.max(6, (pct / (maxPct * 100)) * 100);
+        return `
+        <div class="ix-bar ${q.v === p.v ? 'ix-bar--sel' : ''}">
+            <span class="ix-bar__nome">${q.n}</span>
+            <div class="ix-bar__trilho"><div class="ix-bar__fill" style="width:${larg.toFixed(1)}%"></div></div>
+            <span class="ix-bar__val">${moeda.format(lucroDe(q))} <small>${pct.toFixed(0)}%</small></span>
+        </div>`;
+    }).join('');
 
     box.innerHTML = `
         <h3 class="ix-title">Projeção do plano escolhido</h3>
-        <p class="ix-sub">${p.n} — lucro estimado de ${moeda.format(lucroDe(p))} em ${dias} ${p.dias ? 'dias' : 'dias úteis'}</p>
-        ${svgLinha(serie)}
-        <div class="ix-axis"><span>Dia 0</span><span>Dia ${dias}</span></div>
-        ${p.dias ? '<p class="ix-note">Nos ciclos o valor é pago ao final do prazo; a linha mostra a evolução proporcional.</p>' : ''}
-        <h3 class="ix-title ix-title--mt">Comparativo entre planos</h3>
-        <div class="ix-table-wrap">
-            <table class="ix-table">
-                <thead><tr><th>Plano</th><th>Aporte</th><th>Prazo</th><th>Lucro est.</th></tr></thead>
-                <tbody>${linhas}</tbody>
-            </table>
+        <p class="ix-sub">${p.n}: lucro estimado de ${moeda.format(lucro)} em ${dias} ${unidade}</p>
+        <div class="ix-chart">
+            <div class="ix-chart__y">
+                <span>${moeda.format(lucro)}</span>
+                <span>${moeda.format(lucro / 2)}</span>
+                <span>R$ 0,00</span>
+            </div>
+            <div class="ix-chart__plot">${svgLinha(serie)}</div>
         </div>
+        <div class="ix-axis ix-axis--chart"><span>Dia 0</span><span>Dia ${Math.round(dias / 2)}</span><span>Dia ${dias}</span></div>
+        ${p.dias ? '<p class="ix-note">Nos ciclos o valor é pago ao final do prazo; a linha mostra a evolução proporcional.</p>' : ''}
+
+        <h3 class="ix-title ix-title--mt">Comparativo entre planos</h3>
+        <p class="ix-sub">Lucro estimado de cada plano (R$ e % sobre o aporte)</p>
+        <div class="ix-bars">${barras}</div>
         <p class="ix-note">Estimativa baseada nas regras de cada plano. Não é garantia de ganhos.</p>`;
 }
 
