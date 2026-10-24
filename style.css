@@ -4723,32 +4723,31 @@ body.pagina-oculta .plan-card__photo-wrap::after {
 
 .cupom-modal .modal-close {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 10px;
+    right: 10px;
     z-index: 5;
-    width: 38px;
-    height: 38px;
+    width: 28px;
+    height: 28px;
     padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: none;
     border-radius: 50%;
-    border: 2px solid #f2b640;
-    background: rgba(10, 7, 3, 0.85);
-    color: #ffd54a;
-    font-size: 26px;
-    font-weight: 700;
+    background: rgba(0, 0, 0, 0.45);
+    color: #ffe08a;
+    font-size: 20px;
+    font-weight: 400;
     line-height: 1;
-    box-shadow: 0 0 12px rgba(255, 190, 60, 0.55);
+    box-shadow: none;
     cursor: pointer;
-    transition: transform 0.15s ease, background 0.15s ease;
 }
 
 .cupom-modal .modal-close:hover,
 .cupom-modal .modal-close:active {
-    background: #f2b640;
-    color: #1a1004;
-    transform: scale(1.08);
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    transform: none;
 }
 
 .cupom-modal .cupom-tela {
