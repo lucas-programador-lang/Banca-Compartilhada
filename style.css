@@ -4736,6 +4736,7 @@ body.pagina-oculta .plan-card__photo-wrap::after {
 .cupom-modal .cupom-tela {
     position: relative;
     width: 100%;
+    aspect-ratio: 1024 / 1536;
     container-type: inline-size;
 }
 
@@ -4782,3 +4783,23 @@ body.pagina-oculta .plan-card__photo-wrap::after {
     position: absolute;
     left: 20.7%;
     top: 69.6%;
+    width: 58.6%;
+    height: 7%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    border-radius: 2.5cqw;
+    font-size: 5.5cqw;
+    font-weight: 800;
+    color: #fff;
+    background: linear-gradient(180deg, #ffb94a 0%, #f58a1f 100%);
+    box-shadow: 0 0.6cqw 0 #c76a10;
+    cursor: pointer;
+}
+
+.cupom-modal .cupom-botao:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
