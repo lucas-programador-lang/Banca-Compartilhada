@@ -5081,3 +5081,55 @@ body:not(.admin-page) .modal-card.modal-premium {
         font-size: 1.4rem;
     }
 }
+
+
+/* Banner do topo dos modais (Depósito e Saque) */
+.modal-premium .modal-banner {
+    position: relative;
+    height: 150px;
+    margin: -34px -24px 16px;          /* encosta nas bordas do modal */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 18% 70%, #ffd76a 0 7px, #c98a1d 8px 10px, transparent 11px),
+        radial-gradient(circle at 82% 30%, #ffd76a 0 9px, #c98a1d 10px 12px, transparent 13px),
+        radial-gradient(circle at 90% 78%, #ffd76a 0 6px, #c98a1d 7px 9px, transparent 10px),
+        radial-gradient(circle at 8% 25%, #ffd76a 0 5px, #c98a1d 6px 8px, transparent 9px),
+        radial-gradient(circle at 50% 50%, rgba(255, 190, 60, 0.45), transparent 62%),
+        linear-gradient(180deg, #1a1208, #050302);
+    border-bottom: 2px solid #f2d58a;
+    box-shadow: inset 0 -20px 30px -20px rgba(255, 190, 60, 0.5);
+}
+
+.modal-premium .modal-banner__img {
+    height: 128px;
+    width: auto;
+    max-width: 70%;
+    object-fit: contain;
+    filter: drop-shadow(0 0 14px rgba(255, 190, 60, 0.75));
+}
+
+/* O × precisa ficar visível por cima do banner escuro */
+.modal-premium .modal-close {
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.55);
+    color: #ffe08a;
+}
+
+.modal-premium .modal-close:hover {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+}
+
+@media (max-width: 480px) {
+    .modal-premium .modal-banner {
+        margin: -28px -16px 14px;
+        height: 130px;
+    }
+
+    .modal-premium .modal-banner__img {
+        height: 110px;
+    }
+}
