@@ -5740,3 +5740,65 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
     .deposito-v2 .sv-rodape--flex .sv-btn,
     .deposito-v2 .sv-rodape--flex #btnConfirmarModalDepositar { flex: none; width: 100%; }
 }
+
+
+
+/* ==========================================================================
+   Painel admin: barra lateral de abas
+   ========================================================================== */
+.admin-page .admin-layout {
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.admin-page .admin-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 12px;
+    position: sticky;
+    top: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: visible;
+}
+
+.admin-page .admin-sidebar .admin-tab {
+    width: 100%;
+    text-align: left;
+    padding: 11px 14px;
+    border-radius: var(--radius-sm);
+}
+
+.admin-page .admin-sidebar .admin-tab.ativa {
+    box-shadow: 0 6px 18px rgba(196, 136, 73, 0.25);
+}
+
+.admin-page .admin-main {
+    min-width: 0;
+}
+
+/* Celular e tablet: a barra vira uma faixa rolável no topo */
+@media (max-width: 991px) {
+    .admin-page .admin-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .admin-page .admin-sidebar {
+        flex-direction: row;
+        position: static;
+        overflow-x: auto;
+        scrollbar-width: none;
+        padding: 8px;
+    }
+
+    .admin-page .admin-sidebar .admin-tab {
+        width: auto;
+        flex: none;
+    }
+}
