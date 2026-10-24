@@ -368,45 +368,52 @@
         </div>
     </div>
 
-    <script>
+   <script>
 (function () {
+    var layout = document.querySelector('.admin-layout');
     var nav = document.getElementById('adminTabs');
     var bolao = document.getElementById('aba-bolao');
     var filtros = document.getElementById('redeFiltros');
     var btnMenu = document.getElementById('btnMenuAdmin');
     var overlay = document.getElementById('adminOverlay');
-    if (!nav || !bolao) return;
+    if (!nav || !bolao || !btnMenu) return;
 
     var telaPequena = function () { return window.matchMedia('(max-width: 991px)').matches; };
 
-    function abrirMenu() {
+    function abrirGaveta() {
         nav.classList.add('aberta');
         overlay.classList.add('ativo');
         document.body.classList.add('menu-admin-aberto');
         btnMenu.setAttribute('aria-expanded', 'true');
     }
-    function fecharMenu() {
+    function fecharGaveta() {
         nav.classList.remove('aberta');
         overlay.classList.remove('ativo');
         document.body.classList.remove('menu-admin-aberto');
         btnMenu.setAttribute('aria-expanded', 'false');
     }
 
-    if (btnMenu) {
-        btnMenu.addEventListener('click', function () {
-            nav.classList.contains('aberta') ? fecharMenu() : abrirMenu();
-        });
-    }
-    if (overlay) overlay.addEventListener('click', fecharMenu);
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') fecharMenu();
+    // Botão Menu: no celular abre a gaveta; no computador recolhe ou mostra a barra
+    btnMenu.addEventListener('click', function () {
+        if (telaPequena()) {
+            nav.classList.contains('aberta') ? fecharGaveta() : abrirGaveta();
+        } else {
+            var recolhido = layout.classList.toggle('recolhido');
+            btnMenu.setAttribute('aria-expanded', recolhido ? 'false' : 'true');
+        }
     });
 
-    // Ao escolher uma aba no celular, o menu fecha sozinho
+    overlay.addEventListener('click', fecharGaveta);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') fecharGaveta();
+    });
+
+    // No celular, escolher uma aba fecha a gaveta
     nav.addEventListener('click', function (e) {
-        if (e.target.closest('[data-aba]')) fecharMenu();
+        if (e.target.closest('[data-aba]') && telaPequena()) fecharGaveta();
     }, true);
 
+    // Aba Bolão
     nav.addEventListener('click', function (e) {
         var b = e.target.closest('[data-aba]');
         if (!b) return;
