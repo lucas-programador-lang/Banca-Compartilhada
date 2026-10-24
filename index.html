@@ -195,32 +195,62 @@
                     </button>
                 </div>
 
-                <!-- Simulador de lucro (estimativa baseada nos planos da plataforma) -->
-                <aside class="profit-sim" id="simuladorLucro" aria-labelledby="simTitulo">
-                    <div class="profit-sim__head">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="11" x2="8.01" y2="11"/><line x1="12" y1="11" x2="12.01" y2="11"/><line x1="16" y1="11" x2="16.01" y2="11"/><line x1="8" y1="15" x2="8.01" y2="15"/><line x1="12" y1="15" x2="12.01" y2="15"/><line x1="16" y1="15" x2="16.01" y2="15"/><line x1="8" y1="19" x2="12" y2="19"/></svg>
-                        <h3 class="profit-sim__title" id="simTitulo">Simulador de lucro</h3>
+                <!-- Bolão Lotofácil (substitui o antigo Simulador de lucro). Dados editáveis em bolao-lotofacil.js -->
+                <section class="bolao" id="bolaoLotofacil" aria-labelledby="bolaoTitulo">
+                    <h3 class="sr-only" id="bolaoTitulo">Bolão Lotofácil</h3>
+                    <img class="bolao__banner" src="img/bolao-banner.webp" alt="Bolão Lotofácil" width="1024" height="250" loading="lazy" decoding="async">
+
+                    <div class="bolao__premio">
+                        <span class="bolao__premio-label">Prêmio acumulado</span>
+                        <strong id="bolPremio">R$ 0,00</strong>
+                        <small id="bolConcurso"></small>
                     </div>
 
-                    <label class="profit-sim__field" for="simPlano">
-                        <span class="profit-sim__field-label">Escolha o plano</span>
-                        <select id="simPlano" class="profit-sim__select"></select>
-                    </label>
-
-                    <dl class="profit-sim__rows">
-                        <div class="profit-sim__row"><dt>Aporte</dt><dd id="simAporte">R$ 0,00</dd></div>
-                        <div class="profit-sim__row"><dt>Rendimento diário</dt><dd id="simDiario">—</dd></div>
-                        <div class="profit-sim__row"><dt>Prazo estimado</dt><dd id="simPrazo">—</dd></div>
-                    </dl>
-
-                    <div class="profit-sim__result">
-                        <span class="profit-sim__result-label">Lucro estimado</span>
-                        <strong id="simLucro">R$ 0,00</strong>
-                        <small class="profit-sim__result-detail" id="simDetalhe"></small>
+                    <div class="bolao__stats">
+                        <div class="bolao__stat"><span>Pessoas no bolão</span><strong id="bolPessoas">0</strong><small id="bolDeTotal"></small></div>
+                        <div class="bolao__stat"><span>Valor da cota</span><strong id="bolValorCota">R$ 0,00</strong></div>
+                        <div class="bolao__stat"><span>Cotas disponíveis</span><strong id="bolDisponiveis">0</strong></div>
+                        <div class="bolao__stat"><span>Prêmio estimado</span><strong id="bolEstimado">R$ 0,00</strong></div>
                     </div>
 
-                 <p class="profit-sim__note">Simulação baseada nas regras de cada plano. Não é garantia de ganhos.</p>
-                </aside>
+                    <div class="bolao__tabs" role="tablist">
+                        <button type="button" role="tab" class="bolao__tab is-active" data-tab="numeros" aria-selected="true">Seus números</button>
+                        <button type="button" role="tab" class="bolao__tab" data-tab="participantes" aria-selected="false">Participantes</button>
+                        <button type="button" role="tab" class="bolao__tab" data-tab="extrato" aria-selected="false">Extrato</button>
+                    </div>
+
+                    <div class="bolao__panel" data-panel="numeros">
+                        <div class="bolao__escolha-head">
+                            <div>
+                                <h4>Escolha seus números</h4>
+                                <p>Selecione <span id="bolMeta">15</span> números para participar do bolão.</p>
+                            </div>
+                            <div class="bolao__acoes">
+                                <button type="button" class="bolao__mini" id="bolLimpar">Limpar</button>
+                                <button type="button" class="bolao__mini" id="bolAleatorio">Aleatório</button>
+                            </div>
+                        </div>
+                        <div class="bolao__grid"><button type="button" class="bolao__num" data-n="1" aria-pressed="false">01</button><button type="button" class="bolao__num" data-n="2" aria-pressed="false">02</button><button type="button" class="bolao__num" data-n="3" aria-pressed="false">03</button><button type="button" class="bolao__num" data-n="4" aria-pressed="false">04</button><button type="button" class="bolao__num" data-n="5" aria-pressed="false">05</button><button type="button" class="bolao__num" data-n="6" aria-pressed="false">06</button><button type="button" class="bolao__num" data-n="7" aria-pressed="false">07</button><button type="button" class="bolao__num" data-n="8" aria-pressed="false">08</button><button type="button" class="bolao__num" data-n="9" aria-pressed="false">09</button><button type="button" class="bolao__num" data-n="10" aria-pressed="false">10</button><button type="button" class="bolao__num" data-n="11" aria-pressed="false">11</button><button type="button" class="bolao__num" data-n="12" aria-pressed="false">12</button><button type="button" class="bolao__num" data-n="13" aria-pressed="false">13</button><button type="button" class="bolao__num" data-n="14" aria-pressed="false">14</button><button type="button" class="bolao__num" data-n="15" aria-pressed="false">15</button><button type="button" class="bolao__num" data-n="16" aria-pressed="false">16</button><button type="button" class="bolao__num" data-n="17" aria-pressed="false">17</button><button type="button" class="bolao__num" data-n="18" aria-pressed="false">18</button><button type="button" class="bolao__num" data-n="19" aria-pressed="false">19</button><button type="button" class="bolao__num" data-n="20" aria-pressed="false">20</button><button type="button" class="bolao__num" data-n="21" aria-pressed="false">21</button><button type="button" class="bolao__num" data-n="22" aria-pressed="false">22</button><button type="button" class="bolao__num" data-n="23" aria-pressed="false">23</button><button type="button" class="bolao__num" data-n="24" aria-pressed="false">24</button><button type="button" class="bolao__num" data-n="25" aria-pressed="false">25</button></div>
+                        <div class="bolao__contador">Números selecionados: <strong id="bolSelecionados">0/15</strong></div>
+                    </div>
+                    <div class="bolao__panel" data-panel="participantes" hidden><p class="bolao__vazio">Nenhum participante para mostrar ainda.</p></div>
+                    <div class="bolao__panel" data-panel="extrato" hidden><p class="bolao__vazio">Você ainda não tem participações neste bolão.</p></div>
+
+                    <div class="bolao__compra">
+                        <div class="bolao__qtd">
+                            <span>Quantidade de cotas</span>
+                            <div class="bolao__qtd-ctrl">
+                                <button type="button" id="bolMenos" aria-label="Diminuir">−</button>
+                                <output id="bolQtd">1</output>
+                                <button type="button" id="bolMais" aria-label="Aumentar">+</button>
+                            </div>
+                        </div>
+                        <div class="bolao__total"><span>Valor total</span><strong id="bolTotal">R$ 0,00</strong></div>
+                    </div>
+
+                    <button type="button" class="bolao__cta" id="bolParticipar" disabled>Depositar e participar</button>
+                    <p class="bolao__aviso" id="bolAviso" role="status"></p>
+                </section>
             </section>
             
             <!-- ================= ABA INVESTIR ================= -->
@@ -1064,7 +1094,7 @@
     <script type="module" src="script.js"></script>
     <script type="module" src="missoes.js"></script>
     <script type="module" src="comprovante.js"></script>
-    <script type="module" src="simulador-lucro.js"></script>
+    <script type="module" src="bolao-lotofacil.js"></script>
     <script src="update-modal.js" defer></script>
     <script src="sons-modais.js" defer></script>
     <script src="saque-modal.js" defer></script>
