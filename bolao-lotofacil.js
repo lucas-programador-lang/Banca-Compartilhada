@@ -312,7 +312,6 @@ var ROTA_PIX = '/api/bolao/pix/criar';
 
     function criarModal() {
         if (modal) return modal;
-        injetarEstilo();
         var overlay = el('div', 'bolpix'); overlay.hidden = true;
         overlay.setAttribute('role', 'dialog'); overlay.setAttribute('aria-modal', 'true');
         var box = el('div', 'bolpix__box');
