@@ -1190,8 +1190,10 @@ document.addEventListener('DOMContentLoaded', function() {
             boxSaldoModal = document.createElement('div');
             boxSaldoModal.id = 'boxSaldoDisponivelModal';
             boxSaldoModal.className = 'modal-info-box modal-balance-box';
+            const bannerModal = modalSaque.querySelector('.mo-banner');
             const containerInsercao = modalSaque.querySelector('.modal-body') || modalSaque.querySelector('.modal-card');
-            if (containerInsercao) containerInsercao.prepend(boxSaldoModal);
+            if (bannerModal) bannerModal.after(boxSaldoModal);
+            else if (containerInsercao) containerInsercao.prepend(boxSaldoModal);
         }
         if (boxSaldoModal) {
             boxSaldoModal.innerHTML = `<span>Saldo Disponível:</span> <strong>${formatadorMoeda.format(saldoAtualUsuario)}</strong>`;
@@ -1370,6 +1372,26 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 if (boxResumo) boxResumo.classList.remove('ativo');
             }
+        });
+    }
+
+    // Botões de valor rápido do saque (mínimo, 50, 100 e máximo)
+    const rapidosSaque = document.getElementById('saqueRapidos');
+    if (rapidosSaque && inputValSaque) {
+        rapidosSaque.addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-valor]');
+            if (!btn) return;
+            const tipo = btn.getAttribute('data-valor');
+            let valor = tipo === 'min' ? CONFIG.VALOR_SAQUE_MINIMO
+                      : tipo === 'max' ? saldoAtualUsuario
+                      : parseFloat(tipo);
+            valor = Math.floor((Number(valor) || 0) * 100) / 100;
+            inputValSaque.value = valor > 0 ? valor.toFixed(2) : '';
+            inputValSaque.dispatchEvent(new Event('input', { bubbles: true }));
+            rapidosSaque.querySelectorAll('button').forEach(function(b) { b.classList.toggle('ativo', b === btn); });
+        });
+        inputValSaque.addEventListener('input', function(e) {
+            if (e.isTrusted) rapidosSaque.querySelectorAll('button').forEach(function(b) { b.classList.remove('ativo'); });
         });
     }
 
