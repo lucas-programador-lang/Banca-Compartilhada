@@ -5207,3 +5207,47 @@ body:not(.admin-page) .modal-card.modal-premium {
 @media (max-width: 480px) {
     .ix-quotes, .ix-kpis { grid-template-columns: 1fr; }
 }
+
+
+/* Gráfico de linha com eixo Y */
+.ix-chart { display: flex; gap: 8px; align-items: stretch; }
+.ix-chart__y {
+    display: flex; flex-direction: column; justify-content: space-between;
+    min-width: 62px; padding: 2px 0 6px;
+    font-size: 0.68rem; color: var(--text-faint); text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.ix-chart__plot {
+    flex: 1; min-width: 0; border-radius: 12px; overflow: hidden;
+    background:
+        linear-gradient(rgba(196, 136, 73, 0.18) 1px, transparent 1px) 0 0 / 100% 50%,
+        rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(196, 136, 73, 0.2);
+}
+.ix-axis--chart { margin-left: 70px; }
+
+/* Gráfico de barras */
+.ix-bars { display: flex; flex-direction: column; gap: 8px; }
+.ix-bar {
+    display: grid; grid-template-columns: 120px 1fr 118px;
+    align-items: center; gap: 10px; font-size: 0.8rem;
+}
+.ix-bar__nome { color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ix-bar__trilho { height: 12px; border-radius: 999px; background: rgba(0, 0, 0, 0.35); overflow: hidden; }
+.ix-bar__fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, var(--primary-deep), var(--primary));
+    transition: width 0.4s ease;
+}
+.ix-bar__val { text-align: right; color: var(--text-main); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ix-bar__val small { color: var(--text-faint); margin-left: 4px; }
+.ix-bar--sel .ix-bar__nome { color: var(--primary-hover); font-weight: 700; }
+.ix-bar--sel .ix-bar__fill { background: linear-gradient(90deg, var(--primary), var(--primary-hover)); box-shadow: 0 0 12px rgba(242, 206, 151, 0.55); }
+.ix-bar--sel .ix-bar__val { color: var(--primary-hover); font-weight: 700; }
+
+@media (max-width: 480px) {
+    .ix-bar { grid-template-columns: 1fr auto; row-gap: 4px; }
+    .ix-bar__trilho { grid-column: 1 / -1; grid-row: 2; }
+    .ix-chart__y { min-width: 54px; }
+    .ix-axis--chart { margin-left: 62px; }
+}
