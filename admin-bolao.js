@@ -45,6 +45,12 @@ import { ref, onValue, get, update } from 'https://www.gstatic.com/firebasejs/10
         return parseFloat(String(txt).trim().replace(',', '.'));
     }
 
+    // Usa o modal de confirmação do painel; se não existir, cai no aviso do navegador
+    function confirmar(opcoes) {
+        if (typeof window.confirmarAcao === 'function') return window.confirmarAcao(opcoes);
+        return Promise.resolve(window.confirm(opcoes.titulo));
+    }
+
     // ---------- container ----------
     var raiz = document.getElementById('adminBolao');
     if (!raiz) {
@@ -237,7 +243,16 @@ import { ref, onValue, get, update } from 'https://www.gstatic.com/firebasejs/10
         var r = lerFormulario();
         if (r.erro) { msg.textContent = r.erro; return; }
         if (atual && r.mudouConcurso) {
-            var ok = window.confirm('Você mudou o número do concurso de ' + atual.concurso + ' para ' + r.dados.concurso + '.\n\nIsso começa um bolão NOVO e zera as cotas vendidas. As participações do concurso ' + atual.concurso + ' continuam guardadas.\n\nContinuar?');
+            var ok = await confirmar({
+                titulo: 'Começar um bolão novo?',
+                detalhes: [
+                    { rotulo: 'Concurso atual', valor: String(atual.concurso) },
+                    { rotulo: 'Novo concurso', valor: String(r.dados.concurso), destaque: true },
+                    { rotulo: 'Efeito', valor: 'Zera as cotas vendidas. As participações antigas continuam guardadas.' }
+                ],
+                textoConfirmar: 'Criar bolão novo',
+                perigo: true
+            });
             if (!ok) return;
         }
         btnSalvar.disabled = true; msg.textContent = 'Salvando...';
@@ -254,7 +269,13 @@ import { ref, onValue, get, update } from 'https://www.gstatic.com/firebasejs/10
 
     btnFechar.addEventListener('click', async function () {
         if (!atual) { msg.textContent = 'Não há bolão cadastrado.'; return; }
-        if (!window.confirm('Encerrar as vendas agora? Ninguém mais consegue comprar até você reabrir.')) return;
+        var ok = await confirmar({
+            titulo: 'Encerrar vendas agora?',
+            detalhes: [{ rotulo: 'Efeito', valor: 'Ninguém mais consegue comprar até você reabrir.' }],
+            textoConfirmar: 'Encerrar vendas',
+            perigo: true
+        });
+        if (!ok) return;
         try {
             await update(ref(db, 'bolao/atual'), { status: 'fechado' });
             sujo = false;
