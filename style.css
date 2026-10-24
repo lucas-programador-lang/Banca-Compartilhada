@@ -4855,8 +4855,8 @@ body:not(.admin-page) .modal-card.modal-premium {
     background-color: #0b0805;
     background-image: url("cupons-banner.webp");
     background-repeat: no-repeat;
-    background-size: auto 400px;     /* tamanho da arte */
-    background-position: 50% 40%;    /* sobe/desce o recorte */
+    background-size: auto 330px;     /* tamanho da arte */
+    background-position: 50% 44%;    /* sobe/desce o recorte */
 }
 
 /* Tudo abaixo da arte com margem lateral */
@@ -5121,4 +5121,15 @@ body:not(.admin-page) .modal-card.modal-premium {
     body:not(.admin-page) .modal-card.modal-premium {
         max-width: 100%;
     }
+}
+
+
+/* Corrige o autofill escuro do navegador dentro dos modais claros */
+.modal-premium .input-group input:-webkit-autofill,
+.modal-premium .input-group input:-webkit-autofill:hover,
+.modal-premium .input-group input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #3a2a08;
+    -webkit-box-shadow: 0 0 0 1000px #f4e9c3 inset;
+    caret-color: #3a2a08;
+    border-color: #f2b640;
 }
