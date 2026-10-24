@@ -4828,8 +4828,8 @@ body.pagina-oculta .plan-card__photo-wrap::after {
    ========================================================================== */
 
 @keyframes ouroPulso {
-    0%, 100% { box-shadow: 0 0 22px rgba(255, 176, 40, 0.28), 0 0 60px rgba(255, 150, 20, 0.14), inset 0 0 18px rgba(255, 190, 70, 0.08); }
-    50%      { box-shadow: 0 0 34px rgba(255, 190, 60, 0.5),  0 0 90px rgba(255, 150, 20, 0.26), inset 0 0 26px rgba(255, 190, 70, 0.14); }
+    0%, 100% { box-shadow: 0 0 22px rgba(255, 176, 40, 0.13), 0 0 60px rgba(255, 150, 20, 0.06), inset 0 0 18px rgba(255, 190, 70, 0.04); }
+    50%      { box-shadow: 0 0 34px rgba(255, 190, 60, 0.23),  0 0 90px rgba(255, 150, 20, 0.12), inset 0 0 26px rgba(255, 190, 70, 0.06); }
 }
 @keyframes ouroBrilho {
     0%   { transform: translateX(-130%) skewX(-20deg); }
@@ -4845,12 +4845,12 @@ body:not(.admin-page) .modal-card.modal-ouro {
     gap: 12px;
     text-align: left;
     color: #f6e3b4;
-    border: 1.5px solid rgba(255, 200, 90, 0.6);
+    border: 1.5px solid rgba(255, 200, 90, 0.27);
     border-radius: 26px;
     background:
-        radial-gradient(90% 40% at 50% 0%, rgba(255, 170, 40, 0.16), transparent 70%),
+        radial-gradient(90% 40% at 50% 0%, rgba(255, 170, 40, 0.07), transparent 70%),
         linear-gradient(180deg, #1c1308 0%, #0d0804 55%, #080503 100%);
-    animation: ouroPulso 3.6s ease-in-out infinite;
+    animation: ouroPulso 5s ease-in-out infinite;
 }
 .modal-ouro::before, .modal-ouro::after { display: none; }
 .modal-ouro > * { flex-shrink: 0; margin: 0; }
@@ -4871,19 +4871,19 @@ body:not(.admin-page) .modal-card.modal-ouro {
     align-items: center;
     justify-content: center;
     border-radius: 14px;
-    border: 1.5px solid rgba(255, 200, 90, 0.7);
+    border: 1.5px solid rgba(255, 200, 90, 0.32);
     background: linear-gradient(180deg, #2a1c0a, #120b04);
-    color: #ffd778;
+    color: #d9bd7c;
     font-size: 2rem;
     font-weight: 400;
     line-height: 1;
-    box-shadow: 0 0 14px rgba(255, 176, 40, 0.35), inset 0 1px 0 rgba(255, 230, 160, 0.25);
+    box-shadow: 0 0 14px rgba(255, 176, 40, 0.16), inset 0 1px 0 rgba(255, 230, 160, 0.25);
     transition: transform .15s ease, box-shadow .2s ease;
 }
 .modal-ouro .modal-close:hover,
 .modal-ouro .modal-close:focus-visible {
     color: #fff1c4;
-    box-shadow: 0 0 24px rgba(255, 190, 60, 0.7), inset 0 1px 0 rgba(255, 230, 160, 0.35);
+    box-shadow: 0 0 24px rgba(255, 190, 60, 0.32), inset 0 1px 0 rgba(255, 230, 160, 0.35);
 }
 .modal-ouro .modal-close:active { transform: scale(0.93); }
 
@@ -4891,8 +4891,8 @@ body:not(.admin-page) .modal-card.modal-ouro {
     flex: 0 0 auto;
     width: 40px;
     height: 40px;
-    color: #ffc95a;
-    filter: drop-shadow(0 0 8px rgba(255, 190, 60, 0.75));
+    color: #d7ae52;
+    filter: drop-shadow(0 0 8px rgba(255, 190, 60, 0.34));
 }
 .modal-ouro .mo-header__texto { min-width: 0; }
 .modal-ouro .mo-header__texto h3 {
@@ -4903,17 +4903,17 @@ body:not(.admin-page) .modal-card.modal-ouro {
     line-height: 1.1;
     padding: 0;
     text-align: left;
-    background: linear-gradient(180deg, #fff3c4, #ffc23d 60%, #e08d12);
+    background: linear-gradient(180deg, #f3e2b0, #d9aa3e 60%, #b9801a);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px rgba(255, 176, 40, 0.5));
+    filter: drop-shadow(0 0 10px rgba(255, 176, 40, 0.23));
 }
 .modal-ouro .mo-header__texto .modal-lead {
     margin: 2px 0 0;
     font-size: 0.82rem;
     font-weight: 400;
-    color: #f1e3c0;
+    color: #d8ccb0;
     text-align: left;
 }
 
@@ -4923,9 +4923,9 @@ body:not(.admin-page) .modal-card.modal-ouro {
     overflow: hidden;
     padding: 3px;
     border-radius: 20px;
-    border: 1.5px solid rgba(255, 200, 90, 0.65);
+    border: 1.5px solid rgba(255, 200, 90, 0.29);
     background: linear-gradient(180deg, #2a1c0a, #0b0703);
-    box-shadow: 0 0 26px rgba(255, 176, 40, 0.4), inset 0 0 14px rgba(255, 190, 70, 0.25);
+    box-shadow: 0 0 26px rgba(255, 176, 40, 0.18), inset 0 0 14px rgba(255, 190, 70, 0.11);
 }
 .modal-ouro .mo-banner img {
     display: block;
@@ -4938,7 +4938,7 @@ body:not(.admin-page) .modal-card.modal-ouro {
     position: absolute;
     top: 0; bottom: 0; left: 0;
     width: 30%;
-    background: linear-gradient(90deg, transparent, rgba(255, 244, 200, 0.35), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 244, 200, 0.14), transparent);
     animation: ouroBrilho 5s ease-in-out infinite;
     pointer-events: none;
 }
@@ -4950,9 +4950,9 @@ body:not(.admin-page) .modal-card.modal-ouro {
     gap: 12px;
     padding: 14px;
     border-radius: 20px;
-    border: 1.5px solid rgba(255, 200, 90, 0.5);
+    border: 1.5px solid rgba(255, 200, 90, 0.23);
     background: linear-gradient(180deg, rgba(34, 23, 9, 0.85), rgba(10, 6, 3, 0.9));
-    box-shadow: 0 0 22px rgba(255, 176, 40, 0.22), inset 0 0 20px rgba(255, 190, 70, 0.07);
+    box-shadow: 0 0 22px rgba(255, 176, 40, 0.1), inset 0 0 20px rgba(255, 190, 70, 0.03);
 }
 .modal-ouro .mo-painel > * { margin: 0; }
 
@@ -4969,8 +4969,7 @@ body:not(.admin-page) .modal-card.modal-ouro {
     letter-spacing: 0;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #ffd676;
-    text-shadow: 0 0 10px rgba(255, 176, 40, 0.45);
+    color: #dcc58e;
 }
 .modal-ouro .mo-passo { margin-top: 2px; }
 
@@ -4980,8 +4979,8 @@ body:not(.admin-page) .modal-card.modal-ouro {
     flex: 0 0 24px;
     height: 24px;
     border-radius: 7px;
-    background: linear-gradient(180deg, #ffd978, #e9981a) center / 100% no-repeat;
-    box-shadow: 0 0 10px rgba(255, 176, 40, 0.6);
+    background: linear-gradient(180deg, #d9bd7c, #b88a2c) center / 100% no-repeat;
+    box-shadow: 0 0 10px rgba(255, 176, 40, 0.27);
     -webkit-mask: var(--ico) center / 15px no-repeat, linear-gradient(#000, #000);
     -webkit-mask-composite: xor;
     mask: var(--ico) center / 15px no-repeat exclude, linear-gradient(#000, #000);
@@ -4999,11 +4998,11 @@ body:not(.admin-page) .modal-card.modal-ouro {
     font-family: var(--font-body);
     font-size: 1.05rem;
     font-weight: 600;
-    color: #fff4d6;
+    color: #f1e6c8;
     background: linear-gradient(180deg, #120b05, #050302);
-    border: 1.5px solid rgba(255, 200, 90, 0.7);
+    border: 1.5px solid rgba(255, 200, 90, 0.32);
     border-radius: 14px;
-    box-shadow: 0 0 12px rgba(255, 176, 40, 0.2), inset 0 2px 8px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 12px rgba(255, 176, 40, 0.09), inset 0 2px 8px rgba(0, 0, 0, 0.7);
     transition: box-shadow .2s ease, border-color .2s ease, transform .15s ease;
 }
 .modal-ouro .input-group input::placeholder { color: rgba(240, 225, 190, 0.45); font-weight: 400; }
@@ -5012,17 +5011,17 @@ body:not(.admin-page) .modal-card.modal-ouro {
 .modal-ouro .input-group input:focus,
 .modal-ouro .input-group select:focus {
     outline: none;
-    border-color: #ffd36b;
+    border-color: #d9b45a;
     background: linear-gradient(180deg, #120b05, #050302);
-    box-shadow: 0 0 0 3px rgba(255, 190, 60, 0.28), 0 0 26px rgba(255, 190, 60, 0.6), inset 0 2px 8px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 0 3px rgba(255, 190, 60, 0.13), 0 0 26px rgba(255, 190, 60, 0.27), inset 0 2px 8px rgba(0, 0, 0, 0.7);
 }
-.modal-ouro .input-group select option { background: #120b05; color: #fff4d6; }
+.modal-ouro .input-group select option { background: #120b05; color: #f1e6c8; }
 .modal-ouro .input-group input:-webkit-autofill,
 .modal-ouro .input-group input:-webkit-autofill:hover,
 .modal-ouro .input-group input:-webkit-autofill:focus {
-    -webkit-text-fill-color: #fff4d6;
+    -webkit-text-fill-color: #f1e6c8;
     -webkit-box-shadow: 0 0 0 1000px #0b0703 inset;
-    caret-color: #ffd36b;
+    caret-color: #d9b45a;
 }
 
 /* ---------- Caixas de informação ---------- */
@@ -5034,16 +5033,16 @@ body:not(.admin-page) .modal-card.modal-ouro {
     padding: 12px 14px;
     text-align: left;
     font-size: 0.95rem;
-    color: #f1e3c0;
+    color: #d8ccb0;
     background: linear-gradient(180deg, rgba(40, 28, 12, 0.9), rgba(14, 9, 4, 0.95));
-    border: 1.5px solid rgba(255, 200, 90, 0.55);
+    border: 1.5px solid rgba(255, 200, 90, 0.25);
     border-radius: 16px;
-    box-shadow: 0 0 16px rgba(255, 176, 40, 0.22), inset 0 1px 0 rgba(255, 230, 160, 0.14);
+    box-shadow: 0 0 16px rgba(255, 176, 40, 0.1), inset 0 1px 0 rgba(255, 230, 160, 0.14);
 }
 .modal-ouro .modal-info-row { display: flex; justify-content: space-between; gap: 12px; }
 .modal-ouro .modal-info-row strong,
-.modal-ouro .modal-info-box--key strong { color: #ffe29a; font-weight: 800; }
-.modal-ouro .modal-info-box--key .modal-info-row__label { color: #f1e3c0; }
+.modal-ouro .modal-info-box--key strong { color: #e8d4a2; font-weight: 800; }
+.modal-ouro .modal-info-box--key .modal-info-row__label { color: #d8ccb0; }
 .modal-ouro .modal-info-box--key strong.is-missing { color: #ff7a7a; }
 
 /* Saldo disponível (inserido pelo script) */
@@ -5053,14 +5052,13 @@ body:not(.admin-page) .modal-card.modal-ouro {
     justify-content: space-between;
     padding: 16px 18px;
     border-radius: 20px;
-    box-shadow: 0 0 28px rgba(255, 176, 40, 0.38), inset 0 0 18px rgba(255, 190, 70, 0.14);
+    box-shadow: 0 0 28px rgba(255, 176, 40, 0.17), inset 0 0 18px rgba(255, 190, 70, 0.06);
 }
-.modal-ouro .modal-balance-box span { font-size: 0.95rem; color: #f1e3c0; }
+.modal-ouro .modal-balance-box span { font-size: 0.95rem; color: #d8ccb0; }
 .modal-ouro .modal-balance-box strong {
     font-size: 1.9rem;
     font-weight: 800;
-    color: #ffd25a;
-    text-shadow: 0 0 16px rgba(255, 176, 40, 0.7);
+    color: #e6c56a;
 }
 
 /* Aviso "liberado aos domingos" */
@@ -5070,21 +5068,21 @@ body:not(.admin-page) .modal-card.modal-ouro {
     text-align: center;
     font-size: 0.85rem;
     font-weight: 700;
-    color: #ffd676;
-    border: 1px dashed rgba(255, 200, 90, 0.55);
+    color: #dcc58e;
+    border: 1px dashed rgba(255, 200, 90, 0.25);
     border-radius: 12px;
-    background: rgba(255, 176, 40, 0.07);
+    background: rgba(255, 176, 40, 0.03);
 }
 
 /* Botão "Cadastrar chave PIX" */
 .modal-ouro .btn-ir-perfil {
     align-self: flex-start;
     background: linear-gradient(180deg, #2a1c0a, #120b04);
-    border: 1.5px solid rgba(255, 200, 90, 0.7);
-    color: #ffe29a;
-    box-shadow: 0 0 12px rgba(255, 176, 40, 0.3);
+    border: 1.5px solid rgba(255, 200, 90, 0.32);
+    color: #e8d4a2;
+    box-shadow: 0 0 12px rgba(255, 176, 40, 0.14);
 }
-.modal-ouro .btn-ir-perfil:hover { box-shadow: 0 0 22px rgba(255, 190, 60, 0.6); }
+.modal-ouro .btn-ir-perfil:hover { box-shadow: 0 0 22px rgba(255, 190, 60, 0.27); }
 
 /* ---------- Valores rápidos do saque ---------- */
 .modal-ouro .mo-rapidos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
@@ -5094,35 +5092,35 @@ body:not(.admin-page) .modal-card.modal-ouro {
     font-family: var(--font-body);
     font-size: 0.88rem;
     font-weight: 700;
-    color: #ffe29a;
+    color: #e8d4a2;
     background: linear-gradient(180deg, #241807, #0e0803);
-    border: 1.5px solid rgba(255, 200, 90, 0.5);
+    border: 1.5px solid rgba(255, 200, 90, 0.23);
     border-radius: 12px;
-    box-shadow: 0 0 10px rgba(255, 176, 40, 0.18);
+    box-shadow: 0 0 10px rgba(255, 176, 40, 0.08);
     cursor: pointer;
     transition: box-shadow .2s ease, transform .12s ease, border-color .2s ease;
 }
-.modal-ouro .mo-rapidos button:hover { border-color: #ffd070; box-shadow: 0 0 18px rgba(255, 190, 60, 0.5); }
+.modal-ouro .mo-rapidos button:hover { border-color: #ffd070; box-shadow: 0 0 18px rgba(255, 190, 60, 0.23); }
 .modal-ouro .mo-rapidos button:active { transform: scale(0.95); }
 .modal-ouro .mo-rapidos button.ativo {
-    color: #fff4d6;
-    border-color: #ffd36b;
-    box-shadow: 0 0 0 2px rgba(255, 190, 60, 0.35), 0 0 22px rgba(255, 190, 60, 0.7);
+    color: #f1e6c8;
+    border-color: #d9b45a;
+    box-shadow: 0 0 0 2px rgba(255, 190, 60, 0.16), 0 0 22px rgba(255, 190, 60, 0.32);
 }
 
 /* ---------- Resumo do saque ---------- */
 .modal-ouro .amount-note {
     padding: 12px 14px;
-    color: #f1e3c0;
+    color: #d8ccb0;
     background: linear-gradient(180deg, rgba(40, 28, 12, 0.9), rgba(14, 9, 4, 0.95));
-    border: 1.5px solid rgba(255, 200, 90, 0.55);
+    border: 1.5px solid rgba(255, 200, 90, 0.25);
     border-radius: 16px;
-    box-shadow: 0 0 16px rgba(255, 176, 40, 0.22);
+    box-shadow: 0 0 16px rgba(255, 176, 40, 0.1);
 }
-.modal-ouro .amount-note__row { display: flex; justify-content: space-between; color: #f1e3c0; }
-.modal-ouro .amount-note__row + .amount-note__row { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 200, 90, 0.3); }
+.modal-ouro .amount-note__row { display: flex; justify-content: space-between; color: #d8ccb0; }
+.modal-ouro .amount-note__row + .amount-note__row { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255, 200, 90, 0.14); }
 .modal-ouro .amount-note__row--negative { color: #ff9a8a; }
-.modal-ouro .amount-note__row--positive { color: #ffd25a; font-weight: 800; font-size: 1.05rem; text-shadow: 0 0 12px rgba(255, 176, 40, 0.6); }
+.modal-ouro .amount-note__row--positive { color: #e6c56a; font-weight: 800; font-size: 1.05rem; text-shadow: 0 0 12px rgba(255, 176, 40, 0.27); }
 
 /* ---------- Aviso e status ---------- */
 .modal-ouro .modal-alert {
@@ -5132,20 +5130,20 @@ body:not(.admin-page) .modal-card.modal-ouro {
     border-radius: 14px;
     text-align: center;
 }
-.modal-ouro #statusPagamentoPix { color: #ffd676; }
+.modal-ouro #statusPagamentoPix { color: #dcc58e; }
 
 /* ---------- QR Code ---------- */
-.modal-ouro .qr-area__hint { color: #ffd676; }
+.modal-ouro .qr-area__hint { color: #dcc58e; }
 .modal-ouro .qr-area__frame {
     background: #fff;
-    border: 3px solid #ffc95a;
+    border: 3px solid #d7ae52;
     border-radius: 16px;
-    box-shadow: 0 0 26px rgba(255, 176, 40, 0.55);
+    box-shadow: 0 0 26px rgba(255, 176, 40, 0.25);
 }
 .modal-ouro .qr-area__code {
-    color: #f1e3c0;
-    background: rgba(255, 190, 70, 0.08);
-    border: 1px solid rgba(255, 200, 90, 0.35);
+    color: #d8ccb0;
+    background: rgba(255, 190, 70, 0.04);
+    border: 1px solid rgba(255, 200, 90, 0.16);
 }
 
 /* ---------- Botões do rodapé ---------- */
@@ -5169,9 +5167,9 @@ body:not(.admin-page) .modal-card.modal-ouro {
 .modal-ouro .modal-actions .btn:not(.btn-outline),
 .modal-ouro #btnCopiarPix {
     color: #1a1005;
-    border: 1.5px solid #ffe08a;
-    background: linear-gradient(180deg, #ffe58f 0%, #ffc43c 50%, #f0a117 100%);
-    box-shadow: 0 0 22px rgba(255, 190, 60, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    border: 1.5px solid rgba(230, 200, 120, 0.7);
+    background: linear-gradient(180deg, #dcc07a 0%, #c79a38 55%, #a97c22 100%);
+    box-shadow: 0 0 22px rgba(255, 190, 60, 0.29), inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 .modal-ouro .modal-actions .btn:not(.btn-outline)::after,
 .modal-ouro #btnCopiarPix::after {
@@ -5179,25 +5177,25 @@ body:not(.admin-page) .modal-card.modal-ouro {
     position: absolute;
     top: 0; bottom: 0; left: 0;
     width: 35%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
-    animation: ouroBrilho 3.4s ease-in-out infinite;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+    animation: ouroBrilho 5s ease-in-out infinite;
     pointer-events: none;
 }
 .modal-ouro .modal-actions .btn:not(.btn-outline):hover:not(:disabled),
-.modal-ouro #btnCopiarPix:hover { filter: brightness(1.08); box-shadow: 0 0 34px rgba(255, 200, 70, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+.modal-ouro #btnCopiarPix:hover { filter: brightness(1.08); box-shadow: 0 0 34px rgba(255, 200, 70, 0.41), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
 .modal-ouro .modal-actions .btn:active:not(:disabled),
 .modal-ouro #btnCopiarPix:active { transform: scale(0.97); }
 .modal-ouro .modal-actions .btn:disabled { opacity: 0.55; filter: saturate(0.6); box-shadow: none; cursor: not-allowed; }
 .modal-ouro .modal-actions .btn:disabled::after { display: none; }
 
 .modal-ouro .modal-actions .btn-outline {
-    color: #ffe29a;
+    color: #e8d4a2;
     background: linear-gradient(180deg, #241807, #0e0803);
-    border: 1.5px solid rgba(255, 200, 90, 0.7);
-    box-shadow: 0 0 14px rgba(255, 176, 40, 0.3);
+    border: 1.5px solid rgba(255, 200, 90, 0.32);
+    box-shadow: 0 0 14px rgba(255, 176, 40, 0.14);
 }
 .modal-ouro .modal-actions .btn-outline::after { display: none; }
-.modal-ouro .modal-actions .btn-outline:hover { box-shadow: 0 0 24px rgba(255, 190, 60, 0.6); border-color: #ffd070; }
+.modal-ouro .modal-actions .btn-outline:hover { box-shadow: 0 0 24px rgba(255, 190, 60, 0.27); border-color: #ffd070; }
 .modal-ouro #btnCopiarPix { width: 100%; margin-top: 10px; flex: none; }
 
 @media (max-width: 480px) {
