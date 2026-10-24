@@ -228,6 +228,8 @@ function confirmarAcao({
     });
 }
 
+window.confirmarAcao = confirmarAcao;
+
 function renderizarTabelaSaques(saques, usuarios) {
     const tbody = document.getElementById('tabelaSaquesAdmin');
     if (!tbody) return;
