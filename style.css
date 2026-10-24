@@ -5867,3 +5867,228 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
         overflow: hidden;
     }
 }
+
+
+/* ==========================================================================
+   Painel admin: tabela do Bolão Lotofácil
+   ========================================================================== */
+#adminBolao {
+    margin: 0 0 24px;
+    padding: 22px;
+    background:
+        radial-gradient(90% 60% at 100% 0%, rgba(196, 136, 73, 0.10), transparent 65%),
+        var(--card-bg);
+    border: 1px solid rgba(196, 136, 73, 0.22);
+    border-radius: 20px;
+    box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(242, 206, 151, 0.08);
+    color: var(--text-main);
+}
+
+#adminBolao h2 {
+    text-align: left;
+    font-size: 1.2rem;
+    margin: 0 0 4px;
+    color: var(--primary-hover);
+}
+
+#adminBolao h2::after {
+    display: none;
+}
+
+#adminBolao h3 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--primary-hover);
+    margin: 26px 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(196, 136, 73, 0.16);
+}
+
+#adminBolao p {
+    color: var(--text-muted);
+    font-size: 0.86rem;
+}
+
+/* Campos do formulário */
+#adminBolao .abol__grade {
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px 16px;
+}
+
+#adminBolao .abol__campo label {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 500;
+    opacity: 1;
+}
+
+#adminBolao .abol__campo input,
+#adminBolao .abol__campo select {
+    background: var(--bg-color-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    padding: 11px 12px;
+    font-size: 0.92rem;
+}
+
+#adminBolao .abol__campo input:focus,
+#adminBolao .abol__campo select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+#adminBolao .abol__campo small {
+    color: var(--text-faint);
+    opacity: 1;
+}
+
+/* Botões */
+#adminBolao .abol__btn {
+    border-radius: var(--radius-sm);
+    padding: 11px 18px;
+    font-size: 0.86rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: linear-gradient(135deg, var(--primary-deep), var(--primary) 55%, var(--primary-hover));
+    color: #17100a;
+    box-shadow: 0 10px 24px rgba(138, 84, 41, 0.35);
+}
+
+#adminBolao .abol__btn--sec {
+    background: var(--card-bg-hover);
+    color: var(--primary-hover);
+    border: 1px solid var(--border-color-strong);
+    box-shadow: none;
+}
+
+#adminBolao .abol__btn--perigo {
+    background: linear-gradient(135deg, #b8383d, var(--danger));
+    color: #fff;
+    box-shadow: 0 10px 24px rgba(236, 91, 96, 0.25);
+}
+
+#adminBolao .abol__acoes {
+    gap: 10px;
+}
+
+#adminBolao .abol__msg {
+    color: var(--text-muted);
+    font-size: 0.86rem;
+}
+
+/* Chips de resumo */
+#adminBolao .abol__resumo {
+    gap: 10px;
+    margin: 14px 0;
+}
+
+#adminBolao .abol__chip {
+    background: var(--bg-color-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    min-width: 120px;
+}
+
+#adminBolao .abol__chip strong {
+    color: var(--primary-hover);
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Tabela: cabeçalho fixo, listras, rolagem interna */
+#adminBolao .abol__rolagem {
+    margin-top: 10px;
+    max-height: 440px;
+    overflow: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-color-elevated);
+}
+
+#adminBolao table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.86rem;
+}
+
+#adminBolao thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding: 12px 14px;
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color-strong);
+    white-space: nowrap;
+}
+
+#adminBolao tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+#adminBolao tbody tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.018);
+}
+
+#adminBolao tbody tr:hover td {
+    background: var(--card-bg-hover);
+}
+
+#adminBolao tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Números escolhidos: pílulas em fonte monoespaçada */
+#adminBolao td.abol__nums {
+    font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    color: var(--primary-hover);
+    white-space: normal;
+    min-width: 260px;
+    line-height: 1.9;
+}
+
+#adminBolao td:nth-child(3),
+#adminBolao td:nth-child(4) {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+#adminBolao th:nth-child(3),
+#adminBolao th:nth-child(4) {
+    text-align: right;
+}
+
+/* Celular: a tabela rola na horizontal dentro do bloco, sem quebrar a tela */
+@media (max-width: 600px) {
+    #adminBolao {
+        padding: 16px;
+        border-radius: 16px;
+    }
+
+    #adminBolao .abol__chip {
+        min-width: 0;
+        flex: 1 1 44%;
+    }
+}
