@@ -1503,11 +1503,23 @@ document.addEventListener('DOMContentLoaded', function() {
         if (overlay) overlay.classList.remove('ativo');
     }
 
-    // Converte "#/carteira" em "view-carteira" (e vice-versa)
-    function abaDoHash() {
-        const hash = window.location.hash.replace(/^#\/?/, '');
-        const id = hash ? 'view-' + hash : ABA_PADRAO;
+    // Links antigos (#/carteira) viram a URL limpa (/carteira)
+    (function migrarHashAntigo() {
+        const h = window.location.hash.replace(/^#\/?/, '');
+        if (h && /^[a-z-]+$/i.test(h) && document.getElementById('view-' + h.toLowerCase())) {
+            history.replaceState(null, '', '/' + h.toLowerCase());
+        }
+    })();
+
+    // Converte "/carteira" em "view-carteira"
+    function abaDaUrl() {
+        const caminho = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+        const id = caminho && caminho !== 'index.html' && caminho !== 'index' ? 'view-' + caminho : ABA_PADRAO;
         return document.getElementById(id) ? id : ABA_PADRAO;
+    }
+
+    function urlDaAba(targetId) {
+        return targetId === ABA_PADRAO ? '/' : '/' + targetId.replace(/^view-/, '');
     }
 
     function mostrarAba(targetId) {
@@ -1520,24 +1532,28 @@ document.addEventListener('DOMContentLoaded', function() {
         fecharMenuMobile();
     }
 
-    // Clique no menu: troca o hash (isso já dispara o hashchange abaixo)
+    // Navega sem recarregar a página
+    function irParaAba(targetId) {
+        const novaUrl = urlDaAba(targetId);
+        if (window.location.pathname !== novaUrl) {
+            history.pushState({ aba: targetId }, '', novaUrl);
+        }
+        mostrarAba(targetId);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Clique no menu
     navItems.forEach(function(item) {
         item.addEventListener('click', function(e) {
             e.preventDefault();
             const targetId = this.getAttribute('data-target');
-            if (!targetId) return;
-            const novoHash = '#/' + targetId.replace(/^view-/, '');
-            if (window.location.hash === novoHash) {
-                mostrarAba(targetId);
-            } else {
-                window.location.hash = novoHash;
-            }
+            if (targetId) irParaAba(targetId);
         });
     });
 
-    // Botão voltar, link direto e troca de hash caem aqui
-    window.addEventListener('hashchange', function() {
-        mostrarAba(abaDoHash());
+    // Botão voltar/avançar do navegador
+    window.addEventListener('popstate', function() {
+        mostrarAba(abaDaUrl());
     });
 
     if (btnAbrirMenuMobile) {
@@ -1549,10 +1565,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (overlay) overlay.addEventListener('click', fecharMenuMobile);
 
     // Atalhos da aba Início (Rendimento, Histórico, Ciclos)
-    function irParaAba(targetId) {
-        window.location.hash = '#/' + targetId.replace(/^view-/, '');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
 
     const btnAcessoRendimento = document.getElementById('btnAcessoRendimento');
     if (btnAcessoRendimento) btnAcessoRendimento.addEventListener('click', function() { irParaAba('view-investir'); });
@@ -1585,8 +1597,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Abre a aba certa ao carregar (ex.: link direto para #/ciclos)
-    mostrarAba(abaDoHash());
+    // Abre a aba certa ao carregar (ex.: link direto para /ciclos)
+    mostrarAba(abaDaUrl());
 });
 
 document.addEventListener('visibilitychange', function() {
