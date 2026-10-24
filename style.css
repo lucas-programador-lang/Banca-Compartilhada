@@ -5133,3 +5133,66 @@ body:not(.admin-page) .modal-card.modal-premium {
         height: 110px;
     }
 }
+
+
+
+/* ==========================================================================
+   Modais de Depósito e Saque — topo com a arte do cupom (cavalo + BANCA)
+   ========================================================================== */
+
+body:not(.admin-page) .modal-card.modal-premium.modal-arte {
+    padding: 0 0 24px;
+    border: 2px solid rgba(255, 200, 90, 0.55);
+    border-radius: 22px;
+    max-width: 420px;
+    background:
+        linear-gradient(90deg,
+            #0b0805 0 13.7%,
+            #f8ecc8 13.7% 86.3%,
+            #0b0805 86.3% 100%);
+    box-shadow: 0 0 40px rgba(255, 170, 40, 0.35);
+}
+
+/* Topo: recorte do cupons-banner.webp mostrando só o cavalo e o nome */
+.modal-arte__topo {
+    width: 100%;
+    aspect-ratio: 1024 / 530;
+    background: url("cupons-banner.webp") no-repeat;
+    background-size: 100% auto;
+    background-position: 0 41.2%;   /* ajuste fino: sobe/desce o recorte */
+    margin: 0 0 14px;
+}
+
+/* Tudo que vem depois do topo fica dentro do painel creme */
+.modal-arte > :not(.modal-arte__topo):not(.modal-close):not(#modalToast) {
+    margin-left: 13.7%;
+    margin-right: 13.7%;
+}
+
+/* Aviso de valor mínimo fica por cima da arte */
+.modal-arte #modalToast {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    right: 52px;
+    z-index: 6;
+}
+
+.modal-arte .modal-close {
+    z-index: 6;
+}
+
+.modal-arte > h3 {
+    margin-top: 0;
+}
+
+/* Painel fica mais estreito: botões do rodapé um embaixo do outro no celular */
+@media (max-width: 480px) {
+    body:not(.admin-page) .modal-card.modal-premium.modal-arte {
+        padding-bottom: 18px;
+    }
+
+    .modal-arte .modal-actions {
+        flex-direction: column-reverse;
+    }
+}
