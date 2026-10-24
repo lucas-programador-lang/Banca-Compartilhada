@@ -5350,31 +5350,32 @@ body:not(.admin-page) .modal-card.modal-ouro {
 
 
 /* ==========================================================================
-   Modal de Saque v2 — teclado numérico + etapas (Valor → Revisar)
+   Modais de Saque e Depósito v2 (base compartilhada: .saque-v2 / .deposito-v2)
+   Saque: teclado numérico + etapas (Valor → Revisar)
    Usa a base .modal-ouro (cartão dourado, sons) e só sobrescreve o necessário.
    JS: saque-modal.js
    ========================================================================== */
-.saque-v2 [hidden] { display: none !important; }
+:is(.saque-v2, .deposito-v2) [hidden] { display: none !important; }
 
-body:not(.admin-page) .modal-card.saque-v2 {
+body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
     max-width: 440px;
     padding: 16px;
     gap: 14px;
     max-height: calc(100vh - 2 * var(--space-md));
     max-height: calc(100dvh - 2 * var(--space-md));
 }
-.saque-v2 .sv-etapa { display: flex; flex-direction: column; gap: 14px; }
-.saque-v2 .sv-etapa > * { margin: 0; }
+:is(.saque-v2, .deposito-v2) .sv-etapa { display: flex; flex-direction: column; gap: 14px; }
+:is(.saque-v2, .deposito-v2) .sv-etapa > * { margin: 0; }
 
 /* ---------- Cabeçalho ---------- */
-.saque-v2 .sv-header {
+:is(.saque-v2, .deposito-v2) .sv-header {
     display: grid;
     grid-template-columns: 46px 1fr 46px;
     align-items: center;
     gap: 10px;
 }
-.saque-v2 .sv-header .modal-close { font-size: 1.7rem; padding: 0 0 2px; }
-.saque-v2 .sv-header h3 {
+:is(.saque-v2, .deposito-v2) .sv-header .modal-close { font-size: 1.7rem; padding: 0 0 2px; }
+:is(.saque-v2, .deposito-v2) .sv-header h3 {
     margin: 0;
     padding: 0;
     display: flex;
@@ -5387,10 +5388,10 @@ body:not(.admin-page) .modal-card.saque-v2 {
     color: #f6ecd6;
     text-align: center;
 }
-.saque-v2 .sv-header h3 svg { width: 22px; height: 22px; color: #e0b24f; flex: 0 0 auto; }
+:is(.saque-v2, .deposito-v2) .sv-header h3 svg { width: 22px; height: 22px; color: #e0b24f; flex: 0 0 auto; }
 
 /* ---------- Indicador de etapas ---------- */
-.saque-v2 .sv-passos {
+:is(.saque-v2, .deposito-v2) .sv-passos {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -5398,7 +5399,7 @@ body:not(.admin-page) .modal-card.saque-v2 {
     padding: 0 4px;
     list-style: none;
 }
-.saque-v2 .sv-passo {
+:is(.saque-v2, .deposito-v2) .sv-passo {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -5406,7 +5407,7 @@ body:not(.admin-page) .modal-card.saque-v2 {
     font-weight: 500;
     color: #8f9bb3;
 }
-.saque-v2 .sv-passo__num {
+:is(.saque-v2, .deposito-v2) .sv-passo__num {
     display: grid;
     place-items: center;
     width: 26px;
@@ -5418,28 +5419,28 @@ body:not(.admin-page) .modal-card.saque-v2 {
     background: #0e0a05;
     border: 1.5px solid rgba(255, 200, 90, 0.2);
 }
-.saque-v2 .sv-passo.is-ativo { color: #f0c466; }
-.saque-v2 .sv-passo.is-ativo .sv-passo__num {
+:is(.saque-v2, .deposito-v2) .sv-passo.is-ativo { color: #f0c466; }
+:is(.saque-v2, .deposito-v2) .sv-passo.is-ativo .sv-passo__num {
     color: #1b1206;
     background: linear-gradient(180deg, #f6d77f, #d9a43a);
     border-color: #f0c466;
     box-shadow: 0 0 14px rgba(255, 190, 60, 0.35);
 }
-.saque-v2 .sv-passo.is-feito { color: #e8d4a2; }
-.saque-v2 .sv-passo.is-feito .sv-passo__num {
+:is(.saque-v2, .deposito-v2) .sv-passo.is-feito { color: #e8d4a2; }
+:is(.saque-v2, .deposito-v2) .sv-passo.is-feito .sv-passo__num {
     font-size: 0;
     border-color: #d9b45a;
     background: #1c1308;
 }
-.saque-v2 .sv-passo.is-feito .sv-passo__num::before { content: "\2713"; font-size: 0.85rem; color: #f0c466; }
-.saque-v2 .sv-passos__linha {
+:is(.saque-v2, .deposito-v2) .sv-passo.is-feito .sv-passo__num::before { content: "\2713"; font-size: 0.85rem; color: #f0c466; }
+:is(.saque-v2, .deposito-v2) .sv-passos__linha {
     flex: 1;
     height: 1px;
     background: linear-gradient(90deg, rgba(255, 200, 90, 0.35), rgba(255, 200, 90, 0.08));
 }
 
 /* ---------- Saldo ---------- */
-.saque-v2 .sv-saldo {
+:is(.saque-v2, .deposito-v2) .sv-saldo {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -5450,21 +5451,21 @@ body:not(.admin-page) .modal-card.saque-v2 {
     background: linear-gradient(180deg, rgba(40, 28, 12, 0.9), rgba(14, 9, 4, 0.95));
     box-shadow: 0 0 22px rgba(255, 176, 40, 0.12), inset 0 1px 0 rgba(255, 230, 160, 0.1);
 }
-.saque-v2 .sv-saldo span {
+:is(.saque-v2, .deposito-v2) .sv-saldo span {
     font-size: 0.74rem;
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #a99572;
 }
-.saque-v2 .sv-saldo strong {
+:is(.saque-v2, .deposito-v2) .sv-saldo strong {
     font-size: 1.45rem;
     font-weight: 800;
     color: #f0c466;
     text-shadow: 0 0 14px rgba(255, 176, 40, 0.3);
 }
 
-.saque-v2 .sv-aviso {
+:is(.saque-v2, .deposito-v2) .sv-aviso {
     padding: 8px 12px;
     text-align: center;
     font-size: 0.85rem;
@@ -5476,7 +5477,7 @@ body:not(.admin-page) .modal-card.saque-v2 {
 }
 
 /* ---------- Valor ---------- */
-.saque-v2 .sv-pergunta {
+:is(.saque-v2, .deposito-v2) .sv-pergunta {
     text-align: center;
     font-size: 0.78rem;
     font-weight: 500;
@@ -5484,7 +5485,7 @@ body:not(.admin-page) .modal-card.saque-v2 {
     text-transform: uppercase;
     color: #8f9bb3;
 }
-.saque-v2 .sv-valor {
+:is(.saque-v2, .deposito-v2) .sv-valor {
     text-align: center;
     font-size: 2.7rem;
     font-weight: 800;
@@ -5497,36 +5498,36 @@ body:not(.admin-page) .modal-card.saque-v2 {
     filter: drop-shadow(0 0 12px rgba(255, 176, 40, 0.3));
     transition: opacity .2s ease;
 }
-.saque-v2 .sv-valor.is-vazio { opacity: 0.4; }
-.saque-v2 .sv-valor.is-longo { font-size: 2.2rem; }
-.saque-v2 .sv-valor.is-erro {
+:is(.saque-v2, .deposito-v2) .sv-valor.is-vazio { opacity: 0.4; }
+:is(.saque-v2, .deposito-v2) .sv-valor.is-longo { font-size: 2.2rem; }
+:is(.saque-v2, .deposito-v2) .sv-valor.is-erro {
     background: linear-gradient(180deg, #ffb4a8, #ee6b5c);
     -webkit-background-clip: text;
     background-clip: text;
     filter: drop-shadow(0 0 12px rgba(236, 91, 96, 0.25));
 }
-.saque-v2 .sv-regra {
+:is(.saque-v2, .deposito-v2) .sv-regra {
     text-align: center;
     font-size: 0.78rem;
     color: #a99572;
     margin-top: -6px;
 }
-.saque-v2 .sv-regra.is-erro { color: #ff8e7e; font-weight: 700; }
+:is(.saque-v2, .deposito-v2) .sv-regra.is-erro { color: #ff8e7e; font-weight: 700; }
 
 /* ---------- Atalhos de valor ---------- */
-.saque-v2 .sv-rapidos button { height: 40px; font-size: 0.85rem; font-weight: 500; }
-.saque-v2 .sv-rapidos button.ativo {
+:is(.saque-v2, .deposito-v2) .sv-rapidos button { height: 40px; font-size: 0.85rem; font-weight: 500; }
+:is(.saque-v2, .deposito-v2) .sv-rapidos button.ativo {
     color: #f6d77f;
     background: linear-gradient(180deg, #2c1e08, #130c03);
 }
 
 /* ---------- Teclado numérico ---------- */
-.saque-v2 .sv-teclado {
+:is(.saque-v2, .deposito-v2) .sv-teclado {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 }
-.saque-v2 .sv-teclado button {
+:is(.saque-v2, .deposito-v2) .sv-teclado button {
     height: 56px;
     display: grid;
     place-items: center;
@@ -5542,18 +5543,18 @@ body:not(.admin-page) .modal-card.saque-v2 {
     -webkit-tap-highlight-color: transparent;
     transition: border-color .15s ease, box-shadow .15s ease, transform .1s ease, background .15s ease;
 }
-.saque-v2 .sv-teclado button:hover { border-color: rgba(255, 208, 112, 0.5); }
-.saque-v2 .sv-teclado button:active {
+:is(.saque-v2, .deposito-v2) .sv-teclado button:hover { border-color: rgba(255, 208, 112, 0.5); }
+:is(.saque-v2, .deposito-v2) .sv-teclado button:active {
     transform: scale(0.95);
     border-color: #d9b45a;
     background: linear-gradient(180deg, #1c1308, #0b0703);
     box-shadow: 0 0 16px rgba(255, 190, 60, 0.25);
 }
-.saque-v2 .sv-teclado button:focus-visible { outline: 2px solid #d9b45a; outline-offset: 2px; }
-.saque-v2 .sv-teclado svg { width: 24px; height: 24px; color: #cdbb94; }
+:is(.saque-v2, .deposito-v2) .sv-teclado button:focus-visible { outline: 2px solid #d9b45a; outline-offset: 2px; }
+:is(.saque-v2, .deposito-v2) .sv-teclado svg { width: 24px; height: 24px; color: #cdbb94; }
 
 /* ---------- Resumo (você recebe / taxa) ---------- */
-.saque-v2 .sv-resumo {
+:is(.saque-v2, .deposito-v2) .sv-resumo {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
@@ -5563,14 +5564,14 @@ body:not(.admin-page) .modal-card.saque-v2 {
     border: 1px solid rgba(255, 200, 90, 0.18);
     background: linear-gradient(180deg, rgba(26, 18, 8, 0.8), rgba(8, 5, 2, 0.9));
 }
-.saque-v2 .sv-resumo span { display: block; font-size: 0.78rem; color: #a99572; margin-bottom: 2px; }
-.saque-v2 .sv-resumo strong { font-size: 1.15rem; font-weight: 800; }
-.saque-v2 .sv-resumo__esq strong { color: #f0c466; }
-.saque-v2 .sv-resumo__dir { text-align: right; }
-.saque-v2 .sv-resumo__dir strong { font-size: 0.95rem; color: #d8ccb0; }
+:is(.saque-v2, .deposito-v2) .sv-resumo span { display: block; font-size: 0.78rem; color: #a99572; margin-bottom: 2px; }
+:is(.saque-v2, .deposito-v2) .sv-resumo strong { font-size: 1.15rem; font-weight: 800; }
+:is(.saque-v2, .deposito-v2) .sv-resumo__esq strong { color: #f0c466; }
+:is(.saque-v2, .deposito-v2) .sv-resumo__dir { text-align: right; }
+:is(.saque-v2, .deposito-v2) .sv-resumo__dir strong { font-size: 0.95rem; color: #d8ccb0; }
 
 /* ---------- Cartão da chave PIX ---------- */
-.saque-v2 .sv-pix {
+:is(.saque-v2, .deposito-v2) .sv-pix {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -5585,8 +5586,8 @@ body:not(.admin-page) .modal-card.saque-v2 {
     cursor: pointer;
     transition: border-color .2s ease, box-shadow .2s ease;
 }
-.saque-v2 .sv-pix:hover { border-color: rgba(255, 208, 112, 0.5); }
-.saque-v2 .sv-pix__icone {
+:is(.saque-v2, .deposito-v2) .sv-pix:hover { border-color: rgba(255, 208, 112, 0.5); }
+:is(.saque-v2, .deposito-v2) .sv-pix__icone {
     flex: 0 0 46px;
     height: 46px;
     display: grid;
@@ -5596,10 +5597,10 @@ body:not(.admin-page) .modal-card.saque-v2 {
     background: #1a1208;
     border: 1px solid rgba(255, 200, 90, 0.2);
 }
-.saque-v2 .sv-pix__icone svg { width: 24px; height: 24px; }
-.saque-v2 .sv-pix__texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.saque-v2 .sv-pix__texto small { font-size: 0.75rem; color: #a99572; }
-.saque-v2 .sv-pix__texto strong {
+:is(.saque-v2, .deposito-v2) .sv-pix__icone svg { width: 24px; height: 24px; }
+:is(.saque-v2, .deposito-v2) .sv-pix__texto { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+:is(.saque-v2, .deposito-v2) .sv-pix__texto small { font-size: 0.75rem; color: #a99572; }
+:is(.saque-v2, .deposito-v2) .sv-pix__texto strong {
     font-size: 1rem;
     font-weight: 700;
     color: #f6ecd6;
@@ -5607,12 +5608,12 @@ body:not(.admin-page) .modal-card.saque-v2 {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.saque-v2 .sv-pix__seta { flex: 0 0 18px; width: 18px; height: 18px; color: #a99572; }
-.saque-v2 .sv-pix.is-missing { border-style: dashed; border-color: rgba(255, 130, 110, 0.55); }
-.saque-v2 .sv-pix.is-missing .sv-pix__texto strong { color: #ff9a8a; }
+:is(.saque-v2, .deposito-v2) .sv-pix__seta { flex: 0 0 18px; width: 18px; height: 18px; color: #a99572; }
+:is(.saque-v2, .deposito-v2) .sv-pix.is-missing { border-style: dashed; border-color: rgba(255, 130, 110, 0.55); }
+:is(.saque-v2, .deposito-v2) .sv-pix.is-missing .sv-pix__texto strong { color: #ff9a8a; }
 
 /* ---------- Botões ---------- */
-.saque-v2 .sv-rodape {
+:is(.saque-v2, .deposito-v2) .sv-rodape {
     position: sticky;
     bottom: 0;
     z-index: 2;
@@ -5620,8 +5621,8 @@ body:not(.admin-page) .modal-card.saque-v2 {
     padding: 10px 0 16px;
     background: linear-gradient(180deg, rgba(8, 5, 3, 0), #090603 34%);
 }
-.saque-v2 .sv-rodape--duplo { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; }
-.saque-v2 .sv-btn {
+:is(.saque-v2, .deposito-v2) .sv-rodape--duplo { display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; }
+:is(.saque-v2, .deposito-v2) .sv-btn {
     position: relative;
     width: 100%;
     height: 56px;
@@ -5638,39 +5639,39 @@ body:not(.admin-page) .modal-card.saque-v2 {
     touch-action: manipulation;
     transition: transform .12s ease, box-shadow .2s ease, filter .2s ease;
 }
-.saque-v2 .sv-btn svg { width: 20px; height: 20px; }
-.saque-v2 .sv-btn:active:not(:disabled) { transform: scale(0.98); }
-.saque-v2 .sv-btn--principal {
+:is(.saque-v2, .deposito-v2) .sv-btn svg { width: 20px; height: 20px; }
+:is(.saque-v2, .deposito-v2) .sv-btn:active:not(:disabled) { transform: scale(0.98); }
+:is(.saque-v2, .deposito-v2) .sv-btn--principal {
     color: #1b1206;
     border: 1px solid #f0c466;
     background: linear-gradient(180deg, #f6d77f, #d9a43a 55%, #b9801a);
     box-shadow: 0 0 22px rgba(255, 176, 40, 0.3), inset 0 1px 0 rgba(255, 244, 200, 0.6);
 }
-.saque-v2 .sv-btn--principal:hover:not(:disabled) { filter: brightness(1.07); box-shadow: 0 0 30px rgba(255, 190, 60, 0.45), inset 0 1px 0 rgba(255, 244, 200, 0.6); }
-.saque-v2 .sv-btn--principal:disabled {
+:is(.saque-v2, .deposito-v2) .sv-btn--principal:hover:not(:disabled) { filter: brightness(1.07); box-shadow: 0 0 30px rgba(255, 190, 60, 0.45), inset 0 1px 0 rgba(255, 244, 200, 0.6); }
+:is(.saque-v2, .deposito-v2) .sv-btn--principal:disabled {
     color: rgba(20, 13, 4, 0.8);
     border-color: rgba(255, 200, 90, 0.2);
     background: linear-gradient(180deg, #7d6330, #4f3a17);
     box-shadow: none;
     cursor: not-allowed;
 }
-.saque-v2 .sv-btn--secundario {
+:is(.saque-v2, .deposito-v2) .sv-btn--secundario {
     color: #e8d4a2;
     border: 1.5px solid rgba(255, 200, 90, 0.32);
     background: linear-gradient(180deg, #2a1c0a, #120b04);
 }
-.saque-v2 .sv-btn--secundario:hover { border-color: #ffd070; }
-.saque-v2 .sv-btn:focus-visible { outline: 2px solid #f6d77f; outline-offset: 2px; }
+:is(.saque-v2, .deposito-v2) .sv-btn--secundario:hover { border-color: #ffd070; }
+:is(.saque-v2, .deposito-v2) .sv-btn:focus-visible { outline: 2px solid #f6d77f; outline-offset: 2px; }
 
 /* ---------- Revisão ---------- */
-.saque-v2 .sv-revisao {
+:is(.saque-v2, .deposito-v2) .sv-revisao {
     border-radius: 18px;
     border: 1.5px solid rgba(255, 200, 90, 0.25);
     background: linear-gradient(180deg, rgba(40, 28, 12, 0.9), rgba(14, 9, 4, 0.95));
     box-shadow: 0 0 18px rgba(255, 176, 40, 0.1);
     overflow: hidden;
 }
-.saque-v2 .sv-revisao__linha {
+:is(.saque-v2, .deposito-v2) .sv-revisao__linha {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -5679,22 +5680,176 @@ body:not(.admin-page) .modal-card.saque-v2 {
     color: #d8ccb0;
     font-size: 0.95rem;
 }
-.saque-v2 .sv-revisao__linha + .sv-revisao__linha { border-top: 1px solid rgba(255, 200, 90, 0.14); }
-.saque-v2 .sv-revisao__linha strong { color: #f6ecd6; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
-.saque-v2 .sv-revisao__linha--taxa strong { color: #ff9a8a; }
-.saque-v2 .sv-revisao__linha--total { padding: 16px; background: rgba(255, 176, 40, 0.06); }
-.saque-v2 .sv-revisao__linha--total span { color: #e8d4a2; font-weight: 700; }
-.saque-v2 .sv-revisao__linha--total strong { font-size: 1.5rem; font-weight: 800; color: #f0c466; text-shadow: 0 0 14px rgba(255, 176, 40, 0.3); }
-.saque-v2 .sv-nota { text-align: center; font-size: 0.8rem; color: #a99572; }
+:is(.saque-v2, .deposito-v2) .sv-revisao__linha + .sv-revisao__linha { border-top: 1px solid rgba(255, 200, 90, 0.14); }
+:is(.saque-v2, .deposito-v2) .sv-revisao__linha strong { color: #f6ecd6; font-weight: 700; text-align: right; overflow-wrap: anywhere; }
+:is(.saque-v2, .deposito-v2) .sv-revisao__linha--taxa strong { color: #ff9a8a; }
+:is(.saque-v2, .deposito-v2) .sv-revisao__linha--total { padding: 16px; background: rgba(255, 176, 40, 0.06); }
+:is(.saque-v2, .deposito-v2) .sv-revisao__linha--total span { color: #e8d4a2; font-weight: 700; }
+:is(.saque-v2, .deposito-v2) .sv-revisao__linha--total strong { font-size: 1.5rem; font-weight: 800; color: #f0c466; text-shadow: 0 0 14px rgba(255, 176, 40, 0.3); }
+:is(.saque-v2, .deposito-v2) .sv-nota { text-align: center; font-size: 0.8rem; color: #a99572; }
 
 /* Telas baixas: teclado mais compacto para caber sem rolar tanto */
 @media (max-height: 760px) {
-    .saque-v2 .sv-teclado button { height: 48px; font-size: 1.2rem; }
-    .saque-v2 .sv-valor { font-size: 2.3rem; }
-    .saque-v2 .sv-valor.is-longo { font-size: 1.9rem; }
-    body:not(.admin-page) .modal-card.saque-v2 { gap: 12px; }
+    :is(.saque-v2, .deposito-v2) .sv-teclado button { height: 48px; font-size: 1.2rem; }
+    :is(.saque-v2, .deposito-v2) .sv-valor { font-size: 2.3rem; }
+    :is(.saque-v2, .deposito-v2) .sv-valor.is-longo { font-size: 1.9rem; }
+    body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) { gap: 12px; }
 }
 @media (max-width: 380px) {
-    .saque-v2 .sv-rapidos button { font-size: 0.78rem; }
-    .saque-v2 .sv-saldo strong { font-size: 1.25rem; }
+    :is(.saque-v2, .deposito-v2) .sv-rapidos button { font-size: 0.78rem; }
+    :is(.saque-v2, .deposito-v2) .sv-saldo strong { font-size: 1.25rem; }
+}
+
+
+/* ==========================================================================
+   Modal de Depósito v2 — parte específica (.deposito-v2)
+   JS: deposito-modal.js (resumo do plano e máscaras); regras no script.js
+   ========================================================================== */
+.deposito-v2 { overflow-x: hidden; }
+.deposito-v2 .dp-select-oculto { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; }
+.deposito-v2 .modal-alert { margin: 0; }
+
+/* ---------- Resumo do plano ---------- */
+.deposito-v2 .dp-plano {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(255, 200, 90, 0.3);
+    background:
+        radial-gradient(120% 140% at 100% 0%, rgba(255, 176, 40, 0.14), transparent 60%),
+        linear-gradient(180deg, rgba(40, 28, 12, 0.92), rgba(14, 9, 4, 0.96));
+    box-shadow: 0 0 24px rgba(255, 176, 40, 0.14), inset 0 1px 0 rgba(255, 230, 160, 0.12);
+}
+.deposito-v2 .dp-plano__info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.deposito-v2 .dp-plano__rotulo {
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #a99572;
+}
+.deposito-v2 .dp-plano__nome { font-size: 1.1rem; font-weight: 800; color: #f6ecd6; overflow-wrap: anywhere; }
+.deposito-v2 .dp-plano__detalhe {
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 2px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #e0b24f;
+    border: 1px solid rgba(255, 200, 90, 0.3);
+    border-radius: 999px;
+    background: rgba(255, 176, 40, 0.07);
+}
+.deposito-v2 .dp-plano__valor {
+    flex: 0 0 auto;
+    font-size: 1.9rem;
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(180deg, #f8e3a3, #e5b13f 55%, #c58a1f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px rgba(255, 176, 40, 0.3));
+}
+
+/* ---------- Campos ---------- */
+.deposito-v2 .dp-campos {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 20px;
+    border: 1.5px solid rgba(255, 200, 90, 0.2);
+    background: linear-gradient(180deg, rgba(34, 23, 9, 0.7), rgba(10, 6, 3, 0.85));
+}
+.deposito-v2 .dp-campos > * { margin: 0; }
+.deposito-v2 .dp-intro { font-size: 0.85rem; line-height: 1.4; color: #b8a584; }
+.deposito-v2 .input-group label small {
+    margin-left: auto;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #8f7d5c;
+}
+.deposito-v2 .input-group input.is-invalido {
+    border-color: rgba(255, 120, 100, 0.85);
+    box-shadow: 0 0 0 3px rgba(236, 91, 96, 0.12), inset 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+.deposito-v2 .input-group input.is-valido { border-color: rgba(120, 220, 160, 0.55); }
+.deposito-v2 .dp-erro { display: block; margin-top: 6px; font-size: 0.78rem; font-weight: 600; color: #ff8e7e; }
+
+/* ---------- QR Code (aparece no lugar dos campos) ---------- */
+.deposito-v2:has(.qr-area.ativo) .dp-campos { display: none; }
+.deposito-v2:has(.qr-area.ativo) .dp-plano { padding: 12px 16px; }
+.deposito-v2:has(.qr-area.ativo) .dp-plano__valor { font-size: 1.5rem; }
+
+.deposito-v2 .qr-area { margin: 0; padding: 0; }
+.deposito-v2 .qr-area.ativo { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.deposito-v2 .qr-area__hint { font-size: 0.88rem; font-weight: 600; text-align: center; color: #dcc58e; margin: 0; }
+.deposito-v2 .qr-area__frame { margin: 0; padding: 12px; border-radius: 20px; }
+.deposito-v2 .qr-area__frame img { width: 190px; height: 190px; max-width: 60vw; max-height: 60vw; }
+.deposito-v2 .qr-area__code {
+    width: 100%;
+    max-height: 64px;
+    padding: 10px 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.7rem;
+    line-height: 1.35;
+    text-align: left;
+    border-radius: 12px;
+}
+.deposito-v2 #btnCopiarPix { line-height: 54px; padding: 0 18px; text-align: center; }
+.deposito-v2 #btnCopiarPix::before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: -3px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 1H4a2 2 0 00-2 2v14h2V3h12V1zm3 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M16 1H4a2 2 0 00-2 2v14h2V3h12V1zm3 4H8a2 2 0 00-2 2v14a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2zm0 16H8V7h11v14z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Status "aguardando pagamento" */
+.deposito-v2 .dp-status {
+    margin: 0;
+    padding: 10px 14px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #e8d4a2;
+    border-radius: 12px;
+    border: 1px dashed rgba(255, 200, 90, 0.35);
+    background: rgba(255, 176, 40, 0.05);
+    animation: dpPulso 1.8s ease-in-out infinite;
+}
+@keyframes dpPulso { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+@media (prefers-reduced-motion: reduce) { .deposito-v2 .dp-status { animation: none; } }
+
+/* ---------- Rodapé ---------- */
+.deposito-v2 .sv-rodape--flex { display: flex; gap: 10px; }
+.deposito-v2 .sv-rodape--flex .sv-btn { flex: 1 1 0; width: auto; }
+.deposito-v2 .sv-rodape--flex #btnConfirmarModalDepositar { flex: 1.6 1 0; line-height: 54px; padding: 0 12px; text-align: center; }
+.deposito-v2 #btnConfirmarModalDepositar::before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    vertical-align: -3px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h2v2h-2v-2z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm8-2h2v2h-2v-2zm2 2h2v2h-2v-2zm2-2h2v2h-2v-2zm-4 4h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 2h2v2h-2v-2z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+@media (max-width: 380px) {
+    .deposito-v2 .dp-plano__valor { font-size: 1.6rem; }
+    .deposito-v2 .sv-rodape--flex { flex-direction: column-reverse; }
+    .deposito-v2 .sv-rodape--flex .sv-btn,
+    .deposito-v2 .sv-rodape--flex #btnConfirmarModalDepositar { flex: none; width: 100%; }
 }
