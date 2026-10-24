@@ -39,318 +39,360 @@
         </div>
 
         <div id="conteudoAdmin" style="display: none;">
-            <!-- ===== Abas do painel ===== -->
-            <nav class="admin-tabs" id="adminTabs" role="tablist" aria-label="Seções do painel">
-                <button type="button" class="admin-tab ativa" role="tab" aria-selected="true" data-aba="painel">Painel</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="indicacoes">Indicações</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="equipe">Equipe</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="recargas">Recargas</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="caixa">Caixa</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="comissoes">Comissões</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="perfil">Perfil</button>
-                <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="missoes">Missões</button>
-            </nav>
+            <div class="admin-layout">
 
-            <!-- Busca e período (valem para as abas de rede) -->
-            <div class="rede-filtros" id="redeFiltros" hidden>
-                <input type="search" id="redeBusca" class="rede-input" placeholder="Buscar por nome, e-mail ou ID..." autocomplete="off" aria-label="Buscar usuário">
-                <select id="redePeriodo" class="rede-input" aria-label="Período">
-                    <option value="tudo">Todo o período</option>
-                    <option value="hoje">Hoje</option>
-                    <option value="7d">Últimos 7 dias</option>
-                    <option value="30d">Últimos 30 dias</option>
-                    <option value="mes">Este mês</option>
-                    <option value="custom">Personalizado…</option>
-                </select>
-                <div class="rede-datas" id="redeDatas" hidden>
-                    <label>De <input type="date" id="redeDe" class="rede-input"></label>
-                    <label>Até <input type="date" id="redeAte" class="rede-input"></label>
-                </div>
-                <div class="rede-selecionado" id="redeSelecionado" hidden></div>
-            </div>
+                <!-- ===== Barra lateral de abas ===== -->
+                <nav class="admin-tabs admin-sidebar" id="adminTabs" role="tablist" aria-label="Seções do painel">
+                    <button type="button" class="admin-tab ativa" role="tab" aria-selected="true" data-aba="painel">Painel</button>
+                    <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="indicacoes">Indicações</button>
+                    <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="equipe">Equipe</button>
+                    <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="recargas">Recargas</button>
+                    <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="caixa">Caixa</button>
+                    <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="comissoes">Comissões</button>
+                    <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="perfil">Perfil</button>
+                    <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="missoes">Missões</button>
+                    <button type="button" class="admin-tab" role="tab" aria-selected="false" data-aba="bolao">Bolão</button>
+                </nav>
 
-            <div id="redePaineis">
-                <section class="admin-tabpanel" id="aba-painel" data-painel="painel">
-                    <div class="table-section" style="margin-bottom: var(--space-lg);">
-                        <button class="btn" id="btnRodarRendimentos" type="button" style="width: auto; padding: 12px 24px;">Rodar cálculo de rendimentos agora</button>
-                        <p class="table-hint" style="margin-top: 8px;">Só funciona de segunda a sexta (horário de Brasília). Sábado e domingo não rendem.</p>
-                        <p class="table-hint" style="margin-top: 8px;">Roda o mesmo cálculo do Cron Trigger diário na hora, e mostra abaixo quem foi creditado ou por que alguém ficou de fora (conta não encontrada, data de ativação inválida, etc.).</p>
-                        <div id="resumoRendimentos" style="display: none; margin-top: var(--space-sm); font-size: 0.85rem; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: var(--space-sm);"></div>
+                <div class="admin-main">
+
+                    <!-- Busca e período (valem para as abas de rede) -->
+                    <div class="rede-filtros" id="redeFiltros" hidden>
+                        <input type="search" id="redeBusca" class="rede-input" placeholder="Buscar por nome, e-mail ou ID..." autocomplete="off" aria-label="Buscar usuário">
+                        <select id="redePeriodo" class="rede-input" aria-label="Período">
+                            <option value="tudo">Todo o período</option>
+                            <option value="hoje">Hoje</option>
+                            <option value="7d">Últimos 7 dias</option>
+                            <option value="30d">Últimos 30 dias</option>
+                            <option value="mes">Este mês</option>
+                            <option value="custom">Personalizado…</option>
+                        </select>
+                        <div class="rede-datas" id="redeDatas" hidden>
+                            <label>De <input type="date" id="redeDe" class="rede-input"></label>
+                            <label>Até <input type="date" id="redeAte" class="rede-input"></label>
+                        </div>
+                        <div class="rede-selecionado" id="redeSelecionado" hidden></div>
                     </div>
 
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <h3>Total de Saques Pagos</h3>
-                            <p id="totalSaquesPagosGeral" style="color: var(--success); font-weight: bold;">R$ 0,00</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Total de Saques Pendentes</h3>
-                            <p id="totalSaquesPendentes">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Total de Depósitos Pendentes</h3>
-                            <p id="totalDepositosPendentes">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Pendências de Plano</h3>
-                            <p id="totalPendenciasPlano">0</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Saldo Total dos Usuários</h3>
-                            <p id="totalSaldoUsuarios">R$ 0,00</p>
-                        </div>
-                        <div class="stat-card">
-                            <h3>Usuários Cadastrados</h3>
-                            <p id="totalUsuariosCadastrados">0</p>
-                        </div>
-                    </div>
-
-                    <!-- SEÇÃO DE PLANOS ADQUIRIDOS (COM TÉRMINO PREVISTO) -->
-                    <section class="table-section" style="margin-top: var(--space-lg);">
-                        <div class="table-section__head">
-                            <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                                <h3>Planos Adquiridos e Horários de Pagamento</h3>
-                                <span class="planos-head__count"><strong id="totalPlanosAtivosAdmin">0</strong> ativos</span>
+                    <div id="redePaineis">
+                        <section class="admin-tabpanel" id="aba-painel" data-painel="painel">
+                            <div class="table-section" style="margin-bottom: var(--space-lg);">
+                                <button class="btn" id="btnRodarRendimentos" type="button" style="width: auto; padding: 12px 24px;">Rodar cálculo de rendimentos agora</button>
+                                <p class="table-hint" style="margin-top: 8px;">Só funciona de segunda a sexta (horário de Brasília). Sábado e domingo não rendem.</p>
+                                <p class="table-hint" style="margin-top: 8px;">Roda o mesmo cálculo do Cron Trigger diário na hora, e mostra abaixo quem foi creditado ou por que alguém ficou de fora (conta não encontrada, data de ativação inválida, etc.).</p>
+                                <div id="resumoRendimentos" style="display: none; margin-top: var(--space-sm); font-size: 0.85rem; white-space: pre-wrap; background: rgba(0,0,0,0.2); border-radius: var(--radius-sm); padding: var(--space-sm);"></div>
                             </div>
-                        </div>
-                        <div id="infoUltimaExecucaoRobo" class="robo-status" style="margin-bottom: var(--space-md);">
-                            <div class="robo-status__card robo-status__card--vazio">Carregando status do robô de rendimentos...</div>
-                        </div>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>CLIENTE</th>
-                                        <th>PLANO / DIÁRIO</th>
-                                        <th>HORÁRIO QUE ADQUIRIU</th>
-                                        <th>TÉRMINO PREVISTO</th>
-                                        <th>ÚLTIMO RENDIMENTO PAGO</th>
-                                        <th>JÁ CREDITADO / TETO</th>
-                                        <th>STATUS</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaPlanosAdmin">
-                                    <tr><td colspan="7" class="table-empty">Carregando planos...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
 
-                    <!-- FASE 2: AJUSTE MANUAL DE SALDO -->
-                    <section class="table-section" id="secaoRendimentoManual">
-                        <div class="table-section__head">
-                            <h3>Ajuste Manual de Saldo</h3>
-                        </div>
-                        <p class="table-hint">Adicione rendimentos extras ou remova saldo da conta de qualquer usuário.</p>
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <h3>Total de Saques Pagos</h3>
+                                    <p id="totalSaquesPagosGeral" style="color: var(--success); font-weight: bold;">R$ 0,00</p>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Total de Saques Pendentes</h3>
+                                    <p id="totalSaquesPendentes">0</p>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Total de Depósitos Pendentes</h3>
+                                    <p id="totalDepositosPendentes">0</p>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Pendências de Plano</h3>
+                                    <p id="totalPendenciasPlano">0</p>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Saldo Total dos Usuários</h3>
+                                    <p id="totalSaldoUsuarios">R$ 0,00</p>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Usuários Cadastrados</h3>
+                                    <p id="totalUsuariosCadastrados">0</p>
+                                </div>
+                            </div>
 
-                        <div class="table-search">
-                            <select id="rmTipoOperacao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
-                                <option value="credito">➕ Adicionar Saldo (Crédito)</option>
-                                <option value="debito">➖ Remover Saldo (Débito)</option>
-                            </select>
-                        </div>
-                        <div class="table-search">
-                            <input type="text" id="rmBusca" placeholder="Buscar usuário por nome ou e-mail...">
-                        </div>
-                        <div class="table-search">
-                            <select id="rmUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
-                                <option value="">Carregando usuários...</option>
-                            </select>
-                        </div>
-                        <div class="table-search">
-                            <input type="number" id="rmValor" min="0.01" step="0.01" inputmode="decimal" placeholder="Valor (R$)">
-                        </div>
-                        <div class="table-search">
-                            <input type="text" id="rmMotivo" maxlength="120" placeholder="Motivo (ex.: bônus, correção de erro, etc.)">
-                        </div>
-                        <button class="btn" id="btnCreditarManual" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
+                            <!-- SEÇÃO DE PLANOS ADQUIRIDOS (COM TÉRMINO PREVISTO) -->
+                            <section class="table-section" style="margin-top: var(--space-lg);">
+                                <div class="table-section__head">
+                                    <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                        <h3>Planos Adquiridos e Horários de Pagamento</h3>
+                                        <span class="planos-head__count"><strong id="totalPlanosAtivosAdmin">0</strong> ativos</span>
+                                    </div>
+                                </div>
+                                <div id="infoUltimaExecucaoRobo" class="robo-status" style="margin-bottom: var(--space-md);">
+                                    <div class="robo-status__card robo-status__card--vazio">Carregando status do robô de rendimentos...</div>
+                                </div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>CLIENTE</th>
+                                                <th>PLANO / DIÁRIO</th>
+                                                <th>HORÁRIO QUE ADQUIRIU</th>
+                                                <th>TÉRMINO PREVISTO</th>
+                                                <th>ÚLTIMO RENDIMENTO PAGO</th>
+                                                <th>JÁ CREDITADO / TETO</th>
+                                                <th>STATUS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaPlanosAdmin">
+                                            <tr><td colspan="7" class="table-empty">Carregando planos...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
 
-                        <p class="table-hint">Últimos ajustes manuais (créditos e débitos):</p>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Data/Horário</th>
-                                        <th>Usuário</th>
-                                        <th>Valor</th>
-                                        <th>Motivo</th>
-                                        <th>Executado por</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaCreditosManuais">
-                                    <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
+                            <!-- FASE 2: AJUSTE MANUAL DE SALDO -->
+                            <section class="table-section" id="secaoRendimentoManual">
+                                <div class="table-section__head">
+                                    <h3>Ajuste Manual de Saldo</h3>
+                                </div>
+                                <p class="table-hint">Adicione rendimentos extras ou remova saldo da conta de qualquer usuário.</p>
 
-                    <!-- FASE 3: GERENCIAR PLANOS -->
-                    <section class="table-section" id="secaoGerenciarPlanos">
-                        <div class="table-section__head">
-                            <h3>Gerenciar Planos (Adicionar / Remover)</h3>
-                        </div>
-                        <p class="table-hint">Ative um plano instantaneamente para o usuário (ignora o limite de planos repetidos) ou cancele um plano ativo.</p>
+                                <div class="table-search">
+                                    <select id="rmTipoOperacao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
+                                        <option value="credito">➕ Adicionar Saldo (Crédito)</option>
+                                        <option value="debito">➖ Remover Saldo (Débito)</option>
+                                    </select>
+                                </div>
+                                <div class="table-search">
+                                    <input type="text" id="rmBusca" placeholder="Buscar usuário por nome ou e-mail...">
+                                </div>
+                                <div class="table-search">
+                                    <select id="rmUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                                        <option value="">Carregando usuários...</option>
+                                    </select>
+                                </div>
+                                <div class="table-search">
+                                    <input type="number" id="rmValor" min="0.01" step="0.01" inputmode="decimal" placeholder="Valor (R$)">
+                                </div>
+                                <div class="table-search">
+                                    <input type="text" id="rmMotivo" maxlength="120" placeholder="Motivo (ex.: bônus, correção de erro, etc.)">
+                                </div>
+                                <button class="btn" id="btnCreditarManual" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
 
-                        <div class="table-search">
-                            <select id="gpAcao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
-                                <option value="adicionar">➕ Adicionar Plano (Ativar)</option>
-                                <option value="remover">➖ Remover Plano Ativo (Cancelar)</option>
-                            </select>
-                        </div>
-                        <div class="table-search">
-                            <input type="text" id="gpBusca" placeholder="Buscar usuário por nome ou e-mail...">
-                        </div>
-                        <div class="table-search">
-                            <select id="gpUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
-                                <option value="">Carregando usuários...</option>
-                            </select>
-                        </div>
-                        <div class="table-search">
-                            <select id="gpValor" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
-                                <option value="">Selecione o valor do plano...</option>
-                                <option value="10">Ciclo Express - R$ 10,00 (Teto 140%)</option>
-                                <option value="15">Ciclo Médio 15 - R$ 15,00 (Teto 200%)</option>
-                                <option value="30">Banca Starter - R$ 30,00 (Teto 170%)</option>
-                                <option value="50">Banca Bronze - R$ 50,00 (Teto 170%)</option>
-                                <option value="60">Ciclo Médio 60 - R$ 60,00 (Teto 200%)</option>
-                                <option value="100">Banca Prata - R$ 100,00 (Teto 160%)</option>
-                                <option value="150">Ciclo Médio 150 - R$ 150,00 (Teto 180%)</option>
-                                <option value="200">Ciclo Médio 200 - R$ 200,00 (Teto 190%)</option>
-                                <option value="300">Banca Ouro - R$ 300,00 (Teto 160%)</option>
-                                <option value="450">Ciclo Longo 450 - R$ 450,00 (Teto 210%)</option>
-                                <option value="500">Banca Platinum - R$ 500,00 (Teto 160%)</option>
-                                <option value="1000">Banca Master - R$ 1.000,00 (Teto 160%)</option>
-                            </select>
-                        </div>
-                        <button class="btn" id="btnGerenciarPlano" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
-                    </section>
+                                <p class="table-hint">Últimos ajustes manuais (créditos e débitos):</p>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Data/Horário</th>
+                                                <th>Usuário</th>
+                                                <th>Valor</th>
+                                                <th>Motivo</th>
+                                                <th>Executado por</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaCreditosManuais">
+                                            <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
 
-                    <section class="table-section">
-                        <div class="table-section__head">
-                            <h3>Usuários e Saldos</h3>
-                        </div>
-                        <p class="table-hint">Saldo sacável e comissão de indicação acumulada de cada cliente cadastrado.</p>
-                        <div class="table-search">
-                            <input type="text" id="buscaUsuarios" placeholder="Buscar por nome ou e-mail...">
-                        </div>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Usuário</th>
-                                        <th>E-mail</th>
-                                        <th>Saldo</th>
-                                        <th>Comissão Acumulada</th>
-                                        <th>Total Depositado</th>
-                                        <th>Total Sacado</th>
-                                        <th>Admin</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaUsuariosAdmin">
-                                    <tr><td colspan="7" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
+                            <!-- FASE 3: GERENCIAR PLANOS -->
+                            <section class="table-section" id="secaoGerenciarPlanos">
+                                <div class="table-section__head">
+                                    <h3>Gerenciar Planos (Adicionar / Remover)</h3>
+                                </div>
+                                <p class="table-hint">Ative um plano instantaneamente para o usuário (ignora o limite de planos repetidos) ou cancele um plano ativo.</p>
 
-                    <section class="table-section">
-                        <div class="table-section__head">
-                            <h3>Pendências de Plano</h3>
-                        </div>
-                        <p class="table-hint">Pix confirmado e dinheiro recebido, mas o usuário já tinha um plano ativo desse valor no momento da confirmação — precisa de uma decisão manual: criar o plano mesmo assim (ignora o limite) ou marcar como resolvido sem criar plano (ex.: reembolso feito fora do sistema).</p>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Data/Horário</th>
-                                        <th>Usuário</th>
-                                        <th>Valor</th>
-                                        <th>Observação</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaPendenciasPlano">
-                                    <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
+                                <div class="table-search">
+                                    <select id="gpAcao" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem; margin-bottom: 10px;">
+                                        <option value="adicionar">➕ Adicionar Plano (Ativar)</option>
+                                        <option value="remover">➖ Remover Plano Ativo (Cancelar)</option>
+                                    </select>
+                                </div>
+                                <div class="table-search">
+                                    <input type="text" id="gpBusca" placeholder="Buscar usuário por nome ou e-mail...">
+                                </div>
+                                <div class="table-search">
+                                    <select id="gpUsuario" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                                        <option value="">Carregando usuários...</option>
+                                    </select>
+                                </div>
+                                <div class="table-search">
+                                    <select id="gpValor" style="width: 100%; padding: 10px 14px; background-color: var(--bg-color-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-main); font-size: 0.88rem;">
+                                        <option value="">Selecione o valor do plano...</option>
+                                        <option value="10">Ciclo Express - R$ 10,00 (Teto 140%)</option>
+                                        <option value="15">Ciclo Médio 15 - R$ 15,00 (Teto 200%)</option>
+                                        <option value="30">Banca Starter - R$ 30,00 (Teto 170%)</option>
+                                        <option value="50">Banca Bronze - R$ 50,00 (Teto 170%)</option>
+                                        <option value="60">Ciclo Médio 60 - R$ 60,00 (Teto 200%)</option>
+                                        <option value="100">Banca Prata - R$ 100,00 (Teto 160%)</option>
+                                        <option value="150">Ciclo Médio 150 - R$ 150,00 (Teto 180%)</option>
+                                        <option value="200">Ciclo Médio 200 - R$ 200,00 (Teto 190%)</option>
+                                        <option value="300">Banca Ouro - R$ 300,00 (Teto 160%)</option>
+                                        <option value="450">Ciclo Longo 450 - R$ 450,00 (Teto 210%)</option>
+                                        <option value="500">Banca Platinum - R$ 500,00 (Teto 160%)</option>
+                                        <option value="1000">Banca Master - R$ 1.000,00 (Teto 160%)</option>
+                                    </select>
+                                </div>
+                                <button class="btn" id="btnGerenciarPlano" type="button" style="width: auto; padding: 12px 24px; margin-bottom: var(--space-md);">Executar Operação</button>
+                            </section>
 
-                    <section class="table-section">
-                        <div class="table-section__head">
-                            <h3>Todos os Saques</h3>
-                        </div>
-                        <p class="table-hint">Ao marcar um saque como pago, o Extrato do usuário é atualizado automaticamente.</p>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Data/Horário</th>
-                                        <th>Usuário</th>
-                                        <th>Chave PIX</th>
-                                        <th>Valor Solicitado</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaSaquesAdmin">
-                                    <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
+                            <section class="table-section">
+                                <div class="table-section__head">
+                                    <h3>Usuários e Saldos</h3>
+                                </div>
+                                <p class="table-hint">Saldo sacável e comissão de indicação acumulada de cada cliente cadastrado.</p>
+                                <div class="table-search">
+                                    <input type="text" id="buscaUsuarios" placeholder="Buscar por nome ou e-mail...">
+                                </div>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Usuário</th>
+                                                <th>E-mail</th>
+                                                <th>Saldo</th>
+                                                <th>Comissão Acumulada</th>
+                                                <th>Total Depositado</th>
+                                                <th>Total Sacado</th>
+                                                <th>Admin</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaUsuariosAdmin">
+                                            <tr><td colspan="7" class="table-empty">Carregando...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
 
-                    <section class="table-section">
-                        <div class="table-section__head">
-                            <h3>Todos os Depósitos</h3>
-                        </div>
-                        <p class="table-hint">Ao aprovar um depósito, o plano correspondente é ativado automaticamente na Carteira do usuário.</p>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Data/Horário</th>
-                                        <th>Usuário</th>
-                                        <th>Valor do Plano</th>
-                                        <th>Status</th>
-                                        <th>Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaDepositosAdmin">
-                                    <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </section>
-                </section>
+                            <section class="table-section">
+                                <div class="table-section__head">
+                                    <h3>Pendências de Plano</h3>
+                                </div>
+                                <p class="table-hint">Pix confirmado e dinheiro recebido, mas o usuário já tinha um plano ativo desse valor no momento da confirmação — precisa de uma decisão manual: criar o plano mesmo assim (ignora o limite) ou marcar como resolvido sem criar plano (ex.: reembolso feito fora do sistema).</p>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Data/Horário</th>
+                                                <th>Usuário</th>
+                                                <th>Valor</th>
+                                                <th>Observação</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaPendenciasPlano">
+                                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
 
-                <section class="admin-tabpanel" id="aba-indicacoes" data-painel="indicacoes" hidden><div id="rede-indicacoes"></div></section>
-                <section class="admin-tabpanel" id="aba-equipe" data-painel="equipe" hidden><div id="rede-equipe"></div></section>
-                <section class="admin-tabpanel" id="aba-recargas" data-painel="recargas" hidden><div id="rede-recargas"></div></section>
-                <section class="admin-tabpanel" id="aba-caixa" data-painel="caixa" hidden><div id="rede-caixa"></div></section>
-                <section class="admin-tabpanel" id="aba-comissoes" data-painel="comissoes" hidden><div id="rede-comissoes"></div></section>
-                <section class="admin-tabpanel" id="aba-perfil" data-painel="perfil" hidden><div id="rede-perfil"></div></section>
-                <section class="admin-tabpanel" id="aba-missoes" data-painel="missoes" hidden>
-                    <nav class="admin-subtabs" id="missoesAdmTabs" role="tablist" aria-label="Seções de missões">
-                        <button type="button" class="admin-subtab ativa" role="tab" aria-selected="true" data-sub="geral">Visão geral</button>
-                        <button type="button" class="admin-subtab" role="tab" aria-selected="false" data-sub="progresso">Progresso</button>
-                        <button type="button" class="admin-subtab" role="tab" aria-selected="false" data-sub="recompensas">Recompensas</button>
-                        <button type="button" class="admin-subtab" role="tab" aria-selected="false" data-sub="conferencia">Conferência</button>
-                        <button type="button" class="admin-subtab" role="tab" aria-selected="false" data-sub="configurar">Configurar</button>
-                    </nav>
-                    <div class="rede-filtros madm-filtros" id="missoesAdmFiltros" hidden>
-                        <input type="search" id="missoesAdmBusca" class="rede-input" placeholder="Buscar por nome, e-mail ou ID..." autocomplete="off" aria-label="Buscar usuário">
-                        <select id="missoesAdmFiltro" class="rede-input" aria-label="Filtro"></select>
+                            <section class="table-section">
+                                <div class="table-section__head">
+                                    <h3>Todos os Saques</h3>
+                                </div>
+                                <p class="table-hint">Ao marcar um saque como pago, o Extrato do usuário é atualizado automaticamente.</p>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Data/Horário</th>
+                                                <th>Usuário</th>
+                                                <th>Chave PIX</th>
+                                                <th>Valor Solicitado</th>
+                                                <th>Status</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaSaquesAdmin">
+                                            <tr><td colspan="6" class="table-empty">Carregando...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+
+                            <section class="table-section">
+                                <div class="table-section__head">
+                                    <h3>Todos os Depósitos</h3>
+                                </div>
+                                <p class="table-hint">Ao aprovar um depósito, o plano correspondente é ativado automaticamente na Carteira do usuário.</p>
+                                <div class="table-container">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Data/Horário</th>
+                                                <th>Usuário</th>
+                                                <th>Valor do Plano</th>
+                                                <th>Status</th>
+                                                <th>Ações</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaDepositosAdmin">
+                                            <tr><td colspan="5" class="table-empty">Carregando...</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </section>
+
+                        <section class="admin-tabpanel" id="aba-indicacoes" data-painel="indicacoes" hidden><div id="rede-indicacoes"></div></section>
+                        <section class="admin-tabpanel" id="aba-equipe" data-painel="equipe" hidden><div id="rede-equipe"></div></section>
+                        <section class="admin-tabpanel" id="aba-recargas" data-painel="recargas" hidden><div id="rede-recargas"></div></section>
+                        <section class="admin-tabpanel" id="aba-caixa" data-painel="caixa" hidden><div id="rede-caixa"></div></section>
+                        <section class="admin-tabpanel" id="aba-comissoes" data-painel="comissoes" hidden><div id="rede-comissoes"></div></section>
+                        <section class="admin-tabpanel" id="aba-perfil" data-painel="perfil" hidden><div id="rede-perfil"></div></section>
+                        <section class="admin-tabpanel" id="aba-missoes" data-painel="missoes" hidden>
+                            <nav class="admin-subtabs" id="missoesAdmTabs" role="tablist" aria-label="Seções de missões">
+                                <button type="button" class="admin-subtab ativa" role="tab" aria-selected="true" data-sub="geral">Visão geral</button>
+                                <button type="button" class="admin-subtab" role="tab" aria-selected="false" data-sub="progresso">Progresso</button>
+                                <button type="button" class="admin-subtab" role="tab" aria-selected="false" data-sub="recompensas">Recompensas</button>
+                                <button type="button" class="admin-subtab" role="tab" aria-selected="false" data-sub="conferencia">Conferência</button>
+                                <button type="button" class="admin-subtab" role="tab" aria-selected="false" data-sub="configurar">Configurar</button>
+                            </nav>
+                            <div class="rede-filtros madm-filtros" id="missoesAdmFiltros" hidden>
+                                <input type="search" id="missoesAdmBusca" class="rede-input" placeholder="Buscar por nome, e-mail ou ID..." autocomplete="off" aria-label="Buscar usuário">
+                                <select id="missoesAdmFiltro" class="rede-input" aria-label="Filtro"></select>
+                            </div>
+                            <div id="missoes-adm"></div>
+                        </section>
+
+                        <!-- Aba Bolão: só aparece quando selecionada -->
+                        <section class="admin-tabpanel" id="aba-bolao" data-painel="bolao" hidden>
+                            <div id="adminBolao"></div>
+                        </section>
                     </div>
-                    <div id="missoes-adm"></div>
-                </section>
+                </div>
             </div>
-
-            <!-- Painel de Administração do Bolão (só aparece para admin, pois está dentro de conteudoAdmin) -->
-            <div id="adminBolao" style="margin: 20px;"></div>
         </div>
     </div>
+
+    <script>
+    (function () {
+        var nav = document.getElementById('adminTabs');
+        var bolao = document.getElementById('aba-bolao');
+        var filtros = document.getElementById('redeFiltros');
+        if (!nav || !bolao) return;
+
+        nav.addEventListener('click', function (e) {
+            var b = e.target.closest('[data-aba]');
+            if (!b) return;
+
+            if (b.dataset.aba !== 'bolao') {
+                bolao.hidden = true;
+                return;
+            }
+
+            e.stopPropagation();
+            e.preventDefault();
+
+            nav.querySelectorAll('.admin-tab').forEach(function (t) {
+                var on = t === b;
+                t.classList.toggle('ativa', on);
+                t.setAttribute('aria-selected', on ? 'true' : 'false');
+            });
+            document.querySelectorAll('#redePaineis > [data-painel]').forEach(function (s) {
+                s.hidden = true;
+            });
+            if (filtros) filtros.hidden = true;
+            bolao.hidden = false;
+        }, true);
+    })();
+    </script>
 
     <!-- Scripts -->
     <script type="module" src="auth.js"></script>
