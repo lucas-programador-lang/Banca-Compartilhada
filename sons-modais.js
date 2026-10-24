@@ -36,27 +36,19 @@
     }
 
     var sons = {
-        // Tecla: tique curto, com leve variação para não ficar repetitivo
+        // Tecla: "tic" bem baixinho e grave, quase imperceptível
         tecla: function () {
             var agora = Date.now();
-            if (agora - ultimoTick < 35) return;
+            if (agora - ultimoTick < 60) return;
             ultimoTick = agora;
-            nota(1500 + Math.random() * 300, 0, 0.05, 0.05, 'triangle');
+            nota(620 + Math.random() * 60, 0, 0.035, 0.012, 'sine');
         },
-        // Clique: som de "moeda" (duas notas)
+        // Clique: "pop" suave de uma nota só
         clique: function () {
-            nota(1318, 0, 0.09, 0.07, 'triangle');
-            nota(1760, 0.06, 0.16, 0.06, 'sine');
-        },
-        // Abrir o modal: acorde ascendente
-        abrir: function () {
-            nota(659, 0, 0.18, 0.05, 'sine');
-            nota(880, 0.08, 0.2, 0.05, 'sine');
-            nota(1175, 0.16, 0.3, 0.05, 'sine');
+            nota(520, 0, 0.09, 0.025, 'sine');
         },
         voltar: function () {
-            nota(988, 0, 0.1, 0.05, 'triangle');
-            nota(740, 0.07, 0.16, 0.05, 'sine');
+            nota(430, 0, 0.09, 0.02, 'sine');
         }
     };
 
@@ -86,23 +78,6 @@
     document.addEventListener('change', function (e) {
         if (dentroDoModal(e.target) && e.target.matches('select')) tocar('clique');
     }, true);
-
-    // Som ao abrir cada modal (quando o fundo escuro fica visível)
-    function observar(id) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        var visivel = false;
-        function aberto() { return el.classList.contains('ativo') || getComputedStyle(el).display !== 'none'; }
-        new MutationObserver(function () {
-            var agora = aberto();
-            if (agora && !visivel) tocar('abrir');
-            visivel = agora;
-        }).observe(el, { attributes: true, attributeFilter: ['class', 'style'] });
-    }
-    document.addEventListener('DOMContentLoaded', function () {
-        observar('modalDepositoSistema');
-        observar('modalSaqueSistema');
-    });
 
     // Para desligar/ligar pelo console: somModais.desligar() / somModais.ligar()
     window.somModais = {
