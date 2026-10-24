@@ -955,28 +955,11 @@
     <div class="card modal-card cupom-modal">
         <button id="btnFecharCupom" class="modal-close" aria-label="Fechar" type="button">&times;</button>
 
-        <div class="cupom-arte cupom-arte--topo">
-            <img src="cupons-banner.webp" alt="Banca Compartilhada: receba cupons para investir" width="1024" height="1536">
-        </div>
+        <div class="cupom-tela">
+            <img src="cupons-banner.webp" alt="Receba cupons para investir. Códigos todos os dias no Telegram às 12h, 16h e 20h" width="1024" height="1536">
 
-        <div class="cupom-modal__corpo">
-            <div class="cupom-aviso">
-                <span class="cupom-aviso__icone">🎁</span>
-                <p>
-                    Digite o código que saiu no <strong>Telegram</strong>.
-                    <small>Ele vale por <b>3 minutos</b> e é de <b>uso único</b>.</small>
-                </p>
-            </div>
-
-            <div class="cupom-campo">
-                <label for="inputCodigoCupom">CÓDIGO DO CUPOM</label>
-                <input type="text" id="inputCodigoCupom" class="cupom-input" placeholder="ABCD-EFGH" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false">
-                <button id="btnConfirmarCupom" class="cupom-botao" type="button">Resgatar</button>
-            </div>
-        </div>
-
-        <div class="cupom-arte cupom-arte--base" aria-hidden="true">
-            <img src="cupons-banner.webp" alt="" width="1024" height="1536" loading="lazy">
+            <input type="text" id="inputCodigoCupom" class="cupom-input" placeholder="ABCD-EFGH" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Código do cupom">
+            <button id="btnConfirmarCupom" class="cupom-botao" type="button">Resgatar</button>
         </div>
     </div>
 </div>
