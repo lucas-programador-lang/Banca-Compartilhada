@@ -6269,3 +6269,156 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
         border-radius: 20px;
     }
 }
+
+
+/* ==========================================================================
+   Modal do Bolão: acabamento final (sobrescreve o bloco .bolpix anterior)
+   ========================================================================== */
+.bolpix__box {
+    padding: 26px 22px 22px;
+    border-radius: 26px;
+    border: 1.5px solid rgba(255, 200, 90, 0.3);
+    background:
+        radial-gradient(90% 40% at 50% 0%, rgba(255, 170, 40, 0.10), transparent 70%),
+        linear-gradient(180deg, #1c1308 0%, #0d0804 55%, #080503 100%);
+    box-shadow: 0 0 30px rgba(255, 176, 40, 0.16), 0 0 70px rgba(255, 150, 20, 0.08);
+}
+
+/* Fio dourado no topo, igual aos outros cartões */
+.bolpix__box::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 26px 26px 0 0;
+    background: linear-gradient(90deg, transparent, #c48849 25%, #f2ce97 50%, #c48849 75%, transparent);
+}
+
+.bolpix__box h3 {
+    margin: 4px 0 2px;
+    font-size: 1.6rem;
+    background: linear-gradient(180deg, #f3e2b0, #d9aa3e 60%, #b9801a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.bolpix__box > p {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    color: #d8ccb0;
+}
+
+.bolpix__valor {
+    margin: 6px 0 8px;
+    font-size: 2.1rem;
+}
+
+.bolpix__etapa {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Rótulos com um ponto dourado à frente */
+.bolpix__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 0;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    color: #dcc58e;
+}
+
+.bolpix__label::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #e0b24f;
+    box-shadow: 0 0 8px rgba(255, 190, 60, 0.7);
+}
+
+/* Campos mais altos e com sombra interna, como no depósito */
+.bolpix__input {
+    height: 52px;
+    padding: 0 16px;
+    font-size: 1.02rem;
+    font-weight: 600;
+    border: 1.5px solid rgba(255, 200, 90, 0.32);
+    border-radius: 14px;
+    background: linear-gradient(180deg, #120b05, #050302);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+.bolpix__input::placeholder {
+    color: rgba(240, 225, 190, 0.4);
+    font-weight: 400;
+}
+
+.bolpix__input:focus {
+    border-color: #d9b45a;
+    box-shadow: 0 0 0 3px rgba(255, 190, 60, 0.13), 0 0 22px rgba(255, 190, 60, 0.25), inset 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+/* Botão principal: dourado com brilho, mesma linguagem do depósito */
+.bolpix__btn {
+    height: 54px;
+    margin-top: 14px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 800;
+    color: #1a1005;
+    border: 1.5px solid rgba(230, 200, 120, 0.7);
+    background: linear-gradient(180deg, #dcc07a 0%, #c79a38 55%, #a97c22 100%);
+    box-shadow: 0 0 22px rgba(255, 190, 60, 0.29), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.bolpix__btn:hover:not(:disabled) {
+    filter: brightness(1.08);
+    box-shadow: 0 0 34px rgba(255, 200, 70, 0.41), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: none;
+}
+
+/* Botão secundário: contorno dourado, mais discreto */
+.bolpix__btn--sec {
+    margin-top: 8px;
+    height: 46px;
+    font-size: 0.92rem;
+    color: #e8d4a2;
+    background: linear-gradient(180deg, #241807, #0e0803);
+    border: 1.5px solid rgba(255, 200, 90, 0.32);
+    box-shadow: 0 0 14px rgba(255, 176, 40, 0.12);
+}
+
+.bolpix__btn--sec:hover:not(:disabled) {
+    border-color: #ffd070;
+    box-shadow: 0 0 22px rgba(255, 190, 60, 0.25);
+}
+
+/* Código Pix e status */
+.bolpix__codigo {
+    min-height: 64px;
+    border: 1px solid rgba(255, 200, 90, 0.16);
+    background: rgba(255, 190, 70, 0.04);
+    color: #d8ccb0;
+}
+
+.bolpix__status {
+    min-height: 0;
+    margin: 8px 0 0;
+    font-size: 0.82rem;
+    color: #dcc58e;
+}
+
+.bolpix__status:empty {
+    display: none;
+}
+
+.bolpix__qr {
+    border: 3px solid #d7ae52;
+    box-shadow: 0 0 26px rgba(255, 176, 40, 0.25);
+}
