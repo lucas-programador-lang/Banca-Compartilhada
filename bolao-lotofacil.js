@@ -135,13 +135,18 @@ var ROTA_PIX = '/api/bolao/pix/criar';
         var d = snap.val();
         if (!d) { raiz.hidden = true; return; }
         raiz.hidden = false;
-        BOLAO.concurso = d.concurso; BOLAO.premio = d.premio; BOLAO.valorCota = d.valorCota;
-        BOLAO.cotasTotal = d.cotasTotal; BOLAO.cotasVendidas = d.cotasVendidas;
-        BOLAO.qtdNumeros = d.qtdNumeros; BOLAO.maxPorCompra = d.maxPorCompra;
+        // Number(...) || padrão: se faltar algum campo no Firebase, a tela mostra 0 em vez de NaN
+        BOLAO.concurso = Number(d.concurso) || 0;
+        BOLAO.premio = Number(d.premio) || 0;
+        BOLAO.valorCota = Number(d.valorCota) || 0;
+        BOLAO.cotasTotal = Number(d.cotasTotal) || 0;
+        BOLAO.cotasVendidas = Number(d.cotasVendidas) || 0;
+        BOLAO.qtdNumeros = Number(d.qtdNumeros) || 15;
+        BOLAO.maxPorCompra = Number(d.maxPorCompra) || 20;
         var dt = new Date(d.encerraEm);
         BOLAO.sorteio = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
         encerrado = d.status !== 'aberto' || Date.now() >= d.encerraEm;
-        disponiveis = Math.max(d.cotasTotal - d.cotasVendidas, 0);
+        disponiveis = Math.max(BOLAO.cotasTotal - BOLAO.cotasVendidas, 0);
         preencherTextos();
         atualizar();
         assinarAbas();
