@@ -4824,96 +4824,201 @@ body.pagina-oculta .plan-card__photo-wrap::after {
 
 
 /* ==========================================================================
-   Modais de Depósito e Saque no visual do modal de Cupons
+   Modais de Depósito e Saque — visual claro (igual ao modal de Cupons)
    ========================================================================== */
 
-.modal-premium {
+body:not(.admin-page) .modal-card.modal-premium {
     text-align: center;
-    padding: 34px 26px 26px;
+    padding: 34px 24px 24px;
     border-radius: 26px;
-    border: 1px solid rgba(242, 206, 151, 0.45);
-    background:
-        radial-gradient(90% 55% at 50% 0%, rgba(242, 206, 151, 0.18), transparent 70%),
-        linear-gradient(180deg, #2a1c10, #0d0805 85%);
+    border: 2px solid #f2d58a;
+    background: linear-gradient(180deg, #fffaf0 0%, #f8e8c0 100%);
+    color: #3a2a08;
     box-shadow:
-        0 40px 80px -30px rgba(0, 0, 0, 0.95),
-        0 0 0 6px rgba(196, 136, 73, 0.08),
-        0 0 46px -8px rgba(242, 206, 151, 0.35),
-        inset 0 1px 0 rgba(255, 233, 176, 0.25);
+        0 0 40px rgba(255, 170, 40, 0.35),
+        0 30px 60px -20px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
-/* Título grande e centralizado, como no Cupons */
+/* Título */
 .modal-premium > h3 {
-    font-family: var(--font-display);
-    font-size: 1.7rem;
-    font-weight: 700;
-    color: #f2ce97;
+    font-family: var(--font-body);
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #2b1a06;
     text-align: center;
     padding-right: 0;
-    margin: 6px 0 6px;
-    text-shadow: 0 2px 14px rgba(242, 206, 151, 0.35);
+    margin: 4px 0 6px;
+    text-shadow: none;
 }
 
-.modal-premium > .modal-lead,
-.modal-premium > .modal-lead--warning {
+/* Textos de apoio */
+.modal-premium .modal-lead {
+    color: #6b5226;
+    font-weight: 600;
     text-align: center;
     margin-bottom: 18px;
 }
 
-/* Botão de fechar no canto superior direito, discreto */
-.modal-premium .modal-close {
-    top: 16px;
-    right: 16px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(242, 206, 151, 0.4);
-    color: #f2ce97;
+.modal-premium .modal-lead--warning {
+    display: inline-flex;
+    margin-left: auto;
+    margin-right: auto;
+    color: #b4600a;
 }
 
-/* Caixas de informação com aparência de cartão de cupom */
+/* Botão fechar (×) */
+.modal-premium .modal-close {
+    top: 12px;
+    right: 12px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: none;
+    background: rgba(58, 42, 8, 0.12);
+    color: #5a3d0c;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.modal-premium .modal-close:hover {
+    background: rgba(58, 42, 8, 0.25);
+    color: #2b1a06;
+}
+
+/* Caixas de informação (mínimo, taxa, chave PIX, saldo) */
 .modal-premium .modal-info-box,
 .modal-premium .modal-info-box--key {
     text-align: left;
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(242, 206, 151, 0.28);
-    border-radius: 18px;
+    background: #fff3d0;
+    border: 1px solid #e8c872;
+    border-radius: 16px;
+    color: #6b5226;
 }
 
-.modal-premium .modal-info-row strong {
-    color: #ffe7b0;
+.modal-premium .modal-info-row strong,
+.modal-premium .modal-info-box--key strong {
+    color: #2b1a06;
 }
 
-/* Campos: centralizados e com borda bronze, como o campo de código do Cupons */
+.modal-premium .modal-info-box--key .modal-info-row__label {
+    color: #6b5226;
+}
+
+.modal-premium .modal-info-box--key strong.is-missing {
+    color: #d23b3f;
+}
+
+.modal-premium .modal-balance-box strong {
+    color: #1f9d55;
+}
+
+/* Labels e campos (igual ao campo de código do Cupons) */
 .modal-premium .input-group label {
-    text-align: center;
     display: block;
-    color: #f2ce97;
-    font-size: 0.8rem;
-    letter-spacing: 0.12em;
+    text-align: center;
+    color: #6b4a12;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
 }
 
 .modal-premium .input-group input,
 .modal-premium .input-group select {
     text-align: center;
-    background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(242, 206, 151, 0.55);
-    border-radius: 16px;
+    background: #f4e9c3;
+    border: 2px solid #f2b640;
+    border-radius: 14px;
+    color: #3a2a08;
     font-size: 1.05rem;
-    font-weight: 600;
-    color: #fff4dc;
-    padding: 14px 16px;
+    font-weight: 700;
+    padding: 13px 16px;
+}
+
+.modal-premium .input-group input::placeholder {
+    color: rgba(58, 42, 8, 0.4);
+}
+
+.modal-premium .input-group input:hover,
+.modal-premium .input-group select:hover {
+    border-color: #f2b640;
 }
 
 .modal-premium .input-group input:focus,
 .modal-premium .input-group select:focus {
-    border-color: #ffe7b0;
-    box-shadow: 0 0 0 4px rgba(242, 206, 151, 0.2);
+    background: #f4e9c3;
+    border-color: #f58a1f;
+    box-shadow: 0 0 0 4px rgba(255, 190, 60, 0.35);
 }
 
-/* Botões: cantos bem arredondados e brilho dourado, como o "Resgatar" */
+.modal-premium .input-group select option {
+    background: #fff3d0;
+    color: #3a2a08;
+}
+
+/* Botão "Cadastrar chave PIX" */
+.modal-premium .btn-ir-perfil {
+    background: #fff;
+    border: 1px solid #e8c872;
+    color: #6b4a12;
+}
+
+.modal-premium .btn-ir-perfil:hover {
+    background: #fff3d0;
+    border-color: #f2b640;
+}
+
+/* Valor líquido do saque */
+.modal-premium .amount-note {
+    background: #eaf6e8;
+    color: #1f7a3a;
+    border: 1px solid #bfe3c3;
+}
+
+.modal-premium .amount-note__row {
+    color: #4a6b4f;
+}
+
+.modal-premium .amount-note__row + .amount-note__row {
+    border-top-color: #bfe3c3;
+    color: #1f5e30;
+}
+
+.modal-premium .amount-note__row--negative { color: #d23b3f; }
+.modal-premium .amount-note__row--positive { color: #1f9d55; }
+
+/* Alerta de erro */
+.modal-premium .modal-alert {
+    background: #fde6e6;
+    border: 1px solid #f3b3b5;
+    color: #b02a2e;
+    text-align: center;
+}
+
+/* QR Code Pix */
+.modal-premium #statusPagamentoPix {
+    color: #6b4a12;
+}
+
+.modal-premium .qr-area__hint {
+    color: #6b4a12;
+}
+
+.modal-premium .qr-area__frame {
+    border: 2px solid #f2d58a;
+}
+
+.modal-premium .qr-area__code {
+    background: rgba(58, 42, 8, 0.07);
+    color: #6b5226;
+}
+
+/* Botões do rodapé */
 .modal-premium .modal-actions {
     gap: 12px;
     margin-top: 22px;
@@ -4921,45 +5026,58 @@ body.pagina-oculta .plan-card__photo-wrap::after {
 
 .modal-premium .modal-actions .btn {
     height: 52px;
-    border-radius: 16px;
+    padding: 0 12px;
+    border-radius: 14px;
     font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
+    font-weight: 800;
+    letter-spacing: 0.02em;
 }
 
-.modal-premium .modal-actions .btn:not(.btn-outline) {
-    background: linear-gradient(180deg, #ffe7b0, #f2ce97 55%, #c48849);
-    color: #2a1706;
-    box-shadow: 0 10px 28px rgba(242, 206, 151, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+/* Botão principal: laranja igual ao "Resgatar" */
+.modal-premium .modal-actions .btn:not(.btn-outline),
+.modal-premium .btn-outline#btnCopiarPix {
+    background: linear-gradient(180deg, #ffb94a 0%, #f58a1f 100%);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 0 #c76a10;
 }
 
+.modal-premium .modal-actions .btn:not(.btn-outline):hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+}
+
+.modal-premium .modal-actions .btn:not(.btn-outline):active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #c76a10;
+}
+
+/* Botão Cancelar: claro com borda dourada */
 .modal-premium .modal-actions .btn-outline {
-    background: rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(242, 206, 151, 0.5);
-    color: #f2ce97;
+    background: #fff3d0;
+    border: 2px solid #e8c872;
+    color: #6b4a12;
+    box-shadow: none;
 }
 
-/* Aviso de domingo: selo centralizado */
-.modal-premium .modal-lead--warning {
-    display: inline-flex;
-    margin-left: auto;
-    margin-right: auto;
+.modal-premium .modal-actions .btn-outline:hover {
+    background: #ffe9a6;
+    border-color: #f2b640;
 }
 
-/* Mensagem de erro do depósito: centralizada */
-.modal-premium .modal-alert {
-    text-align: center;
+/* Botão "Copiar código Pix" dentro da área do QR */
+.modal-premium #btnCopiarPix {
+    margin-top: 10px;
+    width: 100%;
 }
 
-/* Celular: modal ocupa a tela com cantos suaves */
 @media (max-width: 480px) {
     .modal-premium {
-        padding: 28px 18px 20px;
+        padding: 28px 16px 18px;
         border-radius: 22px;
     }
 
     .modal-premium > h3 {
-        font-size: 1.45rem;
+        font-size: 1.4rem;
     }
 }
-
