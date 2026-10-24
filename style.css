@@ -6422,3 +6422,34 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
     border: 3px solid #d7ae52;
     box-shadow: 0 0 26px rgba(255, 176, 40, 0.25);
 }
+
+
+
+/* ==========================================================================
+   Modal do Bolão: ajuste da etapa de CPF e telefone
+   ========================================================================== */
+/* Espaço entre "Gerar QR Code Pix" e "Fechar" fica equilibrado */
+.bolpix__etapa {
+    gap: 4px;
+}
+
+.bolpix__box > .bolpix__btn--sec {
+    margin-top: 12px;
+    height: 48px;
+}
+
+/* Campos com texto um pouco mais leve e rótulos mais próximos do campo */
+.bolpix__label {
+    margin: 14px 0 6px;
+}
+
+.bolpix__input {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* Botão "Gerar QR Code Pix" com o mesmo tamanho do "Fechar" */
+.bolpix__etapa > .bolpix__btn:not(.bolpix__btn--sec) {
+    margin-top: 16px;
+}
