@@ -5744,128 +5744,85 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
 
 
 /* ==========================================================================
-   Painel admin: barra lateral no computador, menu hambúrguer no celular
+   Painel admin: menu deslizante pela esquerda, em todas as telas
    ========================================================================== */
+.admin-page .admin-layout {
+    display: block;
+}
+
 .admin-page .admin-menu-btn {
-    display: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    align-self: flex-start;
+    margin-bottom: 14px;
+    padding: 10px 16px;
+    border: 1px solid var(--border-color-strong);
+    border-radius: var(--radius-sm);
+    background: var(--card-bg);
+    color: var(--primary-hover);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.admin-page .admin-menu-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.admin-page .admin-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1200;
+    width: 260px;
+    max-width: 84vw;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 0;
+    padding: 18px 14px;
+    overflow-y: auto;
+    background:
+        linear-gradient(180deg, rgba(196, 136, 73, 0.05), transparent 25%),
+        var(--card-bg);
+    border-right: 1px solid var(--border-color-strong);
+    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    box-shadow: var(--shadow-elevated);
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+}
+
+.admin-page .admin-sidebar.aberta {
+    transform: translateX(0);
+}
+
+.admin-page .admin-sidebar .admin-tab {
+    width: 100%;
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
 }
 
 .admin-page .admin-overlay {
     display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1199;
+    background: rgba(0, 0, 0, 0.6);
 }
 
-/* ---------- Computador: barra fixa à esquerda ---------- */
-@media (min-width: 992px) {
-    .admin-page .admin-layout {
-        display: grid;
-        grid-template-columns: 220px minmax(0, 1fr);
-        gap: 24px;
-        align-items: start;
-    }
-
-    .admin-page .admin-sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin: 0;
-        padding: 12px;
-        position: sticky;
-        top: 16px;
-        background: var(--card-bg);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-    }
-
-    .admin-page .admin-sidebar .admin-tab {
-        width: 100%;
-        text-align: left;
-        padding: 11px 14px;
-        border-radius: var(--radius-sm);
-    }
-
-    .admin-page .admin-main {
-        min-width: 0;
-    }
+.admin-page .admin-overlay.ativo {
+    display: block;
 }
 
-/* ---------- Celular e tablet: menu deslizante ---------- */
-@media (max-width: 991px) {
-    .admin-page .admin-menu-btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        align-self: flex-start;
-        margin-bottom: 14px;
-        padding: 10px 16px;
-        border: 1px solid var(--border-color-strong);
-        border-radius: var(--radius-sm);
-        background: var(--card-bg);
-        color: var(--primary-hover);
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-    }
+body.menu-admin-aberto {
+    overflow: hidden;
+}
 
-    .admin-page .admin-menu-btn svg {
-        width: 20px;
-        height: 20px;
-    }
-
-    .admin-page .admin-layout {
-        display: block;
-    }
-
-    .admin-page .admin-sidebar {
-        position: fixed;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        z-index: 1200;
-        width: 270px;
-        max-width: 84vw;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin: 0;
-        padding: 18px 14px;
-        overflow-y: auto;
-        background:
-            linear-gradient(180deg, rgba(196, 136, 73, 0.05), transparent 25%),
-            var(--card-bg);
-        border-right: 1px solid var(--border-color-strong);
-        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-        box-shadow: var(--shadow-elevated);
-        transform: translateX(-105%);
-        transition: transform 0.25s ease;
-    }
-
-    .admin-page .admin-sidebar.aberta {
-        transform: translateX(0);
-    }
-
-    .admin-page .admin-sidebar .admin-tab {
-        width: 100%;
-        text-align: left;
-        padding: 12px 14px;
-        border-radius: var(--radius-sm);
-    }
-
-    .admin-page .admin-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 1199;
-        background: rgba(0, 0, 0, 0.6);
-    }
-
-    .admin-page .admin-overlay.ativo {
-        display: block;
-    }
-
-    body.menu-admin-aberto {
-        overflow: hidden;
-    }
-
-    .admin-page .admin-main {
-        width: 100%;
-    }
+.admin-page .admin-main {
+    width: 100%;
+    min-width: 0;
 }
