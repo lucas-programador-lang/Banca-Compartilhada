@@ -4820,3 +4820,145 @@ body.pagina-oculta .plan-card__photo-wrap::after {
     opacity: 0.7;
     cursor: wait;
 }
+
+
+
+/* ==========================================================================
+   Modais de Depósito e Saque no visual do modal de Cupons
+   ========================================================================== */
+
+.modal-premium {
+    text-align: center;
+    padding: 34px 26px 26px;
+    border-radius: 26px;
+    border: 1px solid rgba(242, 206, 151, 0.45);
+    background:
+        radial-gradient(90% 55% at 50% 0%, rgba(242, 206, 151, 0.18), transparent 70%),
+        linear-gradient(180deg, #2a1c10, #0d0805 85%);
+    box-shadow:
+        0 40px 80px -30px rgba(0, 0, 0, 0.95),
+        0 0 0 6px rgba(196, 136, 73, 0.08),
+        0 0 46px -8px rgba(242, 206, 151, 0.35),
+        inset 0 1px 0 rgba(255, 233, 176, 0.25);
+}
+
+/* Título grande e centralizado, como no Cupons */
+.modal-premium > h3 {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #f2ce97;
+    text-align: center;
+    padding-right: 0;
+    margin: 6px 0 6px;
+    text-shadow: 0 2px 14px rgba(242, 206, 151, 0.35);
+}
+
+.modal-premium > .modal-lead,
+.modal-premium > .modal-lead--warning {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+/* Botão de fechar no canto superior direito, discreto */
+.modal-premium .modal-close {
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(242, 206, 151, 0.4);
+    color: #f2ce97;
+}
+
+/* Caixas de informação com aparência de cartão de cupom */
+.modal-premium .modal-info-box,
+.modal-premium .modal-info-box--key {
+    text-align: left;
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(242, 206, 151, 0.28);
+    border-radius: 18px;
+}
+
+.modal-premium .modal-info-row strong {
+    color: #ffe7b0;
+}
+
+/* Campos: centralizados e com borda bronze, como o campo de código do Cupons */
+.modal-premium .input-group label {
+    text-align: center;
+    display: block;
+    color: #f2ce97;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.modal-premium .input-group input,
+.modal-premium .input-group select {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(242, 206, 151, 0.55);
+    border-radius: 16px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #fff4dc;
+    padding: 14px 16px;
+}
+
+.modal-premium .input-group input:focus,
+.modal-premium .input-group select:focus {
+    border-color: #ffe7b0;
+    box-shadow: 0 0 0 4px rgba(242, 206, 151, 0.2);
+}
+
+/* Botões: cantos bem arredondados e brilho dourado, como o "Resgatar" */
+.modal-premium .modal-actions {
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.modal-premium .modal-actions .btn {
+    height: 52px;
+    border-radius: 16px;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.modal-premium .modal-actions .btn:not(.btn-outline) {
+    background: linear-gradient(180deg, #ffe7b0, #f2ce97 55%, #c48849);
+    color: #2a1706;
+    box-shadow: 0 10px 28px rgba(242, 206, 151, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.modal-premium .modal-actions .btn-outline {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(242, 206, 151, 0.5);
+    color: #f2ce97;
+}
+
+/* Aviso de domingo: selo centralizado */
+.modal-premium .modal-lead--warning {
+    display: inline-flex;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Mensagem de erro do depósito: centralizada */
+.modal-premium .modal-alert {
+    text-align: center;
+}
+
+/* Celular: modal ocupa a tela com cantos suaves */
+@media (max-width: 480px) {
+    .modal-premium {
+        padding: 28px 18px 20px;
+        border-radius: 22px;
+    }
+
+    .modal-premium > h3 {
+        font-size: 1.45rem;
+    }
+}
