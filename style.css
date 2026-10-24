@@ -4850,7 +4850,7 @@ body:not(.admin-page) .modal-card.modal-premium {
 /* ---------- Arte do topo (cavalo + BANCA) ---------- */
 .modal-premium > .modal-arte__topo {
     order: -1;
-    height: 130px;
+    height: 128px;
     margin: 0 0 12px;
     background-color: #0b0805;
     background-image: url("cupons-banner.webp");
@@ -5132,4 +5132,20 @@ body:not(.admin-page) .modal-card.modal-premium {
     -webkit-box-shadow: 0 0 0 1000px #f4e9c3 inset;
     caret-color: #3a2a08;
     border-color: #f2b640;
+}
+
+
+.modal-premium > .modal-arte__topo {
+    position: relative;
+}
+
+.modal-premium > .modal-arte__topo::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 14px;
+    background: linear-gradient(180deg, transparent, #0b0805 70%);
+    pointer-events: none;
 }
