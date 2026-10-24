@@ -5744,102 +5744,125 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
 
 
 /* ==========================================================================
-   Painel admin: barra lateral de abas
+   Painel admin: barra lateral no computador, menu hambúrguer no celular
    ========================================================================== */
-.admin-page .admin-layout {
-    display: grid;
-    grid-template-columns: 220px minmax(0, 1fr);
-    gap: 24px;
-    align-items: start;
+.admin-page .admin-menu-btn {
+    display: none;
 }
 
-.admin-page .admin-sidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin: 0;
-    padding: 12px;
-    position: sticky;
-    top: 16px;
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    overflow: visible;
+.admin-page .admin-overlay {
+    display: none;
 }
 
-.admin-page .admin-sidebar .admin-tab {
-    width: 100%;
-    text-align: left;
-    padding: 11px 14px;
-    border-radius: var(--radius-sm);
-}
-
-.admin-page .admin-sidebar .admin-tab.ativa {
-    box-shadow: 0 6px 18px rgba(196, 136, 73, 0.25);
-}
-
-.admin-page .admin-main {
-    min-width: 0;
-}
-
-/* Celular e tablet: a barra vira uma faixa rolável no topo */
-@media (max-width: 991px) {
+/* ---------- Computador: barra fixa à esquerda ---------- */
+@media (min-width: 992px) {
     .admin-page .admin-layout {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 14px;
+        display: grid;
+        grid-template-columns: 220px minmax(0, 1fr);
+        gap: 24px;
+        align-items: start;
     }
 
     .admin-page .admin-sidebar {
-        flex-direction: row;
-        position: static;
-        overflow-x: auto;
-        scrollbar-width: none;
-        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin: 0;
+        padding: 12px;
+        position: sticky;
+        top: 16px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
     }
 
     .admin-page .admin-sidebar .admin-tab {
-        width: auto;
-        flex: none;
+        width: 100%;
+        text-align: left;
+        padding: 11px 14px;
+        border-radius: var(--radius-sm);
+    }
+
+    .admin-page .admin-main {
+        min-width: 0;
     }
 }
 
-
-
-/* ==========================================================================
-   Painel admin no celular: abas em faixa horizontal rolável no topo
-   ========================================================================== */
+/* ---------- Celular e tablet: menu deslizante ---------- */
 @media (max-width: 991px) {
-    .admin-page .admin-layout,
-    .admin-page .admin-layout > .admin-sidebar,
+    .admin-page .admin-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        align-self: flex-start;
+        margin-bottom: 14px;
+        padding: 10px 16px;
+        border: 1px solid var(--border-color-strong);
+        border-radius: var(--radius-sm);
+        background: var(--card-bg);
+        color: var(--primary-hover);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .admin-page .admin-menu-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
     .admin-page .admin-layout {
         display: block;
     }
 
     .admin-page .admin-sidebar {
-        display: flex !important;
-        flex-direction: row !important;
-        position: static !important;
-        gap: 8px;
-        padding: 8px;
-        margin-bottom: 14px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: x proximity;
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1200;
+        width: 270px;
+        max-width: 84vw;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin: 0;
+        padding: 18px 14px;
+        overflow-y: auto;
+        background:
+            linear-gradient(180deg, rgba(196, 136, 73, 0.05), transparent 25%),
+            var(--card-bg);
+        border-right: 1px solid var(--border-color-strong);
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        box-shadow: var(--shadow-elevated);
+        transform: translateX(-105%);
+        transition: transform 0.25s ease;
     }
 
-    .admin-page .admin-sidebar::-webkit-scrollbar {
-        display: none;
+    .admin-page .admin-sidebar.aberta {
+        transform: translateX(0);
     }
 
     .admin-page .admin-sidebar .admin-tab {
-        flex: 0 0 auto;
-        width: auto !important;
-        white-space: nowrap;
-        scroll-snap-align: start;
-        padding: 9px 14px;
-        font-size: 0.85rem;
+        width: 100%;
+        text-align: left;
+        padding: 12px 14px;
+        border-radius: var(--radius-sm);
+    }
+
+    .admin-page .admin-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1199;
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .admin-page .admin-overlay.ativo {
+        display: block;
+    }
+
+    body.menu-admin-aberto {
+        overflow: hidden;
     }
 
     .admin-page .admin-main {
