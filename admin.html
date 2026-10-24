@@ -38,8 +38,15 @@
             ⚠️ Você não tem permissão para acessar esta página.
         </div>
 
-        <div id="conteudoAdmin" style="display: none;">
+            <div id="conteudoAdmin" style="display: none;">
             <div class="admin-layout">
+
+                <!-- Botão do menu (só aparece no celular) -->
+                <button type="button" class="admin-menu-btn" id="btnMenuAdmin" aria-label="Abrir menu" aria-controls="adminTabs" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                    <span>Menu</span>
+                </button>
+                <div class="admin-overlay" id="adminOverlay"></div>
 
                 <!-- ===== Barra lateral de abas ===== -->
                 <nav class="admin-tabs admin-sidebar" id="adminTabs" role="tablist" aria-label="Seções do painel">
@@ -362,37 +369,69 @@
     </div>
 
     <script>
-    (function () {
-        var nav = document.getElementById('adminTabs');
-        var bolao = document.getElementById('aba-bolao');
-        var filtros = document.getElementById('redeFiltros');
-        if (!nav || !bolao) return;
+(function () {
+    var nav = document.getElementById('adminTabs');
+    var bolao = document.getElementById('aba-bolao');
+    var filtros = document.getElementById('redeFiltros');
+    var btnMenu = document.getElementById('btnMenuAdmin');
+    var overlay = document.getElementById('adminOverlay');
+    if (!nav || !bolao) return;
 
-        nav.addEventListener('click', function (e) {
-            var b = e.target.closest('[data-aba]');
-            if (!b) return;
+    var telaPequena = function () { return window.matchMedia('(max-width: 991px)').matches; };
 
-            if (b.dataset.aba !== 'bolao') {
-                bolao.hidden = true;
-                return;
-            }
+    function abrirMenu() {
+        nav.classList.add('aberta');
+        overlay.classList.add('ativo');
+        document.body.classList.add('menu-admin-aberto');
+        btnMenu.setAttribute('aria-expanded', 'true');
+    }
+    function fecharMenu() {
+        nav.classList.remove('aberta');
+        overlay.classList.remove('ativo');
+        document.body.classList.remove('menu-admin-aberto');
+        btnMenu.setAttribute('aria-expanded', 'false');
+    }
 
-            e.stopPropagation();
-            e.preventDefault();
+    if (btnMenu) {
+        btnMenu.addEventListener('click', function () {
+            nav.classList.contains('aberta') ? fecharMenu() : abrirMenu();
+        });
+    }
+    if (overlay) overlay.addEventListener('click', fecharMenu);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') fecharMenu();
+    });
 
-            nav.querySelectorAll('.admin-tab').forEach(function (t) {
-                var on = t === b;
-                t.classList.toggle('ativa', on);
-                t.setAttribute('aria-selected', on ? 'true' : 'false');
-            });
-            document.querySelectorAll('#redePaineis > [data-painel]').forEach(function (s) {
-                s.hidden = true;
-            });
-            if (filtros) filtros.hidden = true;
-            bolao.hidden = false;
-        }, true);
-    })();
-    </script>
+    // Ao escolher uma aba no celular, o menu fecha sozinho
+    nav.addEventListener('click', function (e) {
+        if (e.target.closest('[data-aba]') && telaPequena()) fecharMenu();
+    }, true);
+
+    nav.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-aba]');
+        if (!b) return;
+
+        if (b.dataset.aba !== 'bolao') {
+            bolao.hidden = true;
+            return;
+        }
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        nav.querySelectorAll('.admin-tab').forEach(function (t) {
+            var on = t === b;
+            t.classList.toggle('ativa', on);
+            t.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        document.querySelectorAll('#redePaineis > [data-painel]').forEach(function (s) {
+            s.hidden = true;
+        });
+        if (filtros) filtros.hidden = true;
+        bolao.hidden = false;
+    }, true);
+})();
+</script>
 
     <!-- Scripts -->
     <script type="module" src="auth.js"></script>
