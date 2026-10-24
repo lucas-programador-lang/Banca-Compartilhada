@@ -5744,17 +5744,25 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
 
 
 /* ==========================================================================
-   Painel admin: menu deslizante pela esquerda, em todas as telas
+   Painel admin: barra fixa à esquerda no computador (com botão para recolher)
+   e gaveta deslizante no celular
    ========================================================================== */
 .admin-page .admin-layout {
-    display: block;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    grid-template-areas:
+        "btn  btn"
+        "nav  main";
+    gap: 0 24px;
+    align-items: start;
 }
 
 .admin-page .admin-menu-btn {
+    grid-area: btn;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    align-self: flex-start;
+    justify-self: start;
     margin-bottom: 14px;
     padding: 10px 16px;
     border: 1px solid var(--border-color-strong);
@@ -5771,58 +5779,91 @@ body:not(.admin-page) .modal-card:is(.saque-v2, .deposito-v2) {
     height: 20px;
 }
 
+.admin-page .admin-main {
+    grid-area: main;
+    min-width: 0;
+}
+
 .admin-page .admin-sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1200;
-    width: 260px;
-    max-width: 84vw;
+    grid-area: nav;
     display: flex;
     flex-direction: column;
     gap: 6px;
     margin: 0;
-    padding: 18px 14px;
-    overflow-y: auto;
-    background:
-        linear-gradient(180deg, rgba(196, 136, 73, 0.05), transparent 25%),
-        var(--card-bg);
-    border-right: 1px solid var(--border-color-strong);
-    border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-    box-shadow: var(--shadow-elevated);
-    transform: translateX(-105%);
-    transition: transform 0.25s ease;
-}
-
-.admin-page .admin-sidebar.aberta {
-    transform: translateX(0);
+    padding: 12px;
+    position: sticky;
+    top: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
 }
 
 .admin-page .admin-sidebar .admin-tab {
     width: 100%;
     text-align: left;
-    padding: 12px 14px;
+    padding: 11px 14px;
     border-radius: var(--radius-sm);
+}
+
+/* Computador recolhido: some a barra e o conteúdo ocupa a tela toda */
+.admin-page .admin-layout.recolhido {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+        "btn"
+        "main";
+}
+
+.admin-page .admin-layout.recolhido .admin-sidebar {
+    display: none;
 }
 
 .admin-page .admin-overlay {
     display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 1199;
-    background: rgba(0, 0, 0, 0.6);
 }
 
-.admin-page .admin-overlay.ativo {
-    display: block;
-}
+/* Celular e tablet: a barra vira gaveta que desliza pela esquerda */
+@media (max-width: 991px) {
+    .admin-page .admin-layout {
+        display: block;
+    }
 
-body.menu-admin-aberto {
-    overflow: hidden;
-}
+    .admin-page .admin-sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 1200;
+        width: 260px;
+        max-width: 84vw;
+        padding: 18px 14px;
+        overflow-y: auto;
+        background:
+            linear-gradient(180deg, rgba(196, 136, 73, 0.05), transparent 25%),
+            var(--card-bg);
+        border: none;
+        border-right: 1px solid var(--border-color-strong);
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+        box-shadow: var(--shadow-elevated);
+        transform: translateX(-105%);
+        transition: transform 0.25s ease;
+    }
 
-.admin-page .admin-main {
-    width: 100%;
-    min-width: 0;
+    .admin-page .admin-sidebar.aberta {
+        transform: translateX(0);
+    }
+
+    .admin-page .admin-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1199;
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .admin-page .admin-overlay.ativo {
+        display: block;
+    }
+
+    body.menu-admin-aberto {
+        overflow: hidden;
+    }
 }
