@@ -1171,8 +1171,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnAbrirSaqueModal = document.getElementById('btnAbrirSaqueModal');
     const btnConfirmarModalSaque = document.getElementById('btnConfirmarModalSaque') || document.getElementById('btnSolicitarSaqueFinal') || document.getElementById('btnConfirmarModalSacar');
 
-    // Cria (uma vez) os botões "Comissão" e "Rendimento" dentro do modal de saque
-    function criarSeletorTipoSaque() {
+    // Dados que o saque-modal.js (window.SaqueUI) precisa para desenhar o modal
+    function dadosParaSaqueUI() {
+        return {
+            saldo: saldoDoTipo(tipoSaqueAtual),
+            minimo: CONFIG.VALOR_SAQUE_MINIMO,
+            taxa: CONFIG.TAXA_SAQUE_PERCENTUAL,
+            saquePermitido: saquePermitidoHoje(tipoSaqueAtual),
+            chave: dadosPixSaque.chave,
+            tipoPix: dadosPixSaque.tipoPix,
+            tipoSaque: tipoSaqueAtual,
+            saldoRendimento: saldoRendimentoAtual,
+            saldoComissao: saldoComissaoAtual,
+            // chamado pelo seletor Comissão/Rendimento do modal
+            aoTrocarTipo: function(tipo) {
+                tipoSaqueAtual = tipo;
+                atualizarModalSaque();
+            }
+        };
+    }
+
+    // Seletor e saldo para o modal ANTIGO (usado só se o saque-modal.js não estiver na página)
+    function criarSeletorTipoSaqueAntigo() {
         let seletor = document.getElementById('seletorTipoSaque');
         if (seletor || !modalSaque) return seletor;
 
@@ -1205,10 +1225,20 @@ document.addEventListener('DOMContentLoaded', function() {
         return seletor;
     }
 
-    // Atualiza saldo mostrado, aviso de dia e estado do botão conforme o tipo escolhido
+    // Atualiza o modal conforme o tipo escolhido (zera o valor digitado)
     function atualizarModalSaque() {
-        const seletor = criarSeletorTipoSaque();
         const permitido = saquePermitidoHoje(tipoSaqueAtual);
+
+        if (btnConfirmarModalSaque) btnConfirmarModalSaque.disabled = !permitido;
+
+        if (window.SaqueUI) {
+            // Interface nova (saque-modal.js): ela mesma desenha o seletor, o saldo e o aviso
+            window.SaqueUI.abrir(dadosParaSaqueUI());
+            return;
+        }
+
+        // ----- Modal antigo (sem saque-modal.js) -----
+        const seletor = criarSeletorTipoSaqueAntigo();
         const saldo = saldoDoTipo(tipoSaqueAtual);
         const nomeTipo = tipoSaqueAtual === 'comissao' ? 'Comissão' : 'Rendimento';
 
@@ -1225,14 +1255,7 @@ document.addEventListener('DOMContentLoaded', function() {
             boxSaldoModal = document.createElement('div');
             boxSaldoModal.id = 'boxSaldoDisponivelModal';
             boxSaldoModal.className = 'modal-info-box modal-balance-box';
-            if (seletor) {
-                seletor.after(boxSaldoModal);
-            } else {
-                const bannerModal = modalSaque.querySelector('.mo-banner');
-                const containerInsercao = modalSaque.querySelector('.modal-body') || modalSaque.querySelector('.modal-card');
-                if (bannerModal) bannerModal.after(boxSaldoModal);
-                else if (containerInsercao) containerInsercao.prepend(boxSaldoModal);
-            }
+            if (seletor) seletor.after(boxSaldoModal);
         }
         if (boxSaldoModal) {
             const aviso = permitido ? '' : `<div style="font-size:0.8rem;color:#dc2626;margin-top:4px;">${
@@ -1241,21 +1264,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     : 'Saque de rendimento disponível somente aos domingos.'
             }</div>`;
             boxSaldoModal.innerHTML = `<span>Saldo de ${nomeTipo}</span> <strong>${formatadorMoeda.format(saldo)}</strong>${aviso}`;
-        }
-
-        if (btnConfirmarModalSaque) btnConfirmarModalSaque.disabled = !permitido;
-
-        // Interface nova do modal (saque-modal.js): teclado, etapas e resumo
-        if (window.SaqueUI) {
-            window.SaqueUI.abrir({
-                saldo: saldo,
-                minimo: CONFIG.VALOR_SAQUE_MINIMO,
-                taxa: CONFIG.TAXA_SAQUE_PERCENTUAL,
-                saquePermitido: permitido,
-                chave: dadosPixSaque.chave,
-                tipoPix: dadosPixSaque.tipoPix,
-                tipoSaque: tipoSaqueAtual
-            });
         }
     }
 
@@ -1600,7 +1608,13 @@ document.addEventListener('DOMContentLoaded', function() {
             atualizarPainel(dadosFinanceiros);
 
             // Se o modal de saque estiver aberto, atualiza o saldo mostrado
-            if (modalSaque && modalSaque.style.display === 'flex') atualizarModalSaque();
+            if (modalSaque && modalSaque.style.display === 'flex') {
+                if (window.SaqueUI && window.SaqueUI.configurar) {
+                    window.SaqueUI.configurar(dadosParaSaqueUI());   // não apaga o valor digitado
+                } else {
+                    atualizarModalSaque();
+                }
+            }
         });
 
         inicializarPerfilUsuario(userId);
