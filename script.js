@@ -5,7 +5,6 @@ import { signOut, sendPasswordResetEmail, EmailAuthProvider, reauthenticateWithC
 
 const CONFIG = {
     VALOR_SAQUE_MINIMO: 32.50,
-    DIA_SAQUE_PERMITIDO: 0, // 0 = Domingo (Padrão)
     TAXA_SAQUE_PERCENTUAL: 0.14,
     VALORES_PLANOS_PERMITIDOS: [10, 15, 30, 50, 60, 100, 150, 200, 300, 450, 500, 1000],
     PLANOS_DE_CICLO: [10, 15, 60, 150, 200, 450],
@@ -36,6 +35,14 @@ const formatadorDataHoraCurto = new Intl.DateTimeFormat('pt-BR', {
 function obterDiaSemanaBrasilia() {
     const brasiliaMs = Date.now() - 3 * 60 * 60 * 1000;
     return new Date(brasiliaMs).getUTCDay();
+}
+
+// Regra dos saques (horário de Brasília):
+// - comissão: segunda a sexta
+// - rendimento: somente domingo
+function saquePermitidoHoje(tipo) {
+    const dia = obterDiaSemanaBrasilia();
+    return tipo === 'comissao' ? (dia >= 1 && dia <= 5) : dia === 0;
 }
 
 function getEl(id) {
@@ -622,10 +629,11 @@ function inicializarExtratoUsuario(userId) {
 
             const solicitado = parseFloat(saq.valorSolicitado || 0);
             const liquido = parseFloat(saq.valorLiquido || 0);
+            const rotuloTipoSaque = saq.tipoSaque === 'comissao' ? 'de comissão' : 'de rendimento';
             conta.push({
                 data: dataValida(saq.dataSolicitacao || saq.dataPagamento),
                 categoria: { chave: 'saque', rotulo: 'Saque' },
-                descricao: 'Saque via Pix' + (liquido ? ' — líquido de ' + formatadorMoeda.format(liquido) : ''),
+                descricao: 'Saque ' + rotuloTipoSaque + ' via Pix' + (liquido ? ' — líquido de ' + formatadorMoeda.format(liquido) : ''),
                 valor: -solicitado,
                 statusHtml: statusHtml,
             });
@@ -926,10 +934,18 @@ function inicializarCupons() {
 
 document.addEventListener('DOMContentLoaded', function() {
     let saldoAtualUsuario = 0;
+    let saldoRendimentoAtual = 0;
+    let saldoComissaoAtual = 0;
+    let tipoSaqueAtual = 'rendimento'; // 'rendimento' (domingo) ou 'comissao' (seg a sex)
+    let dadosPixSaque = { chave: '', tipoPix: 'CPF' };
     let userIdAtual = null;
     let userAtual = null;
     let nomeUsuarioAtual = '';
     let emailUsuarioAtual = '';
+
+    function saldoDoTipo(tipo) {
+        return tipo === 'comissao' ? saldoComissaoAtual : saldoRendimentoAtual;
+    }
 
     // Guarda todas as opções de plano antes de qualquer alteração no select
     const selectPlanoModal = document.getElementById('modalValorPlano');
@@ -1155,6 +1171,94 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnAbrirSaqueModal = document.getElementById('btnAbrirSaqueModal');
     const btnConfirmarModalSaque = document.getElementById('btnConfirmarModalSaque') || document.getElementById('btnSolicitarSaqueFinal') || document.getElementById('btnConfirmarModalSacar');
 
+    // Cria (uma vez) os botões "Comissão" e "Rendimento" dentro do modal de saque
+    function criarSeletorTipoSaque() {
+        let seletor = document.getElementById('seletorTipoSaque');
+        if (seletor || !modalSaque) return seletor;
+
+        seletor = document.createElement('div');
+        seletor.id = 'seletorTipoSaque';
+        seletor.style.cssText = 'display:flex;gap:8px;margin:12px 0;';
+        seletor.innerHTML = `
+            <button type="button" data-tipo="comissao" style="flex:1;padding:10px;border-radius:8px;border:1px solid #ccc;cursor:pointer;">
+                Comissão<br><small>Seg a Sex</small>
+            </button>
+            <button type="button" data-tipo="rendimento" style="flex:1;padding:10px;border-radius:8px;border:1px solid #ccc;cursor:pointer;">
+                Rendimento<br><small>Domingo</small>
+            </button>`;
+
+        const bannerModal = modalSaque.querySelector('.mo-banner');
+        const container = modalSaque.querySelector('.modal-body') || modalSaque.querySelector('.modal-card');
+        if (bannerModal) bannerModal.after(seletor);
+        else if (container) container.prepend(seletor);
+
+        seletor.addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-tipo]');
+            if (!btn) return;
+            tipoSaqueAtual = btn.getAttribute('data-tipo');
+            if (inputValSaque) {
+                inputValSaque.value = '';
+                inputValSaque.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            atualizarModalSaque();
+        });
+        return seletor;
+    }
+
+    // Atualiza saldo mostrado, aviso de dia e estado do botão conforme o tipo escolhido
+    function atualizarModalSaque() {
+        const seletor = criarSeletorTipoSaque();
+        const permitido = saquePermitidoHoje(tipoSaqueAtual);
+        const saldo = saldoDoTipo(tipoSaqueAtual);
+        const nomeTipo = tipoSaqueAtual === 'comissao' ? 'Comissão' : 'Rendimento';
+
+        if (seletor) {
+            seletor.querySelectorAll('button').forEach(function(b) {
+                const ativo = b.getAttribute('data-tipo') === tipoSaqueAtual;
+                b.style.background = ativo ? '#16a34a' : '#f3f3f3';
+                b.style.color = ativo ? '#fff' : '#111';
+            });
+        }
+
+        let boxSaldoModal = document.getElementById('boxSaldoDisponivelModal');
+        if (!boxSaldoModal && modalSaque) {
+            boxSaldoModal = document.createElement('div');
+            boxSaldoModal.id = 'boxSaldoDisponivelModal';
+            boxSaldoModal.className = 'modal-info-box modal-balance-box';
+            if (seletor) {
+                seletor.after(boxSaldoModal);
+            } else {
+                const bannerModal = modalSaque.querySelector('.mo-banner');
+                const containerInsercao = modalSaque.querySelector('.modal-body') || modalSaque.querySelector('.modal-card');
+                if (bannerModal) bannerModal.after(boxSaldoModal);
+                else if (containerInsercao) containerInsercao.prepend(boxSaldoModal);
+            }
+        }
+        if (boxSaldoModal) {
+            const aviso = permitido ? '' : `<div style="font-size:0.8rem;color:#dc2626;margin-top:4px;">${
+                tipoSaqueAtual === 'comissao'
+                    ? 'Saque de comissão disponível de segunda a sexta.'
+                    : 'Saque de rendimento disponível somente aos domingos.'
+            }</div>`;
+            boxSaldoModal.innerHTML = `<span>Saldo de ${nomeTipo}</span> <strong>${formatadorMoeda.format(saldo)}</strong>${aviso}`;
+        }
+
+        if (btnConfirmarModalSaque) btnConfirmarModalSaque.disabled = !permitido;
+
+        // Interface nova do modal (saque-modal.js): teclado, etapas e resumo
+        if (window.SaqueUI) {
+            window.SaqueUI.abrir({
+                saldo: saldo,
+                minimo: CONFIG.VALOR_SAQUE_MINIMO,
+                taxa: CONFIG.TAXA_SAQUE_PERCENTUAL,
+                saquePermitido: permitido,
+                chave: dadosPixSaque.chave,
+                tipoPix: dadosPixSaque.tipoPix,
+                tipoSaque: tipoSaqueAtual
+            });
+        }
+    }
+
     function abrirModalSaque() {
         const perfNome = document.getElementById('perfilNome');
         const perfTipo = document.getElementById('perfilTipoPix');
@@ -1185,43 +1289,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        let boxSaldoModal = document.getElementById('boxSaldoDisponivelModal');
-        if (!boxSaldoModal && modalSaque) {
-            boxSaldoModal = document.createElement('div');
-            boxSaldoModal.id = 'boxSaldoDisponivelModal';
-            boxSaldoModal.className = 'modal-info-box modal-balance-box';
-            const bannerModal = modalSaque.querySelector('.mo-banner');
-            const containerInsercao = modalSaque.querySelector('.modal-body') || modalSaque.querySelector('.modal-card');
-            if (bannerModal) bannerModal.after(boxSaldoModal);
-            else if (containerInsercao) containerInsercao.prepend(boxSaldoModal);
-        }
-        if (boxSaldoModal) {
-            boxSaldoModal.innerHTML = `<span>Saldo Disponível</span> <strong>${formatadorMoeda.format(saldoAtualUsuario)}</strong>`;
-        }
+        dadosPixSaque = { chave: chavePixPerfil, tipoPix: tipoPixPerfil };
 
-        const diaHoje = obterDiaSemanaBrasilia();
-        if (diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
-            if (btnConfirmarModalSaque) {
-                btnConfirmarModalSaque.disabled = true;
-            }
-        } else {
-            if (btnConfirmarModalSaque) {
-                btnConfirmarModalSaque.disabled = false;
-            }
-        }
-
-        // Interface nova do modal (saque-modal.js): teclado, etapas e resumo
-        if (window.SaqueUI) {
-            window.SaqueUI.abrir({
-                saldo: saldoAtualUsuario,
-                minimo: CONFIG.VALOR_SAQUE_MINIMO,
-                taxa: CONFIG.TAXA_SAQUE_PERCENTUAL,
-                diaPermitido: CONFIG.DIA_SAQUE_PERMITIDO,
-                saquePermitido: diaHoje === CONFIG.DIA_SAQUE_PERMITIDO,
-                chave: chavePixPerfil,
-                tipoPix: tipoPixPerfil
-            });
-        }
+        // Abre já no tipo que está liberado hoje (domingo = rendimento, seg a sex = comissão)
+        tipoSaqueAtual = obterDiaSemanaBrasilia() === 0 ? 'rendimento' : 'comissao';
+        atualizarModalSaque();
 
         if (modalSaque) modalSaque.style.display = 'flex';
     }
@@ -1356,7 +1428,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (inputValSaque) {
         inputValSaque.addEventListener('input', function(e) {
             const val = parseFloat(e.target.value);
-            const diaHoje = obterDiaSemanaBrasilia();
+            const permitidoHoje = saquePermitidoHoje(tipoSaqueAtual);
 
             if (!isNaN(val) && val > 0) {
                 const taxa = val * CONFIG.TAXA_SAQUE_PERCENTUAL;
@@ -1377,7 +1449,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (btnConfirmarModalSaque) {
-                    if (val > saldoAtualUsuario || val < CONFIG.VALOR_SAQUE_MINIMO || diaHoje !== CONFIG.DIA_SAQUE_PERMITIDO) {
+                    if (val > saldoDoTipo(tipoSaqueAtual) || val < CONFIG.VALOR_SAQUE_MINIMO || !permitidoHoje) {
                         btnConfirmarModalSaque.disabled = true;
                     } else {
                         btnConfirmarModalSaque.disabled = false;
@@ -1397,7 +1469,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!btn) return;
             const tipo = btn.getAttribute('data-valor');
             let valor = tipo === 'min' ? CONFIG.VALOR_SAQUE_MINIMO
-                      : tipo === 'max' ? saldoAtualUsuario
+                      : tipo === 'max' ? saldoDoTipo(tipoSaqueAtual)
                       : parseFloat(tipo);
             valor = Math.floor((Number(valor) || 0) * 100) / 100;
             inputValSaque.value = valor > 0 ? valor.toFixed(2) : '';
@@ -1430,12 +1502,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const valorSaque = parseFloat(inputValSaque ? inputValSaque.value : 0);
 
+            if (!saquePermitidoHoje(tipoSaqueAtual)) {
+                mostrarToast(
+                    tipoSaqueAtual === 'comissao'
+                        ? '⚠️ Saque de comissão só de segunda a sexta.'
+                        : '⚠️ Saque de rendimento só aos domingos.',
+                    'warning'
+                );
+                return;
+            }
+
             if (isNaN(valorSaque) || valorSaque < CONFIG.VALOR_SAQUE_MINIMO) {
                 mostrarToast(`⚠️ O valor mínimo para saque é ${formatadorMoeda.format(CONFIG.VALOR_SAQUE_MINIMO)}.`, 'warning');
                 return;
             }
 
-            if (valorSaque > saldoAtualUsuario) {
+            if (valorSaque > saldoDoTipo(tipoSaqueAtual)) {
                 mostrarToast('⚠️ Valor solicitado maior que o saldo disponível.', 'warning');
                 return;
             }
@@ -1450,7 +1532,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${idToken}`,
                     },
-                    body: JSON.stringify({ valorSaque }),
+                    body: JSON.stringify({ valorSaque, tipo: tipoSaqueAtual }),
                 });
 
                 const dadosResposta = await respostaSaque.json();
@@ -1512,8 +1594,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const financeiroRef = ref(db, 'financeiro/' + userId);
         onValue(financeiroRef, function(snapshot) {
             const dadosFinanceiros = snapshot.val() || {};
-            saldoAtualUsuario = parseFloat(dadosFinanceiros.saldoRendimento || 0) + parseFloat(dadosFinanceiros.saldoComissao || 0);
+            saldoRendimentoAtual = Math.max(0, parseFloat(dadosFinanceiros.saldoRendimento || 0));
+            saldoComissaoAtual = Math.max(0, parseFloat(dadosFinanceiros.saldoComissao || 0));
+            saldoAtualUsuario = saldoRendimentoAtual + saldoComissaoAtual;
             atualizarPainel(dadosFinanceiros);
+
+            // Se o modal de saque estiver aberto, atualiza o saldo mostrado
+            if (modalSaque && modalSaque.style.display === 'flex') atualizarModalSaque();
         });
 
         inicializarPerfilUsuario(userId);
