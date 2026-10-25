@@ -4,10 +4,15 @@
    Este arquivo cuida SÓ da interface. As regras e o envio do saque continuam
    no script.js, que:
      - chama SaqueUI.abrir({...}) ao abrir o modal (passando saldo, taxa, etc.)
+     - chama SaqueUI.configurar({...}) para atualizar saldos SEM reiniciar o modal
      - chama SaqueUI.fechar() ao fechar
      - lê o valor do campo oculto #modalValorSaque (mesmo id de antes)
      - trata o clique em #btnConfirmarModalSacar (chamada ao Worker)
      - trata os atalhos de #saqueRapidos (Mínimo / 50 / 100 / Tudo)
+
+   NOVO: seletor de tipo de saque (Comissão: seg a sex | Rendimento: domingo).
+   Ele é criado aqui, no topo da etapa 1, e avisa o script.js pela função
+   cfg.aoTrocarTipo(tipo) quando a pessoa troca de tipo.
    ========================================================================== */
 (function () {
     'use strict';
@@ -42,12 +47,23 @@
     };
 
     var moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-    var DIAS = ['domingos', 'segundas', 'terças', 'quartas', 'quintas', 'sextas', 'sábados'];
 
     // Valores padrão (o script.js sobrescreve ao abrir, com os do CONFIG dele)
-    var cfg = { saldo: 0, minimo: 32.5, taxa: 0.14, diaPermitido: 0, saquePermitido: true, chave: '', tipoPix: 'CPF' };
+    var cfg = {
+        saldo: 0,                 // saldo do tipo de saque escolhido
+        minimo: 32.5,
+        taxa: 0.14,
+        saquePermitido: true,     // o tipo escolhido está liberado hoje?
+        chave: '',
+        tipoPix: 'CPF',
+        tipoSaque: 'rendimento',  // 'rendimento' (domingo) ou 'comissao' (seg a sex)
+        saldoRendimento: 0,
+        saldoComissao: 0,
+        aoTrocarTipo: null        // function(tipo) chamada quando a pessoa troca de tipo
+    };
     var texto = '';       // o que foi digitado, no formato brasileiro (ex.: "150,5")
     var interno = false;  // evita loop quando nós mesmos disparamos o evento "input"
+    var seletor = null;   // bloco com os botões Comissão / Rendimento
 
     /* ---------- Utilidades ---------- */
 
@@ -97,6 +113,49 @@
         return null;
     }
 
+    /* ---------- Seletor de tipo de saque (Comissão / Rendimento) ---------- */
+
+    function criarSeletor() {
+        if (seletor && seletor.isConnected) return;
+
+        seletor = document.createElement('div');
+        seletor.id = 'saqueTipoSeletor';
+        seletor.style.cssText = 'display:flex;gap:8px;margin:0 0 12px 0;';
+        seletor.innerHTML =
+            '<button type="button" data-tipo="comissao" style="flex:1;padding:10px 8px;border-radius:10px;cursor:pointer;line-height:1.35;font:inherit;">' +
+                '<strong>Comissão</strong><br><small data-saldo></small><br><small>Seg a Sex</small>' +
+            '</button>' +
+            '<button type="button" data-tipo="rendimento" style="flex:1;padding:10px 8px;border-radius:10px;cursor:pointer;line-height:1.35;font:inherit;">' +
+                '<strong>Rendimento</strong><br><small data-saldo></small><br><small>Domingo</small>' +
+            '</button>';
+
+        var painel1 = card ? card.querySelector('[data-painel="1"]') : null;
+        var destino = painel1 || card;
+        if (destino) destino.insertBefore(seletor, destino.firstChild);
+
+        seletor.addEventListener('click', function (e) {
+            var btn = e.target.closest('button[data-tipo]');
+            if (!btn) return;
+            var tipo = btn.getAttribute('data-tipo');
+            if (tipo === cfg.tipoSaque) return;
+            if (typeof cfg.aoTrocarTipo === 'function') cfg.aoTrocarTipo(tipo);
+        });
+    }
+
+    function atualizarSeletor() {
+        if (!seletor) return;
+        seletor.querySelectorAll('button[data-tipo]').forEach(function (b) {
+            var tipo = b.getAttribute('data-tipo');
+            var ativo = tipo === cfg.tipoSaque;
+            var saldo = tipo === 'comissao' ? cfg.saldoComissao : cfg.saldoRendimento;
+            b.style.background = ativo ? '#16a34a' : 'transparent';
+            b.style.color = ativo ? '#fff' : 'inherit';
+            b.style.border = ativo ? '1px solid #16a34a' : '1px solid rgba(128,128,128,0.45)';
+            var elSaldo = b.querySelector('[data-saldo]');
+            if (elSaldo) elSaldo.textContent = moeda.format(saldo || 0);
+        });
+    }
+
     /* ---------- Atualização da tela ---------- */
 
     function atualizar() {
@@ -125,7 +184,11 @@
 
     function atualizarAviso() {
         var msg = '';
-        if (!cfg.saquePermitido) msg = 'Saques liberados apenas aos ' + (DIAS[cfg.diaPermitido] || 'domingos');
+        if (!cfg.saquePermitido) {
+            msg = cfg.tipoSaque === 'comissao'
+                ? 'Saque de comissão liberado apenas de segunda a sexta'
+                : 'Saque de rendimento liberado apenas aos domingos';
+        }
         el.aviso.textContent = msg;
         el.aviso.hidden = !msg;
     }
@@ -249,13 +312,28 @@
         irParaEtapa(1);
     }
 
+    function mesclar(dados) {
+        for (var k in dados) { if (Object.prototype.hasOwnProperty.call(dados, k)) cfg[k] = dados[k]; }
+    }
+
     window.SaqueUI = {
+        // Abre o modal do zero: apaga o valor digitado e volta para a etapa 1
         abrir: function (dados) {
-            for (var k in dados) { if (Object.prototype.hasOwnProperty.call(dados, k)) cfg[k] = dados[k]; }
+            mesclar(dados);
             var rotulo = 'Taxa (' + pct() + ')';
             el.taxaRotulo.textContent = rotulo;
             el.revTaxaRotulo.textContent = rotulo;
+            criarSeletor();
             reiniciar();
+            atualizarSeletor();
+            atualizarAviso();
+            atualizarChave();
+            atualizar();
+        },
+        // Atualiza saldos/permissões SEM apagar o valor digitado nem sair da etapa atual
+        configurar: function (dados) {
+            mesclar(dados);
+            atualizarSeletor();
             atualizarAviso();
             atualizarChave();
             atualizar();
